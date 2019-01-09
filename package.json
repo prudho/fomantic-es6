@@ -1,0 +1,28 @@
+{
+  "name": "rollupmantic",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/fomantic.cjs.js",
+  "module": "dist/fomantic.esm.js",
+  "browser": "dist/fomantic.umd.js",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "pretest": "npm run build"
+  },
+  "author": "prudho",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "rollup-plugin-babel": "^4.2.0",
+    "rollup-plugin-commonjs": "^9.2.0",
+    "rollup-plugin-multi-entry": "^2.1.0",
+    "rollup-plugin-node-resolve": "^4.0.0"
+  },
+  "dependencies": {
+    "cash-dom": "^2.3.9",
+    "dom-slider": "^1.5.3"
+  }
+}
