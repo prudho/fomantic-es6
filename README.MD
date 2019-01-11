@@ -24,32 +24,32 @@ npm run build
 ...and contemplate broken modules by loading examples available in the `test` repository.
 
 ## What's done ?
-| Module        | Depends on    | Done  |
-| ------------- |:-------------:| :----:|
-| Transition    | none          |   ✔️  |
-| Dimmer        | Transition    |   ✔️  |
-| Progress      | none          |   ✔️  |
-| Rating        | none          |   ✔️  |
-| Popup         | Transition    |   ✔️  |
-| Toast         | Transition    |   ✔️  |
-| Accordion     | Transition    |   ❌  |
-| Calendar      | ...           |   ❌  |
-| Checkbox      | ...           |   ❌  |
-| Dropdown      | ...           |   ❌  |
-| Embed         | ...           |   ❌  |
-| Modal         | ...           |   ❌  |
-| Nag           | ...           |   ❌  |
-| Search        | ...           |   ❌  |
-| Shape         | ...           |   ❌  |
-| Sidebar       | ...           |   ❌  |
-| Slider        | ...           |   ❌  |
-| Sticky        | ...           |   ❌  |
-| Tab           | ...           |   ❌  |
-| API           | ...           |   ❌  |
-| Form          | ...           |   ❌  |
-| State         | ...           |   ❌  |
-| Visibility    | ...           |   ❌  |
-| Site          | ...           |   ❌  |
+| Module        | Depends on    | Done  | Comment |
+| ------------- |:-------------:| :----:| ------- |
+| Transition    | none          |   ✔️  |         |
+| Dimmer        | Transition    |   ✔️  |         |
+| Progress      | none          |   ✔️  |         |
+| Rating        | none          |   ✔️  |         |
+| Popup         | Transition    |   ✔️  |         |
+| Toast         | Transition    |   ✔️  |         |
+| Calendar      | Popup         |   ⚠️  | range is broken, halp ! |
+| Accordion     | Transition    |   ❌  |         |
+| Checkbox      | ...           |   ❌  |         |
+| Dropdown      | ...           |   ❌  |         |
+| Embed         | ...           |   ❌  |         |
+| Modal         | ...           |   ❌  |         |
+| Nag           | ...           |   ❌  |         |
+| Search        | ...           |   ❌  |         |
+| Shape         | ...           |   ❌  |         |
+| Sidebar       | ...           |   ❌  |         |
+| Slider        | ...           |   ❌  |         |
+| Sticky        | ...           |   ❌  |         |
+| Tab           | ...           |   ❌  |         |
+| API           | ...           |   ❌  |         |
+| Form          | ...           |   ❌  |         |
+| State         | ...           |   ❌  |         |
+| Visibility    | ...           |   ❌  |         |
+| Site          | ...           |   ❌  |         |
 
 ## jQuery
 

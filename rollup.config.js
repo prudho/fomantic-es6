@@ -13,7 +13,8 @@ export default [
 			'src/modules/progress.js',
 			'src/modules/dimmer.js',
 			'src/modules/popup.js',
-			'src/modules/toast.js'
+			'src/modules/toast.js',
+			'src/modules/calendar.js'
 		],
 		output: {
 			name: 'fomantic',

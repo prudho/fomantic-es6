@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Rollupmantic</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="../dist/fomantic.umd.js"></script>
+  
+</head>
+<body style="padding: 100px;">
+
+    <div id="calendar" class="ui calendar">
+        <div class="ui input left icon">
+            <i class="calendar icon"></i>
+            <input type="text" placeholder="Date/Time">
+        </div>
+    </div>
+
+    <div class="ui form">
+        <div class="eight fields">
+            <div class="field">
+                <label>Start date</label>
+                <div class="ui calendar" id="rangestart">
+                    <div class="ui input left icon">
+                        <i class="calendar icon"></i>
+                        <input type="text" placeholder="Start">
+                    </div>
+                </div>
+            </div>
+            <div class="field">
+                <label>End date</label>
+                <div class="ui calendar" id="rangeend">
+                    <div class="ui input left icon">
+                        <i class="calendar icon"></i>
+                        <input type="text" placeholder="End">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+        /*const test = new fomantic.Calendar('#calendar', {
+            
+        });*/
+
+        const rangeend = new fomantic.Calendar('#rangeend', {
+            type: 'date',
+            debug: true,
+            verbose: true
+        });
+
+        const rangestart = new fomantic.Calendar('#rangestart', {
+            type: 'date',
+            debug: true,
+            verbose: true,
+            endCalendar: rangeend
+        });
+
+        /*rangestart.on('change', function(element, date, text, mode) {
+            console.log(element, date, text, mode)
+        })
+
+        rangeend.on('change', function(element, date, text, mode) {
+            //console.log(element, date, text, mode)
+        })*/
+    });
+  </script>
+</body>
