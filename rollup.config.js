@@ -12,7 +12,8 @@ export default [
 			'src/modules/transition.js',
 			'src/modules/progress.js',
 			'src/modules/dimmer.js',
-			'src/modules/popup.js'
+			'src/modules/popup.js',
+			'src/modules/toast.js'
 		],
 		output: {
 			name: 'fomantic',

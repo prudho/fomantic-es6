@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Rollupmantic</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="../dist/fomantic.umd.js"></script>
+  
+</head>
+<body style="padding: 100px;">
+
+    <div id="popup" class="ui icon button" data-content="Add users to your feed">
+        <i class="add icon"></i>
+    </div>
+
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+        const test = new fomantic.Toast('body', {
+            debug: true,
+            verbose: true,
+            displayTime: 0
+        });
+
+        test.on('hide', function(one, two) {
+            console.log(this, one, two);
+            return false;
+        })
+
+        
+
+        
+    });
+  </script>
+</body>
