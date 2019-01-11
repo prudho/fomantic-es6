@@ -118,7 +118,7 @@ export class Toast extends Module {
         this.debug('Removing toast', this.$toast);
         this.$toast.remove();
         this.$toast = undefined;
-        this.invokeCallback('remove', this.$toast, this.element);
+        this.invokeCallback('remove')(this.$toast, this.element);
     }
 
     create_container() {
@@ -198,7 +198,7 @@ export class Toast extends Module {
         callback = callback || function(){};
         this.debug('Showing toast');
 
-        if (this.invokeCallback('show', this.$toast, this.element) === false) {
+        if (this.invokeCallback('show')(this.$toast, this.element) === false) {
             this.debug('onShow callback returned false, cancelling toast animation');
             return;
         }
@@ -230,7 +230,7 @@ export class Toast extends Module {
 
             transition.on('complete', function() {
                 callback.call(this.$toast, this.element);
-                this.invokeCallback('visible', this.$toast, this.element);
+                this.invokeCallback('visible')(this.$toast, this.element);
             }.bind(this));
         } else {
             this.error(this.settings.error.noTransition);
@@ -272,7 +272,7 @@ export class Toast extends Module {
             transition.on('complete', function() {
                 this.destroy();
                 callback.call(this.$toast, this.element);
-                this.invokeCallback('hidden', this.$toast, this.element);
+                this.invokeCallback('hidden')(this.$toast, this.element);
             }.bind(this));
         }
         else {
@@ -288,7 +288,7 @@ export class Toast extends Module {
     }
 
     event_click() {
-        this.invokeCallback('click', this.$toast, this.element);
+        this.invokeCallback('click')(this.$toast, this.element);
         this.close();
     }
 

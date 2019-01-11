@@ -219,7 +219,7 @@ export class Rating extends Module {
             }
         }
         if(!this.initialLoad || this.settings.fireOnInit) {
-            this.invokeCallback('rate', rating);
+            this.invokeCallback('rate')(rating);
         }
     }
     

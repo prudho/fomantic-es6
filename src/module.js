@@ -7,6 +7,8 @@ export default class Module {
         this.selector = selector;
         if ($.isArray(this.selector)) {
             this.element = document.querySelector(this.selector);
+        } else {
+            this.element = this.selector
         }
         this.$element = $(this.selector);
         this.settings = $.extend(settings, parameters);
@@ -21,11 +23,11 @@ export default class Module {
         var method = this.callbacks.find(obj => { return obj.name === name });
 
         if (method !== undefined) {
-            method.callback(...args);
-
             if (method.once) {
                 this.off(name);
             }
+
+            return method.callback;
         }
     }
 

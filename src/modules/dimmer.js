@@ -188,10 +188,10 @@ export class Dimmer extends Module {
         ;
         this.debug('Showing dimmer', this.$dimmer, this.settings);
         this.set_variation();
-        if((!this.is_dimmed() || this.is_animating()) && this.is_enabled()) {
+        if ((!this.is_dimmed() || this.is_animating()) && this.is_enabled()) {
             this.animate_show(callback);
-            this.invokeCallback('show', this.element);
-            this.invokeCallback('change', this.element);
+            this.invokeCallback('show')(this.element);
+            this.invokeCallback('change')(this.element);
         } else {
             this.debug('Dimmer is already shown or disabled');
         }
@@ -205,8 +205,8 @@ export class Dimmer extends Module {
         if (this.is_dimmed() || this.is_animating()) {
             this.debug('Hiding dimmer', this.$dimmer);
             this.animate_hide(callback);
-            this.invokeCallback('hide', this.element);
-            this.invokeCallback('change', this.element);
+            this.invokeCallback('hide')(this.element);
+            this.invokeCallback('change')(this.element);
         }
         else {
             this.debug('Dimmer is not visible');

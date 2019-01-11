@@ -132,7 +132,7 @@ export class Transition extends Module {
             } else {
                 this.verbose('Static animation completed');
                 this.restore_conditions();
-                this.invokeCallback('complete', this.$element); // INVESTIGATE
+                this.invokeCallback('complete')(this.$element); // INVESTIGATE
             }
         }
     }
@@ -142,8 +142,8 @@ export class Transition extends Module {
         this.remove_hidden();
         this.set_visible();
         this.force_visible();
-        this.invokeCallback('show', this.$element); // INVESTIGATE
-        this.invokeCallback('complete', this.$element); // INVESTIGATE
+        this.invokeCallback('show')(this.$element); // INVESTIGATE
+        this.invokeCallback('complete')(this.$element); // INVESTIGATE
         // module.repaint(); already commented
     }
 
@@ -158,8 +158,8 @@ export class Transition extends Module {
         this.remove_visible();
         this.set_hidden();
         this.force_hidden();
-        this.invokeCallback('hide', this.$element); // INVESTIGATE
-        this.invokeCallback('complete', this.$element); // INVESTIGATE
+        this.invokeCallback('hide')(this.$element); // INVESTIGATE
+        this.invokeCallback('complete')(this.$element); // INVESTIGATE
         // module.repaint(); already commented
     }
 
@@ -362,10 +362,7 @@ export class Transition extends Module {
     }
 
     get_displayType(shouldDetermine) {
-        shouldDetermine = (shouldDetermine !== undefined)
-            ? shouldDetermine
-            : true
-        ;
+        shouldDetermine = (shouldDetermine !== undefined) ? shouldDetermine : true;
         if(this.settings.displayType) {
             return this.settings.displayType;
         }
@@ -529,7 +526,7 @@ export class Transition extends Module {
                     .removeAttr('style')
                     .removeClass(this.settings.className.hidden)
                     .removeClass(this.settings.className.visible)
-                    //.show()
+                    .show()
                     .css('display')
                 ;
                 this.verbose('Determining final display state', displayType);
@@ -671,7 +668,7 @@ export class Transition extends Module {
         this.set_duration(this.settings.duration);
 
         //this.invokeCallback('start', element); INVESTIGATE
-        this.invokeCallback('start', this.$element);
+        this.invokeCallback('start')(this.$element);
     }
 
     add_failSafe() {

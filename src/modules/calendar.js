@@ -1078,7 +1078,7 @@ export class Calendar extends Module {
         var mode = this.get_mode();
         var text = this.settings.formatter.datetime(date, settings);
         // if (fireChange && this.settings.onChange.call(element, date, text, mode) === false) {
-        if (fireChange && this.invokeCallback('change', (element, date, text, mode)) === false) {
+        if (fireChange && this.invokeCallback('change')(this.element, date, text, mode) === false) {
             return false;
         }
 

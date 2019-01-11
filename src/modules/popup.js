@@ -171,7 +171,7 @@ export class Popup extends Module {
         this.verbose('Initializing popup module', this.settings);
         this.createID();
         this.bind_events();
-        if(!this.exists() && this.settings.preserve) {
+        if (!this.exists() && this.settings.preserve) {
             this.create();
         }
         if (this.settings.observeChanges) {
@@ -229,7 +229,7 @@ export class Popup extends Module {
                 .data(this.settings.metadata.activator, this.$element)
                 .html(html)
             ;
-            if(this.settings.inline) {
+            if (this.settings.inline) {
                 this.verbose('Inserting popup element inline', this.$popup);
                 this.$popup.insertAfter(this.$element);
             } else {
@@ -242,18 +242,18 @@ export class Popup extends Module {
             if (this.settings.hoverable) {
                 this.bind_popup();
             }
-            this.invokeCallback('create', this.$popup, this.element)
-        } else if($target.next(selector.popup).length !== 0) {
-            this.verbose('Pre-existing popup found');
-            this.settings.inline = true;
-            this.settings.popup  = this.$target.next(this.settings.selector.popup).data(this.settings.metadata.activator, this.$element);
+            this.invokeCallback('create')(this.$popup, this.element)
+        } else if (this.settings.popup) {
+            $(this.settings.popup).data(this.settings.metadata.activator, this.$element);
+            this.verbose('Used popup specified in settings');
             this.refresh();
             if (this.settings.hoverable) {
                 this.bind_popup();
             }
-        } else if (this.settings.popup) {
-            $(this.settings.popup).data(this.settings.metadata.activator, this.$element);
-            this.verbose('Used popup specified in settings');
+        } else if (this.$target.next(this.settings.selector.popup).length !== 0) {
+            this.verbose('Pre-existing popup found');
+            this.settings.inline = true;
+            this.settings.popup  = this.$target.next(this.settings.selector.popup).data(this.settings.metadata.activator, this.$element);
             this.refresh();
             if (this.settings.hoverable) {
                 this.bind_popup();
@@ -338,7 +338,7 @@ export class Popup extends Module {
         if (this.settings.on == 'click') {
             this.$element.on('click' + this.eventNamespace, this.toggle.bind(this));
         }
-        if (settings.on == 'hover') {
+        if (this.settings.on == 'hover') {
             this.$element.on(clickEvent + this.eventNamespace, this.event_touchstart.bind(this));
         }
         if (this.get_startEvent()) {
@@ -369,7 +369,7 @@ export class Popup extends Module {
         ;
 
         clearTimeout(this.hideTimer);
-        if(!this.openedWithTouch || (this.openedWithTouch && this.settings.addTouchEvents) ) {
+        if (!this.openedWithTouch || (this.openedWithTouch && this.settings.addTouchEvents) ) {
             this.showTimer = setTimeout(this.show.bind(this), delay);
         }
     }
@@ -493,7 +493,7 @@ export class Popup extends Module {
             if (!this.exists()) {
                 this.create();
             }
-            if (this.invokeCallback('show', this.$popup, this.element) === false) {
+            if (this.invokeCallback('show')(this.$popup, this.element) === false) {
                 this.debug('onShow callback returned false, cancelling popup animation');
                 return;
             } else if (!this.settings.preserve && !this.settings.popup) {
@@ -512,7 +512,7 @@ export class Popup extends Module {
     hide(callback) {
         callback = callback || function(){};
         if (this.is_visible() || this.is_animating()) {
-            if (this.invokeCallback('hide', this.$popup, this.element) === false) {
+            if (this.invokeCallback('hide')(this.$popup, this.element) === false) {
                 this.debug('onHide callback returned false, cancelling popup animation');
                 return;
             }
@@ -544,7 +544,7 @@ export class Popup extends Module {
             transition.on('complete', function() {
                 module.bind_close();
                 callback.call(module.$popup, module.element);
-                module.invokeCallback('visible', module.$popup, module.element);
+                module.invokeCallback('visible')(module.$popup, module.element);
             });
         } else {
             this.error(this.settings.error.noTransition);
@@ -554,7 +554,7 @@ export class Popup extends Module {
     animate_hide(callback) {
         callback = $.isFunction(callback) ? callback : function(){};
         this.debug('Hiding pop-up');
-        if (this.invokeCallback('onhide', this.$popup, this.element) === false) {
+        if (this.invokeCallback('onhide')(this.$popup, this.element) === false) {
             this.debug('onHide callback returned false, cancelling popup animation');
             return;
         }
@@ -574,7 +574,7 @@ export class Popup extends Module {
             transition.on('complete', function() {
                 module.reset();
                 callback.call(module.$popup, module.element);
-                module.invokeCallback('hidden', module.$popup, module.element);
+                module.invokeCallback('hidden')(module.$popup, module.element);
             });
         }
         else {
@@ -587,7 +587,7 @@ export class Popup extends Module {
     }
 
     exists() {
-        if(!this.$popup) {
+        if (!this.$popup) {
             return false;
         }
         if (this.settings.inline || this.settings.popup) {
@@ -676,7 +676,7 @@ export class Popup extends Module {
             : 0
         ;
         calculations.target.margin.left = (this.settings.inline)
-            ? module.is.rtl()
+            ? this.is_rtl()
              ? parseInt( window.getComputedStyle(targetElement).getPropertyValue('margin-right'), 10)
              : parseInt( window.getComputedStyle(targetElement).getPropertyValue('margin-left'), 10)
             : 0
@@ -849,10 +849,10 @@ export class Popup extends Module {
     get_startEvent() {
         if(this.settings.on == 'hover') {
             return 'mouseenter';
-        } else if(this.settings.on == 'focus') {
+        } else if (this.settings.on == 'focus') {
             return 'focus';
         }
-          return false;
+        return false;
     }
 
     get_title() {
@@ -1049,7 +1049,7 @@ export class Popup extends Module {
                     this.remove_attempts();
                     this.remove_loading();
                     this.reset();
-                    this.invokeCallback('unplaceable', this.$popup, this.element);
+                    this.invokeCallback('unplaceable')(this.$popup, this.element);
                     return false;
                 }
             }
@@ -1163,7 +1163,7 @@ export class Popup extends Module {
             this.debug('Removing popup', this.$popup);
             this.$popup.remove();
             this.$popup = undefined;
-            this.invokeCallback('remove', this.$popup, this.element); // Called after removed !?
+            this.invokeCallback('remove')(this.$popup, this.element); // Called after removed !?
         }
     }
 

@@ -299,12 +299,12 @@ export class Progress extends Module {
         this.remove_warning();
         this.remove_error();
         this.remove_success();
-        text = this.invokeCallback('labelupdate', 'active', text, this.value, this.total);
+        text = this.invokeCallback('labelupdate')('active', text, this.value, this.total);
         if (text) {
             this.set_label(text);
         }
         this.bind_transitionEnd(function() {
-            this.invokeCallback('active', this.element, this.value, this.total);
+            this.invokeCallback('active')(this.element, this.value, this.total);
         });
     }
 
@@ -349,12 +349,12 @@ export class Progress extends Module {
         this.remove_success();
         this.remove_warning();
         this.complete();
-        text = this.invokeCallback('labelupdate', 'error', text, this.value, this.total)
+        text = this.invokeCallback('labelupdate')('error', text, this.value, this.total)
         if (text) {
             this.set_label(text);
         }
         this.bind_transitionEnd(function() {
-            this.invokeCallback('error', this.element, this.value, this.total)
+            this.invokeCallback('error')(this.element, this.value, this.total)
         });
     }
 
@@ -430,7 +430,7 @@ export class Progress extends Module {
         this.set_barWidth(percent);
         this.set_labelInterval();
         this.set_labels();
-        this.invokeCallback('change', this.element, percent, this.value, this.total);
+        this.invokeCallback('change')(this.element, percent, this.value, this.total);
     }
 
     set_progress(value) {
@@ -487,14 +487,14 @@ export class Progress extends Module {
         this.remove_error();
         this.complete();
         if(this.settings.text.success) {
-            text = this.invokeCallback('labelupdate', 'success', text, this.value, this.total)
+            text = this.invokeCallback('labelupdate')('success', text, this.value, this.total)
             this.set_label(text);
         } else {
-            text = this.invokeCallback('active', 'success', text, this.value, this.total)
+            text = this.invokeCallback('active')('success', text, this.value, this.total)
             this.set_label(text);
         }
         this.bind_transitionEnd(function() {
-            this.invokeCallback('success', this.element, this.value, this.total)
+            this.invokeCallback('success')(this.element, this.value, this.total)
         });
     }
 
@@ -510,12 +510,12 @@ export class Progress extends Module {
         this.remove_success();
         this.remove_error();
         this.complete();
-        text = this.invokeCallback('labelupdate', 'warning', text, this.value, this.total)
+        text = this.invokeCallback('labelupdate')('warning', text, this.value, this.total)
         if (text) {
             this.set_label(text);
         }
         this.bind_transitionEnd(function() {
-            this.invokeCallback('warning', this.element, this.value, this.total)
+            this.invokeCallback('warning')(this.element, this.value, this.total)
         });
     }
 
