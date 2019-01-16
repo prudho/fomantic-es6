@@ -33,9 +33,9 @@ npm run build
 | Popup         | Transition    |   ✔️  |         |
 | Toast         | Transition    |   ✔️  |         |
 | Calendar      | Popup         |   ⚠️  | range is broken, halp ! |
+| Checkbox      | none          |   ⚠️  | grouped checkbox must be rethinked |
+| Dropdown      | Transition    |   ⚠️  | not finished and utterly broken |
 | Accordion     | Transition    |   ❌  |         |
-| Checkbox      | ...           |   ❌  |         |
-| Dropdown      | ...           |   ❌  |         |
 | Embed         | ...           |   ❌  |         |
 | Modal         | ...           |   ❌  |         |
 | Nag           | ...           |   ❌  |         |

@@ -14,7 +14,9 @@ export default [
 			'src/modules/dimmer.js',
 			'src/modules/popup.js',
 			'src/modules/toast.js',
-			'src/modules/calendar.js'
+			'src/modules/calendar.js',
+			'src/modules/dropdown.js',
+			'src/modules/checkbox.js'
 		],
 		output: {
 			name: 'fomantic',
