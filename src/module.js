@@ -28,6 +28,8 @@ export default class Module {
             }
 
             return method.callback;
+        } else {
+            return function() {};
         }
     }
 
