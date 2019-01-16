@@ -132,7 +132,7 @@ export class Transition extends Module {
             } else {
                 this.verbose('Static animation completed');
                 this.restore_conditions();
-                this.invokeCallback('complete')(this.$element); // INVESTIGATE
+                this.invokeCallback('complete')(this.$element);
             }
         }
     }
@@ -142,8 +142,8 @@ export class Transition extends Module {
         this.remove_hidden();
         this.set_visible();
         this.force_visible();
-        this.invokeCallback('show')(this.$element); // INVESTIGATE
-        this.invokeCallback('complete')(this.$element); // INVESTIGATE
+        this.invokeCallback('show')(this.$element);
+        this.invokeCallback('complete')(this.$element);
         // module.repaint(); already commented
     }
 
@@ -158,8 +158,8 @@ export class Transition extends Module {
         this.remove_visible();
         this.set_hidden();
         this.force_hidden();
-        this.invokeCallback('hide')(this.$element); // INVESTIGATE
-        this.invokeCallback('complete')(this.$element); // INVESTIGATE
+        this.invokeCallback('hide')(this.$element);
+        this.invokeCallback('complete')(this.$element);
         // module.repaint(); already commented
     }
 
