@@ -16,7 +16,8 @@ export default [
 			'src/modules/toast.js',
 			'src/modules/calendar.js',
 			'src/modules/dropdown.js',
-			'src/modules/checkbox.js'
+			'src/modules/checkbox.js',
+			'src/modules/sticky.js'
 		],
 		output: {
 			name: 'fomantic',
