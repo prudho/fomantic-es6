@@ -33,9 +33,11 @@ npm run build
 | Popup         | Transition    |   ✔️  |         |
 | Toast         | Transition    |   ✔️  |         |
 | Sticky        | none          |   ✔️  |         |
+| Slider        | none          |   ✔️  |         |
 | Calendar      | Popup         |   ⚠️  | range is broken, halp ! |
 | Checkbox      | none          |   ⚠️  | grouped checkbox must be rethinked |
 | Dropdown      | Transition    |   ⚠️  | not finished and utterly broken |
+| Tab           | none          |   ⚠️  | not finished and utterly broken |
 | Accordion     | Transition    |   ❌  |         |
 | Embed         | ...           |   ❌  |         |
 | Modal         | ...           |   ❌  |         |
@@ -43,8 +45,6 @@ npm run build
 | Search        | ...           |   ❌  |         |
 | Shape         | ...           |   ❌  |         |
 | Sidebar       | ...           |   ❌  |         |
-| Slider        | ...           |   ❌  |         |
-| Tab           | ...           |   ❌  |         |
 | API           | ...           |   ❌  |         |
 | Form          | ...           |   ❌  |         |
 | State         | ...           |   ❌  |         |

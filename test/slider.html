@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Rollupmantic</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="../dist/fomantic.umd.js"></script>
+  
+</head>
+<body>
+  
+    <div id="slider" class="ui range labeled ticked slider"></div>
+
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+      const test = new fomantic.Slider('#slider', {
+        debug: true,
+        verbose: true,
+        smooth: true,
+        labelType: "letter"
+      });
+
+      setTimeout(function() {
+        test.resync();
+      }, 3000);
+    });
+  </script>
+</body>

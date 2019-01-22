@@ -17,7 +17,9 @@ export default [
 			'src/modules/calendar.js',
 			'src/modules/dropdown.js',
 			'src/modules/checkbox.js',
-			'src/modules/sticky.js'
+			'src/modules/sticky.js',
+			'src/modules/tab.js',
+			'src/modules/slider.js'
 		],
 		output: {
 			name: 'fomantic',
