@@ -2,24 +2,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>Fomantic - Popup</title>
+  <title>Fomantic - Embed</title>
   <link rel="stylesheet" href="./styles.css">
   <script src="../dist/fomantic.umd.js"></script>
   
 </head>
-<body style="padding: 100px;">
-
-  <div id="popup" class="ui icon button" data-content="Add users to your feed">
-    <i class="add icon"></i>
-  </div>
+<body style="padding: 1rem;">
+  
+  <div id="embed" class="ui embed" data-url="https://www.youtube.com/embed/O6Xo21L0ybE" data-placeholder="./images/rickroll.jpg"></div>
 
   <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', () => {
-      const test = new fomantic.Popup('#popup', {
+      const embed = new fomantic.Embed('#embed', {
         debug: true,
-        verbose: true,
-        on: 'click',
-        position: 'top center'
+        verbose: true
       });
     });
   </script>

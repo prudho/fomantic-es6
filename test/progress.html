@@ -2,7 +2,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>Rollupmantic</title>
+  <title>Fomantic - Progress</title>
   <link rel="stylesheet" href="./styles.css">
   <script src="../dist/fomantic.umd.js"></script>
   
@@ -20,11 +20,10 @@
     document.addEventListener('DOMContentLoaded', () => {
         const test = new fomantic.Progress('#progress', {
             debug: true,
-            verbose: true,
-            text: { warning: 'error' }
+            verbose: true
         });
 
-        test.on('error', function(one, two, three, four) {
+        test.on('change', function(one, two, three, four) {
             console.log(one, two, three, four)
         })
 

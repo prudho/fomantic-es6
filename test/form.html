@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Fomantic - Form</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="../dist/fomantic.umd.js"></script>
+  
+</head>
+<body>
+
+  <div class="ui form segment">
+    <div class="two fields">
+      <div class="field">
+        <label>Name</label>
+        <input placeholder="First Name" name="name" type="text">
+      </div>
+      <div class="field">
+        <label>Gender</label>
+        <select class="ui dropdown" name="gender">
+          <option value="">Gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </div>
+    </div>
+    <div class="two fields">
+      <div class="field">
+        <label>Username</label>
+        <input placeholder="Username" name="username" type="text">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" name="password">
+      </div>
+    </div>
+    <div class="field">
+      <label>Skills</label>
+      <select name="skills" multiple="" class="ui dropdown">
+        <option value="">Select Skills</option>
+        <option value="css">CSS</option>
+        <option value="html">HTML</option>
+        <option value="javascript">Javascript</option>
+        <option value="design">Graphic Design</option>
+        <option value="plumbing">Plumbing</option>
+        <option value="mech">Mechanical Engineering</option>
+        <option value="repair">Kitchen Repair</option>
+      </select>
+    </div>
+    <div class="inline field">
+      <div class="ui checkbox">
+        <input type="checkbox" name="terms">
+        <label>I agree to the terms and conditions</label>
+      </div>
+    </div>
+    <div class="ui primary submit button">Submit</div>
+    <div class="ui error message"></div>
+  </div>
+
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = new fomantic.Form('.ui.form', {
+        debug: true,
+        verbose: true,
+        inline: true,
+        fields: {
+          name     : 'empty',
+          gender   : 'empty',
+          username : 'empty',
+          password : ['minLength[6]', 'empty'],
+          skills   : ['minCount[2]', 'empty'],
+          terms    : 'checked'
+        }
+      });
+
+      form.on('dirty', () => {
+        console.log('dirty');
+      });
+
+      form.on('clean', () => {
+        console.log('clean');
+      });
+
+      // document.querySelector('.ui.show.button').addEventListener('click', () => {
+      //   dimmer.show();
+      // });
+
+      // document.querySelector('.ui.hide.button').addEventListener('click', () => {
+      //   dimmer.hide();
+      // });
+    });
+  </script>
+</body>

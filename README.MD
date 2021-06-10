@@ -55,6 +55,6 @@ npm run build
 
 [jQuery's related discussion](https://github.com/fomantic/Fomantic-UI/issues/374)
 
-jQuery is heavily used in FUI actually, and remove all its references from code is a real PITA (trust me, i've tried and others too...). But we can reduce its footprint on the code by using a lighter compatible library. [Cash](https://github.com/kenwheeler/cash) seems to be a great solution. The only caveat I saw for now is the lack on jQuery's animation methods, but we'll find a lightweight alternative too !
+jQuery is heavily used in FUI actually, and remove all its references from code is a real PITA (trust me, i've tried and others too...). But we can reduce its footprint on the code by using a lighter compatible library. [Cash](https://github.com/fabiospampinato/cash) seems to be a great solution. The only caveat I saw for now is the lack on jQuery's animation methods, but we'll find a lightweight alternative too !
 
 ### To be continued...
