@@ -92,9 +92,9 @@ export class Sidebar extends Module {
 
   elementNamespace: string;
   id: string;
-  transitionEvent;
+  transitionEvent: string;
   cache;
-  currentScroll;
+  currentScroll: number;
 
   instance: Sidebar;
 
@@ -589,7 +589,7 @@ export class Sidebar extends Module {
     return transition;
   }
 
-  get_transitionEvent() {
+  get_transitionEvent(): string {
     let
       element     = document.createElement('element'),
       transitions = {

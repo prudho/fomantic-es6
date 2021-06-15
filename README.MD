@@ -34,6 +34,7 @@ npm run build
 | Toast         | Transition    |   ✔️  |         |
 | Sticky        | none          |   ✔️  |         |
 | Slider        | none          |   ✔️  |         |
+| Sidebar       | none          |   ✔️  |         |
 | Calendar      | Popup         |   ⚠️  | range is broken, halp ! |
 | Checkbox      | none          |   ⚠️  | grouped checkbox must be rethinked |
 | Dropdown      | Transition    |   ⚠️  | not finished and utterly broken |
@@ -42,7 +43,6 @@ npm run build
 | Embed         | ...           |   ⚠️  |         |
 | Modal         | ...           |   ⚠️  |         |
 | Nag           | ...           |   ⚠️  |         |
-| Sidebar       | ...           |   ⚠️  |         |
 | API           | ...           |   ⚠️  | needs intesive tests |
 | Form          | ...           |   ⚠️  |         |
 | Search        | API, Transition |   ⚠️  | needs API debugging |
