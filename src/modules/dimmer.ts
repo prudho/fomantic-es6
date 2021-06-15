@@ -3,7 +3,7 @@
 import Module from '../module';
 
 import $, { Cash } from 'cash-dom';
-import { Transition } from './transition';
+import Transition from './transition';
 
 const settings = {
   name        : 'Dimmer',
@@ -77,8 +77,9 @@ const settings = {
       if (settings.displayLoader) {
         l = $('<div/>')
           .addClass(settings.className.loader)
-          .addClass(settings.loaderVariation);
-        if (!!settings.loaderText){
+          .addClass(settings.loaderVariation)
+        ;
+        if (!!settings.loaderText) {
           l.text(settings.loaderText);
           l.addClass('text');
         }
@@ -88,7 +89,7 @@ const settings = {
     }
   },
 
-  events: ['change', 'show', 'hide']
+  events: ['change', 'show', 'hide', 'visible', 'hidden']
 }
 
 export class Dimmer extends Module {
@@ -147,13 +148,13 @@ export class Dimmer extends Module {
     return $element;
   }
 
-  instantiate() {
+  instantiate(): void {
     this.verbose('Storing instance of module', this);
     this.instance = this;
     this.$element.data(this.moduleNamespace, this.instance);
   }
 
-  destroy() {
+  destroy(): void {
     this.verbose('Destroying previous module', this.$dimmer);
     this.unbind_events();
     this.remove_variation(undefined);
@@ -186,7 +187,7 @@ export class Dimmer extends Module {
     this.$dimmable.off(this.eventNamespace);
   }
 
-  show(callback: Function = () => {}) {
+  show(callback: Function = () => {}): void {
     this.debug('Showing dimmer', this.$dimmer, this.settings);
     this.set_variation(undefined);
     if ((!this.is_dimmed() || this.is_animating()) && this.is_enabled()) {
@@ -199,8 +200,7 @@ export class Dimmer extends Module {
     }
   }
 
-  hide(callback: Function = () => {}) {
-    console.log(this, this.is_dimmed(), this.is_animating())
+  hide(callback: Function = () => {}): void {
     if (this.is_dimmed() || this.is_animating()) {
       this.debug('Hiding dimmer', this.$dimmer);
       this.animate_hide(callback);
@@ -212,7 +212,7 @@ export class Dimmer extends Module {
     }
   }
 
-  toggle() {
+  toggle(): void {
     this.verbose('Toggling dimmer visibility', this.$dimmer);
     if (!this.is_dimmed() ) {
       this.show(undefined);
@@ -224,11 +224,7 @@ export class Dimmer extends Module {
     }
   }
 
-  animate_show(callback) {
-    callback = $.isFunction(callback)
-      ? callback
-      : function(){}
-    ;
+  animate_show(callback: Function = () => {}): void {
     // if (this.settings.useCSS && $.fn.transition !== undefined && this.$dimmer.transition('is supported')) {
     if (this.settings.useCSS) {
       if (this.settings.useFlex) {
@@ -260,6 +256,7 @@ export class Dimmer extends Module {
 
       transition.on('complete', () => {
         this.set_active();
+        this.invokeCallback('visible')(this.element);
         callback();
       });
 
@@ -287,11 +284,7 @@ export class Dimmer extends Module {
     }
   }
 
-  animate_hide(callback) {
-    callback = $.isFunction(callback)
-      ? callback
-      : function(){}
-    ;
+  animate_hide(callback: Function = () => {}): void {
     // if (this.settings.useCSS && $.fn.transition !== undefined && this.$dimmer.transition('is supported')) {
     if (this.settings.useCSS) {
       this.verbose('Hiding dimmer with css');
@@ -315,6 +308,7 @@ export class Dimmer extends Module {
         this.remove_dimmed();
         this.remove_variation(undefined);
         this.remove_active();
+        this.invokeCallback('hidden')(this.element);
         callback();
       });
 
@@ -334,7 +328,7 @@ export class Dimmer extends Module {
     }
   }
 
-  event_click(event) {
+  event_click(event): void {
     this.verbose('Determining if event occurred on dimmer', event);
     if (this.$dimmer.find(event.target).length === 0 || $(event.target).is(this.settings.selector.content)) {
       this.hide(undefined);
@@ -342,7 +336,7 @@ export class Dimmer extends Module {
     }
   }
 
-  can_show() {
+  can_show(): boolean {
     return !this.$dimmer.hasClass(this.settings.className.disabled);
   }
 
@@ -417,33 +411,33 @@ export class Dimmer extends Module {
     return this.settings.duration;
   }
 
-  set_active() {
+  set_active(): void {
     this.$dimmer.addClass(this.settings.className.active);
   }
 
-  set_dimmable() {
+  set_dimmable(): void {
     this.$dimmable.addClass(this.settings.className.dimmable);
   }
 
-  set_dimmed() {
+  set_dimmed(): void {
     this.$dimmable.addClass(this.settings.className.dimmed);
   }
 
-  set_disabled() {
+  set_disabled(): void {
     this.$dimmer.addClass(this.settings.className.disabled);
   }
 
-  set_legacy() {
+  set_legacy(): void {
     this.$dimmer.addClass(this.settings.className.legacy);
   }
 
-  set_opacity(opacity) {
+  set_opacity(opacity): void {
     let
       color      = this.$dimmer.css('background-color'),
       colorArray = color.split(','),
       isRGB      = (colorArray && colorArray.length >= 3)
     ;
-    opacity    = this.settings.opacity === 0 ? 0 : this.settings.opacity || opacity;
+    opacity = this.settings.opacity === 0 ? 0 : this.settings.opacity || opacity;
     if (isRGB) {
       colorArray[2] = colorArray[2].replace(')','');
       colorArray[3] = opacity + ')';
@@ -456,43 +450,41 @@ export class Dimmer extends Module {
     this.$dimmer.css('background-color', color);
   }
 
-  set_pageDimmer() {
+  set_pageDimmer(): void {
     this.$dimmer.addClass(this.settings.className.pageDimmer);
   }
 
-  set_variation(variation = this.settings.variation) {
+  set_variation(variation = this.settings.variation): void {
     if (variation) {
       this.$dimmer.addClass(variation);
     }
   }
 
-  remove_active() {
+  remove_active(): void {
     this.$dimmer.removeClass(this.settings.className.active);
   }
 
-  remove_dimmed() {
+  remove_dimmed(): void {
     this.$dimmable.removeClass(this.settings.className.dimmed);
   }
 
-  remove_disabled() {
+  remove_disabled(): void {
     this.$dimmer.removeClass(this.settings.className.disabled);
   }
 
-  remove_legacy() {
+  remove_legacy(): void {
     this.$dimmer.removeClass(this.settings.className.legacy);
   }
 
-  remove_variation(variation) {
+  remove_variation(variation): void {
     variation = variation || settings.variation;
     if (variation) {
       this.$dimmer.removeClass(variation);
     }
   }
 
-  add_content(element) {
-    let
-      $content = $(element)
-    ;
+  add_content(element): void {
+    let $content = $(element);
     this.debug('Add content to dimmer', $content);
     if ($content.parent()[0] !== this.$dimmer[0]) {
       $content.detach().appendTo(this.$dimmer);

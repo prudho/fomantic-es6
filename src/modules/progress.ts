@@ -131,7 +131,7 @@ export class Progress extends Module {
     this.$element.data(this.moduleNamespace, this);
   }
 
-  destroy() {
+  destroy(): void {
     this.verbose('Destroying previous progress for', this.$element);
     clearInterval(this.instance.interval);
     this.remove_state();
@@ -139,19 +139,19 @@ export class Progress extends Module {
     this.instance = undefined;
   }
 
-  create_progressPoll() {
+  create_progressPoll(): void {
     this.progressPoll = setTimeout(() => {
       this.update_toNextValue();
       this.remove_progressPoll();
     }, this.get_updateInterval());
   }
 
-  reset() {
+  reset(): void {
     this.remove_nextValue();
     this.update_progress(0);
   }
 
-  increment(incrementValue) {
+  increment(incrementValue): void {
     let
       startValue,
       newValue
@@ -170,7 +170,7 @@ export class Progress extends Module {
     this.set_progress(newValue);
   }
 
-  decrement(decrementValue) {
+  decrement(decrementValue): void {
     let
       total     = this.get_total(),
       startValue,
@@ -192,14 +192,12 @@ export class Progress extends Module {
     this.set_progress(newValue);
   }
 
-  bind_transitionEnd(callback) {
+  bind_transitionEnd(callback): void {
     let transitionEnd = this.get_transitionEnd();
-    this.$bars
-      .one(transitionEnd + this.eventNamespace, (event) => {
-        clearTimeout(this.failSafeTimer);
-        callback.call(this, event);
-      });
-    ;
+    this.$bars.one(transitionEnd + this.eventNamespace, (event) => {
+      clearTimeout(this.failSafeTimer);
+      callback.call(this, event);
+    });
     this.failSafeTimer = setTimeout(() => {
       // this.$bars.triggerHandler(transitionEnd);
       this.$bars.trigger(transitionEnd);
@@ -207,14 +205,12 @@ export class Progress extends Module {
     this.verbose('Adding fail safe timer', this.timer);
   }
 
-  read_metadata() {
-    let
-      data = {
-        percent : this.helper_forceArray(this.$element.data(this.settings.metadata.percent)),
-        total   : this.$element.data(this.settings.metadata.total),
-        value   : this.helper_forceArray(this.$element.data(this.settings.metadata.value))
-      }
-    ;
+  read_metadata(): void {
+    let data = {
+      percent : this.helper_forceArray(this.$element.data(this.settings.metadata.percent)),
+      total   : this.$element.data(this.settings.metadata.total),
+      value   : this.helper_forceArray(this.$element.data(this.settings.metadata.value))
+    };
     if (data.total !== undefined) {
       this.debug('Total value set from metadata', data.total);
       this.set_total(data.total);
@@ -230,7 +226,7 @@ export class Progress extends Module {
     }
   }
 
-  read_settings() {
+  read_settings(): void {
     if (this.settings.total !== false) {
       this.debug('Current total set in settings', this.settings.total);
       this.set_total(this.settings.total);
@@ -249,7 +245,7 @@ export class Progress extends Module {
   complete(keepState: boolean): void {
     if (this.percent === undefined || this.percent < 100) {
       this.remove_progressPoll();
-      if (keepState !== true){
+      if (keepState !== true) {
           this.set_percent(100);
       }
     }
@@ -263,32 +259,32 @@ export class Progress extends Module {
     return (this.get_total() !== false);
   }
 
-  is_complete() {
+  is_complete(): boolean {
     return this.is_success() || this.is_warning() || this.is_error();
   }
 
-  is_success() {
+  is_success(): boolean {
     return this.$element.hasClass(this.settings.className.success);
   }
 
-  is_warning() {
+  is_warning(): boolean {
     return this.$element.hasClass(this.settings.className.warning);
   }
 
-  is_error() {
+  is_error(): boolean {
     return this.$element.hasClass(this.settings.className.error);
   }
 
-  is_active() {
+  is_active(): boolean {
     return this.$element.hasClass(this.settings.className.active);
   }
 
-  is_visible() {
-    return this.$element.is(':visible');
+  is_visible(): boolean {
+    return this.$element.is('.visible');
   }
 
   // gets current displayed percentage (if animating values this is the intermediary value)
-  get_displayPercent(index) {
+  get_displayPercent(index): number {
     let
       $bar           = $(this.$bars[index]),
       barWidth       = $bar.width(),
@@ -304,7 +300,7 @@ export class Progress extends Module {
     ;
   }
 
-  get_normalizedValue(value) {
+  get_normalizedValue(value): number {
     if (value < 0) {
       this.debug('Value cannot decrement below 0');
       return 0;
@@ -322,7 +318,7 @@ export class Progress extends Module {
     return value;
   }
 
-  get_numericValue(value) {
+  get_numericValue(value): number {
     return (typeof value === 'string')
       ? (value.replace(/[^\d.]/g, '') !== '')
         ? +(value.replace(/[^\d.]/g, ''))
@@ -331,11 +327,11 @@ export class Progress extends Module {
     ;
   }
 
-  get_percent(index = 0) {
+  get_percent(index = 0): number {
     return this.percent && this.percent[index || 0] || 0;
   }
 
-  get_randomValue() {
+  get_randomValue(): number {
     this.debug('Generating random increment percentage');
     return Math.floor((Math.random() * this.settings.random.max) + this.settings.random.min);
   }
@@ -348,7 +344,7 @@ export class Progress extends Module {
         ? this.get_displayPercent(index)
         : this.get_percent(index),
       left = (total !== false)
-        ? Math.max(0,total - value)
+        ? Math.max(0, total - value)
         : (100 - percent)
     ;
     templateText = templateText || '';
@@ -363,11 +359,11 @@ export class Progress extends Module {
     return templateText;
   }
 
-  get_total() {
+  get_total(): number|boolean {
     return this.total !== undefined ? this.total : false;
   }
 
-  get_transitionEnd() {
+  get_transitionEnd(): string {
     let
       element     = document.createElement('element'),
       transitions = {
@@ -378,7 +374,7 @@ export class Progress extends Module {
       },
       transition
     ;
-    for (transition in transitions){
+    for (transition in transitions) {
       if (element.style[transition] !== undefined ) {
         return transitions[transition];
       }
@@ -392,11 +388,11 @@ export class Progress extends Module {
     return this.settings.updateInterval;
   }
 
-  get_value(index = 0) {
+  get_value(index = 0): number {
     return this.nextValue || this.value && this.value[index || 0] || 0;
   }
 
-  set_active(text: string = this.settings.text.active) {
+  set_active(text: string = this.settings.text.active): void {
     this.debug('Setting active state');
     if (this.settings.showActivity && !this.is_active() ) {
       this.$element.addClass(this.settings.className.active);
@@ -413,7 +409,7 @@ export class Progress extends Module {
     });
   }
 
-  set_barLabel(text: string = '') {
+  set_barLabel(text: string = ''): void {
     this.$progresses.map((index, element) => {
       let $progress = $(element);
       if (text !== undefined) {
@@ -430,7 +426,7 @@ export class Progress extends Module {
     });
   }
 
-  set_barWidth(values) {
+  set_barWidth(values): void {
     this.debug("set bar width with ", values);
     values = this.helper_forceArray(values);
     let
@@ -474,7 +470,7 @@ export class Progress extends Module {
     this.$element.attr('data-percent', percents);
   }
 
-  set_duration(duration = this.settings.duration) {
+  set_duration(duration = this.settings.duration): void {
     duration = (typeof duration == 'number')
       ? duration + 'ms'
       : duration
@@ -485,23 +481,24 @@ export class Progress extends Module {
     });
   }
 
-  set_error(text: string = this.settings.text.error, keepState) {
+  set_error(text: string = this.settings.text.error, keepState): void {
     this.debug('Setting error state');
     this.$element.addClass(this.settings.className.error);
     this.remove_active();
     this.remove_success();
     this.remove_warning();
     this.complete(keepState);
-    text = this.settings.onLabelUpdate('error', text, this.value, this.total);
+    // text = this.settings.onLabelUpdate('error', text, this.value, this.total);
+    text = this.invokeCallback('labelUpdate')('error', text, this.value, this.total);
     if (text) {
       this.set_label(text);
     }
     this.bind_transitionEnd(() => {
-      this.invokeCallback('error').call(this.element, this.value, this.total);
+      this.invokeCallback('error')(this.element, this.value, this.total);
     });
   }
 
-  set_label(text: string = '') {
+  set_label(text: string = ''): void {
     if (text) {
       text = this.get_text(text);
       this.verbose('Setting label to text', text);
@@ -509,7 +506,7 @@ export class Progress extends Module {
     }
   }
 
-  set_labelInterval() {
+  set_labelInterval(): void {
     let animationCallback = () => {
       this.verbose('Bar finished animating, removing continuous label updates');
       clearInterval(this.interval);
@@ -536,17 +533,17 @@ export class Progress extends Module {
     }, this.settings.framerate);
   }
 
-  set_labels() {
+  set_labels(): void {
     this.verbose('Setting both bar progress and outer label text');
     this.set_barLabel();
     this.set_state();
   }
 
-  set_nextValue(value) {
+  set_nextValue(value): void {
     this.nextValue = value;
   }
 
-  set_percent(percents) {
+  set_percent(percents): void {
     percents = this.helper_forceArray(percents).map((percent) => {
       percent = (typeof percent == 'string')
         ? +(percent.replace('%', ''))
@@ -599,10 +596,10 @@ export class Progress extends Module {
       this.set_barWidth(percents);
       this.set_labelInterval();
     }
-    this.invokeCallback('change').call(this.element, percents, this.value, this.total);
+    this.invokeCallback('change')(this.element, percents, this.value, this.total);
   }
 
-  set_progress(value) {
+  set_progress(value): void {
     if (!this.has_progressPoll()) {
       this.debug('First update in progress update interval, immediately updating', value);
       this.update_progress(value);
@@ -615,7 +612,7 @@ export class Progress extends Module {
   }
   
 
-  set_state(percent = this.helper_sum(this.percent)) {
+  set_state(percent = this.helper_sum(this.percent)): void {
     if (percent === 100) {
       if (this.settings.autoSuccess && this.$bars.length === 1 && !(this.is_warning() || this.is_error() || this.is_success())) {
         this.set_success();
@@ -637,7 +634,7 @@ export class Progress extends Module {
     }
   }
 
-  set_success(text: string = this.settings.text.success || this.settings.text.active, keepState: boolean = false) {
+  set_success(text: string = this.settings.text.success || this.settings.text.active, keepState: boolean = false): void {
     this.debug('Setting success state');
     this.$element.addClass(this.settings.className.success);
     this.remove_active();
@@ -645,11 +642,13 @@ export class Progress extends Module {
     this.remove_error();
     this.complete(keepState);
     if (this.settings.text.success) {
-      text = this.settings.onLabelUpdate('success', text, this.value, this.total);
+      // text = this.settings.onLabelUpdate('success', text, this.value, this.total);
+      text = this.invokeCallback('labelUpdate')('success', text, this.value, this.total);
       this.set_label(text);
     }
     else {
-      text = this.settings.onLabelUpdate('active', text, this.value, this.total);
+      // text = this.settings.onLabelUpdate('active', text, this.value, this.total);
+      text = this.invokeCallback('labelUpdate')('active', text, this.value, this.total);
       this.set_label(text);
     }
     this.bind_transitionEnd(() => {
@@ -657,15 +656,15 @@ export class Progress extends Module {
     });
   }
 
-  set_total(totalValue) {
+  set_total(totalValue): void {
     this.total = totalValue;
   }
 
-  set_transitionEvent() {
+  set_transitionEvent(): void {
     this.transitionEnd = this.get_transitionEnd();
   }
 
-  set_value(value) {
+  set_value(value): void {
     this.value = this.helper_forceArray(value);
   }
 
@@ -676,7 +675,8 @@ export class Progress extends Module {
     this.remove_success();
     this.remove_error();
     this.complete(keepState);
-    text = this.settings.onLabelUpdate('warning', text, this.value, this.total);
+    // text = this.settings.onLabelUpdate('warning', text, this.value, this.total);
+    text = this.invokeCallback('active')('warning', text, this.value, this.total);
     if (text) {
       this.set_label(text);
     }
@@ -685,7 +685,7 @@ export class Progress extends Module {
     });
   }
 
-  update_progress(values) {
+  update_progress(values): void {
     let hasTotal = this.has_total();
     if (hasTotal) {
       this.set_value(values);
@@ -707,10 +707,10 @@ export class Progress extends Module {
       }
       return percentComplete;
     });
-    this.set_percent( percentCompletes );
+    this.set_percent(percentCompletes);
   }
 
-  update_toNextValue() {
+  update_toNextValue(): void {
     let nextValue = this.nextValue;
     if (nextValue) {
       this.debug('Update interval complete using last updated value', nextValue);
@@ -719,22 +719,22 @@ export class Progress extends Module {
     }
   }
 
-  remove_active() {
+  remove_active(): void {
     this.verbose('Removing active state');
     this.$element.removeClass(this.settings.className.active);
   }
 
-  remove_error() {
+  remove_error(): void {
     this.verbose('Removing error state');
     this.$element.removeClass(this.settings.className.error);
   }
 
-  remove_nextValue() {
+  remove_nextValue(): void {
     this.verbose('Removing progress value stored for next update');
     delete this.nextValue;
   }
 
-  remove_progressPoll() {
+  remove_progressPoll(): void {
     this.verbose('Removing progress poll timer');
     if (this.progressPoll) {
       clearTimeout(this.progressPoll);
@@ -742,19 +742,19 @@ export class Progress extends Module {
     }
   }
 
-  remove_state() {
+  remove_state(): void {
     this.verbose('Removing stored state');
     delete this.total;
     delete this.percent;
     delete this.value;
   }
 
-  remove_success() {
+  remove_success(): void {
     this.verbose('Removing success state');
     this.$element.removeClass(this.settings.className.success);
   }
 
-  remove_warning() {
+  remove_warning(): void {
     this.verbose('Removing warning state');
     this.$element.removeClass(this.settings.className.warning);
   }
@@ -780,7 +780,7 @@ export class Progress extends Module {
    * @param total A total amount of multiple values
    * @returns {number} A precison. Could be 1, 10, 100, ... 1e+10.
    */
-  helper_derivePrecision(min, total) {
+  helper_derivePrecision(min, total): number {
     let
       precisionPower = 0,
       precision = 1,
@@ -807,7 +807,7 @@ export class Progress extends Module {
     ;
   }
 
-  helper_sum(nums) {
+  helper_sum(nums): number {
     return Array.isArray(nums) ? nums.reduce((left, right) => {
       return left + Number(right);
     }, 0) : 0;

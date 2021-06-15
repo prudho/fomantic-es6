@@ -145,7 +145,7 @@ const settings = {
       if (text.length === 0) {
         return null;
       }
-      if (text.match(/^[0-9]{4}[\/\-\.][0-9]{1,2}[\/\-\.][0-9]{1,2}$/)){
+      if (text.match(/^[0-9]{4}[\/\-\.][0-9]{1,2}[\/\-\.][0-9]{1,2}$/)) {
         text = text.replace(/[\/\-\.]/g,'/') + ' 00:00:00';
       }
       // Reverse date and month in some cases
@@ -353,40 +353,6 @@ const settings = {
     }
   },
 
-  // callback before date is changed, return false to cancel the change
-  onBeforeChange: function (date, text, mode) {
-    return true;
-  },
-
-  // callback when date changes
-  onChange: function (date, text, mode) {
-  },
-
-  // callback before show animation, return false to prevent show
-  onShow: function () {
-  },
-
-  // callback after show animation
-  onVisible: function () {
-  },
-
-  // callback before hide animation, return false to prevent hide
-  onHide: function () {
-  },
-
-  // callback after hide animation
-  onHidden: function () {
-  },
-
-  // callback before item is selected, return false to prevent selection
-  onSelect: function (date, mode) {
-  },
-
-  // is the given date disabled?
-  isDisabled: function (date, mode) {
-    return false;
-  },
-
   selector: {
     popup: '.ui.popup',
     input: 'input',
@@ -450,7 +416,16 @@ const settings = {
 
   eventClass: 'blue',
 
-  events: ['rate']
+  events: [
+    'beforeChange', // callback before date is changed, return false to cancel the change
+    'change',       // callback when date changes
+    'show',         // callback before show animation, return false to prevent show
+    'visible',      // callback after show animation
+    'hide',         // callback before hide animation, return false to prevent hide
+    'hidden',       // callback after hide animation
+    'select',       // callback before item is selected, return false to prevent selection
+    'disabled'      // is the given date disabled?
+  ]
 }
 
 const numberText = ['','one','two','three','four','five','six','seven','eight'];
@@ -463,7 +438,7 @@ const timeGapTable = {
   '30': {'row': 2, 'column': 1 }
 };
 
-export class Calendar extends Module {
+export default class Calendar extends Module {
   $input: Cash;
   $activator: Cash;
   $container: Cash;
@@ -509,20 +484,20 @@ export class Calendar extends Module {
     this.instantiate();
   }
 
-  instantiate() {
+  instantiate(): void {
     this.verbose('Storing instance of calendar');
     this.instance = this;
     this.$element.data(this.moduleNamespace, this.instance);
   }
 
-  destroy() {
+  destroy(): void {
     this.verbose('Destroying previous calendar for', this.element);
     this.$element.removeAttr(this.moduleNamespace);
     this.unbind_events();
     this.disconnect_classObserver();
   }
 
-  setup_config() {
+  setup_config(): void {
     if (this.get_minDate() !== null) {
       this.set_minDate(this.$element.data(this.settings.metadata.minDate));
     }
@@ -533,7 +508,7 @@ export class Calendar extends Module {
     this.setting('on', this.settings.on || (this.$input.length ? 'focus' : 'click'));
   }
 
-  setup_popup() {
+  setup_popup(): void {
     if (this.settings.inline) {
       return;
     }
@@ -558,13 +533,14 @@ export class Calendar extends Module {
       this.$container = $('<div/>').addClass(this.settings.className.popup)[domPositionFunction]($activatorParent);
     }
     this.$container.addClass(this.settings.className.calendar);
-    if (this.isInverted){
+    if (this.isInverted) {
       this.$container.addClass(this.settings.className.inverted);
     }
     let
       onVisible = () => {
         this.refreshTooltips();
-        return this.settings.onVisible.apply(this.$container, arguments);
+        // return this.settings.onVisible.apply(this.$container, arguments);
+        return this.invokeCallback('visible').apply(this.$container, arguments);
       },
       onHidden = this.settings.onHidden
     ;
@@ -574,11 +550,13 @@ export class Calendar extends Module {
       onVisible = () => {
         this.refreshTooltips();
         this.focus();
-        return this.settings.onVisible.apply(this.$container, arguments);
+        // return this.settings.onVisible.apply(this.$container, arguments);
+        return this.invokeCallback('visible').apply(this.$container, arguments)
       };
       onHidden = () => {
         this.blur();
-        return this.settings.onHidden.apply(this.$container, arguments);
+        // return this.settings.onHidden.apply(this.$container, arguments);
+        return this.invokeCallback('hidden').apply(this.$container, arguments)
       };
     }
 
@@ -599,15 +577,16 @@ export class Calendar extends Module {
       //reset the focus date onShow
       this.set_focusDate(this.get_date());
       this.set_mode(this.get_validatedMode(this.settings.startMode));
-      return this.settings.onShow.apply(this.$container, arguments);
+      // return this.settings.onShow.apply(this.$container, arguments);
+      return this.invokeCallback('show').apply(this.$container, arguments)
     });
 
     this.popup.on('visible', onVisible);
-    this.popup.on('hide', this.settings.onHide);
+    this.popup.on('hide', this.invokeCallback('hide'));
     this.popup.on('hidden', onHidden);
   }
 
-  setup_inline() {
+  setup_inline(): void {
     if (this.$activator.length && !this.settings.inline) {
       return;
     }
@@ -618,14 +597,14 @@ export class Calendar extends Module {
     }
   }
 
-  setup_input() {
+  setup_input(): void {
     if (this.settings.touchReadonly && this.$input.length && this.isTouch) {
       this.$input.prop('readonly', true);
     }
     this.check_disabled();
   }
 
-  setup_date() {
+  setup_date(): void {
     let date;
     if (this.settings.initialDate) {
       date = this.settings.parser.date(this.settings.initialDate, this.settings);
@@ -638,7 +617,7 @@ export class Calendar extends Module {
     this.set_mode(this.get_mode(), false);
   }
 
-  create_calendar() {
+  create_calendar(): void {
     let i, row, cell, pageGrid;
   
     let
@@ -786,7 +765,7 @@ export class Calendar extends Module {
       i = isYear ? Math.ceil(year / 10) * 10 - 9 : isDay ? 1 - firstMonthDayColumn : 0;
       for (let r = 0; r < rows; r++) {
         row = $('<tr/>').appendTo(tbody);
-        if (isDay && this.settings.showWeekNumbers){
+        if (isDay && this.settings.showWeekNumbers) {
             cell = $('<th/>').appendTo(row);
             cell.text(this.get_weekOfYear(year, month, i+1-this.settings.firstDayOfWeek));
             cell.addClass(this.settings.className.weekCell);
@@ -885,13 +864,13 @@ export class Calendar extends Module {
 
       this.update_focus(false, table);
 
-      if (this.settings.inline){
+      if (this.settings.inline) {
         this.refreshTooltips();
       }
     }
   }
 
-  bind_events() {
+  bind_events(): void {
     this.debug('Binding events');
     this.$container.on('mousedown' + this.eventNamespace, this.event_mousedown.bind(this));
     this.$container.on('touchstart' + this.eventNamespace, this.event_mousedown.bind(this));
@@ -908,7 +887,7 @@ export class Calendar extends Module {
     }
   }
 
-  unbind_events() {
+  unbind_events(): void {
     this.debug('Unbinding events');
     this.$container.off(this.eventNamespace);
     if (this.$input.length) {
@@ -916,7 +895,7 @@ export class Calendar extends Module {
     }
   }
 
-  event_class_mutation(mutations) {
+  event_class_mutation(mutations): void {
     mutations.forEach((mutation) => {
       if (mutation.attributeName === "class") {
         this.check_disabled();
@@ -924,7 +903,7 @@ export class Calendar extends Module {
     });
   }
 
-  event_inputBlur() {
+  event_inputBlur(): void {
     this.$container.removeClass(this.settings.className.active);
     if (this.settings.formatInput) {
       let
@@ -1050,7 +1029,8 @@ export class Calendar extends Module {
       focusDate = target.data(this.settings.metadata.focusDate),
       mode = target.data(this.settings.metadata.mode)
     ;
-    if (date && settings.onSelect.call(this.element, date, this.get_mode()) !== false) {
+    // if (date && settings.onSelect.call(this.element, date, this.get_mode()) !== false) {
+    if (date && this.invokeCallback('visible').apply(this.element, date, this.get_mode()) !== false) {
       let forceSet = target.hasClass(this.settings.className.today);
       this.selectDate(date, forceSet);
     }
@@ -1363,7 +1343,8 @@ export class Calendar extends Module {
       text = this.settings.formatter.datetime(date, this.settings)
     ;
 
-    if (fireChange && this.settings.onBeforeChange.call(this.element, date, text, mode) === false) {
+    // if (fireChange && this.settings.onBeforeChange.call(this.element, date, text, mode) === false) {
+    if (fireChange && this.invokeCallback('beforeChange').apply(this.element, date, text, mode) === false) {
       return false;
     }
 
@@ -1385,7 +1366,8 @@ export class Calendar extends Module {
     }
 
     if (fireChange) {
-      this.settings.onChange.call(this.element, date, text, mode);
+      // this.settings.onChange.call(this.element, date, text, mode);
+      this.invokeCallback('change').call(this.element, date, text, mode);
     }
   }
 
@@ -1419,7 +1401,7 @@ export class Calendar extends Module {
     }
   }
 
-  set_maxDate(date) {
+  set_maxDate(date): void {
     date = this.helper_sanitiseDate(date);
     if (this.settings.minDate !== null && this.settings.minDate >= date) {
       this.verbose('Unable to set maxDate variable lower that minDate variable', date, this.settings.minDate);
@@ -1429,7 +1411,7 @@ export class Calendar extends Module {
     }
   }
 
-  set_minDate(date) {
+  set_minDate(date): void {
     date = this.helper_sanitiseDate(date);
     if (settings.maxDate !== null && this.settings.maxDate <= date) {
       this.verbose('Unable to set minDate variable bigger that maxDate variable', date, this.settings.maxDate);
@@ -1439,17 +1421,17 @@ export class Calendar extends Module {
     }
   }
 
-  set_mode(mode: string, refreshCalendar: boolean = false) {
+  set_mode(mode: string, refreshCalendar: boolean = false): void {
     this.set_dataKeyValue(this.settings.metadata.mode, mode, refreshCalendar);
   }
 
-  set_monthOffset(monthOffset, refreshCalendar) {
+  set_monthOffset(monthOffset, refreshCalendar): void {
     let multiMonth = Math.max(settings.multiMonth, 1);
     monthOffset = Math.max(1 - multiMonth, Math.min(0, monthOffset));
     this.set_dataKeyValue(this.settings.metadata.monthOffset, monthOffset, refreshCalendar);
   }
 
-  set_startDate(date, refreshCalendar) {
+  set_startDate(date, refreshCalendar): void {
     date = this.helper_sanitiseDate(date);
     let startModule = this.get_calendarModule(this.settings.startCalendar);
     if (startModule) {

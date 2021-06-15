@@ -27,14 +27,6 @@ const settings = {
   // additional parameters to include with the embed
   parameters: false,
 
-  onDisplay            : function() {},
-  onPlaceholderDisplay : function() {},
-  onReset              : function() {},
-  onCreate             : function(url) {},
-  onEmbed              : function(parameters) {
-    return parameters;
-  },
-
   metadata    : {
     id          : 'id',
     icon        : 'icon',
@@ -108,15 +100,13 @@ const settings = {
         + ' webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>'
       ;
     },
-    placeholder : function(image, icon) {
-      let
-        html = ''
-      ;
+    placeholder : function(image: string, icon: string) {
+      let html: string = '';
       if (icon) {
-        html += '<i class="' + icon + ' icon"></i>';
+        html += `<i class="${icon} icon"></i>`;
       }
       if (image) {
-        html += '<img class="placeholder" src="' + image + '">';
+        html += `<img class="placeholder" src="${image}">`;
       }
       return html;
     }
@@ -126,7 +116,15 @@ const settings = {
   api     : false,
   onPause : function() {},
   onPlay  : function() {},
-  onStop  : function() {}
+  onStop  : function() {},
+
+  events: [
+    'display',
+    'placeholderDisplay',
+    'reset',
+    'create',
+    'embed'
+  ]
 }
 
 export class Embed extends Module {
@@ -186,7 +184,7 @@ export class Embed extends Module {
       .html(this.generate_embed(url))
       .appendTo(this.$element)
     ;
-    this.settings.onCreate.call(this.element, url);
+    this.invokeCallback('create').call(this.element, url);
     this.debug('Creating embed object', this.$embed);
   }
 
@@ -225,13 +223,13 @@ export class Embed extends Module {
   generate_parameters(source, extraParameters = this.settings.parameters): string {
     let
       parameters = (this.settings.sources[source] && this.settings.sources[source].parameters !== undefined)
-        ? this.settings.sources[source].parameters(settings)
+        ? this.settings.sources[source].parameters(this.settings)
         : {}
     ;
     if (extraParameters) {
       parameters = $.extend({}, parameters, extraParameters);
     }
-    parameters = this.settings.onEmbed(parameters);
+    parameters = this.invokeCallback('embed', parameters);
     return this.encode_parameters(parameters);
   }
 
@@ -287,13 +285,13 @@ export class Embed extends Module {
   showPlaceholder() {
     this.debug('Showing placeholder image');
     this.remove_active();
-    this.settings.onPlaceholderDisplay.call(this.element);
+    this.invokeCallback('placeholderDisplay').call(this.element);
   }
 
   show(): void {
     this.debug('Showing embed');
     this.set_active();
-    this.settings.onDisplay.call(this.element);
+    this.invokeCallback('display').call(this.element);
   }
 
   hide(): void {
@@ -314,7 +312,7 @@ export class Embed extends Module {
     this.remove_active();
     this.remove_embed();
     this.showPlaceholder();
-    this.settings.onReset.call(this.element);
+    this.invokeCallback('reset').call(this.element);
   }
 
   should_autoplay(): boolean {
@@ -379,8 +377,8 @@ export class Embed extends Module {
   }
   
   get_source() {
-    return (settings.source)
-      ? settings.source
+    return (this.settings.source)
+      ? this.settings.source
       : (this.$element.data(this.settings.metadata.source) !== undefined)
         ? this.$element.data(this.settings.metadata.source)
         : this.determine_source()

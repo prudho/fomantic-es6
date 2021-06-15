@@ -7,37 +7,37 @@
   <script src="../dist/fomantic.umd.js"></script>
   
 </head>
-<body>
+<body style="padding: 1rem;">
 
-    <div id="progress" class="ui progress" data-percent="50">
-        <div class="bar">
-            <div class="progress"></div>
-        </div>
-        <div class="label">Uploading Files</div>
+  <div id="progress" class="ui progress" data-percent="50">
+    <div class="bar">
+      <div class="progress"></div>
     </div>
+    <div class="label">Uploading Files</div>
+  </div>
 
   <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', () => {
-        const test = new fomantic.Progress('#progress', {
-            debug: true,
-            verbose: true
-        });
+      const progress = new fomantic.Progress('#progress', {
+        debug: true,
+        verbose: true
+      });
 
-        test.on('change', function(one, two, three, four) {
-            console.log(one, two, three, four)
-        })
+      progress.on('change', function(one, two, three, four) {
+        console.log(one, two, three, four);
+      });
 
-        setTimeout(function() {
-            test.increment(10);
-        }, 2000)
+      setTimeout(function() {
+        progress.increment(10);
+      }, 2000);
 
-        setTimeout(function() {
-            test.decrement(20);
-        }, 4000)
+      setTimeout(function() {
+        progress.decrement(20);
+      }, 4000);
 
-        setTimeout(function() {
-            test.reset();
-        }, 6000)
+      setTimeout(function() {
+        progress.reset();
+      }, 6000);
         
     });
   </script>

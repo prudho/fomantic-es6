@@ -80,8 +80,8 @@ const settings = {
     letter  : 'letter'
   },
 
-  onChange : function(value, thumbVal, secondThumbVal){},
-  onMove   : function(value, thumbVal, secondThumbVal){},
+  onChange : function(value, thumbVal, secondThumbVal) {},
+  onMove   : function(value, thumbVal, secondThumbVal) {},
 
   events: ['change', 'move']
 }
@@ -223,7 +223,7 @@ export class Slider extends Module {
   }
 
   setup_layout(): void {
-    if ( this.$element.attr('tabindex') === undefined) {
+    if (this.$element.attr('tabindex') === undefined) {
       this.$element.attr('tabindex', '0');
     }
     if (this.$element.find('.inner').length == 0) {
@@ -489,7 +489,7 @@ export class Slider extends Module {
     this.verbose('Taking a step');
     if (step > 0) {
       this.set_value(currValue + step * multiplier);
-    } else if (step == 0){
+    } else if (step == 0) {
       let
         precision = this.get_precision(),
         newValue = currValue + (multiplier/precision)
@@ -751,7 +751,7 @@ export class Slider extends Module {
       // While the distance between two labels is too short,
       // we divide the number of labels at each iteration
       // and apply only if the modulo of the operation is an odd number.
-      if (trackLength > 0){
+      if (trackLength > 0) {
         while ((trackLength / numLabels) * gapCounter < this.settings.labelDistance) {
           if (!(numLabels % gapCounter)) {
             gapRatio = gapCounter;
@@ -942,12 +942,12 @@ export class Slider extends Module {
       this.previousValue = this.previousValue === undefined ? this.get_value() : this.previousValue;
       if (first <= min) {
         first = min;
-      } else if (first >= max){
+      } else if (first >= max) {
         first = max;
       }
       if (second <= min) {
         second = min;
-      } else if (second >= max){
+      } else if (second >= max) {
         second = max;
       }
       this.thumbVal = first;
@@ -973,7 +973,7 @@ export class Slider extends Module {
     let toReset: boolean = this.previousValue === undefined;
     this.previousValue = this.previousValue === undefined ? this.get_value() : this.previousValue;
     this.update_value(newValue, (value, thumbVal, secondThumbVal) => {
-      if ((!this.initialLoad || this.settings.fireOnInit) && fireChange){
+      if ((!this.initialLoad || this.settings.fireOnInit) && fireChange) {
         if (newValue !== this.previousValue) {
           this.invokeCallback('change')(this.element, this.value, this.thumbVal, this.secondThumbVal);
         }

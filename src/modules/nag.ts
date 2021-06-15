@@ -1,6 +1,7 @@
 'use strict';
 
 import Module from '../module';
+import Utils from '../utils';
 
 import $, { Cash } from 'cash-dom';
 
@@ -13,13 +14,12 @@ import $, { Cash } from 'cash-dom';
 
 const settings = {
   name        : 'Nag',
+  namespace   : 'Nag',
   
   silent      : false,
   debug       : false,
   verbose     : false,
   performance : true,
-
-  namespace   : 'Nag',
 
   // allows cookie to be overridden
   persist     : false,
@@ -66,25 +66,18 @@ const settings = {
   },
 
   selector      : {
-    close : '> .close.icon'
+    close : ':scope> .close.icon'
   },
 
   duration      : 500,
   easing        : 'easeOutQuad',
 
-  // callback before show animation, return false to prevent show
-  onShow        : function() {},
-
-  // called after show animation
-  onVisible     : function() {},
-
-  // callback before hide animation, return false to prevent hide
-  onHide        : function() {},
-
-  // callback after hide animation
-  onHidden      : function() {},
-
-  events: ['show', 'visible', 'hide', 'hidden']
+  events: [
+    'show',    // callback before show animation, return false to prevent show
+    'visible', // called after show animation
+    'hide',    // callback before hide animation, return false to prevent hide
+    'hidden'   // callback after hide animation
+  ]
 }
 
 export class Nag extends Module {
@@ -103,7 +96,7 @@ export class Nag extends Module {
     this.initialize();
   }
 
-  initialize() {
+  initialize(): void {
     this.verbose('Initializing element');
     this.storage = this.get_storage();
     this.$element
@@ -124,7 +117,7 @@ export class Nag extends Module {
     this.show();
   }
 
-  destroy() {
+  destroy(): void {
     this.verbose('Destroying instance');
     this.$element
       .removeAttr(this.moduleNamespace)
@@ -132,11 +125,11 @@ export class Nag extends Module {
     ;
   }
 
-  clear() {
+  clear(): void {
     this.storage_remove(this.settings.key);
   }
 
-  dismiss(event) {
+  dismiss(event): void {
     if (this.hide() !== false && this.settings.storageMethod) {
       this.debug('Dismissing nag', this.settings.storageMethod, this.settings.key, this.settings.value, this.settings.expires);
       this.storage_set(this.settings.key, this.settings.value);
@@ -146,7 +139,7 @@ export class Nag extends Module {
   }
 
   show() {
-    if (this.should_show() && !this.$element.is(':visible') ) {
+    if (this.should_show() && !this.$element.is('visible') ) {
       // if (this.settings.onShow.call(this.element) === false) {
       if (this.invokeCallback('show')(this.element) === false) {
         this.debug('onShow callback returned false, cancelling nag animation');
@@ -155,11 +148,11 @@ export class Nag extends Module {
       this.debug('Showing nag', this.settings.animation.show);
       if (this.settings.animation.show === 'fade') {
         // this.$element.fadeIn(this.settings.duration, this.settings.easing, this.settings.onVisible);
-        this.$element.fadeIn(this.settings.duration, this.settings.easing, this.invokeCallback('visible'));
+        Utils.fadeIn(this.$element, this.settings.duration, this.settings.easing, this.invokeCallback('visible'))
       }
       else {
         // this.$element.slideDown(this.settings.duration, this.settings.easing, this.settings.onVisible);
-        this.$element.slideDown(this.settings.duration, this.settings.easing, this.invokeCallback('visible'));
+        Utils.slideDown(this.$element, this.settings.duration, this.invokeCallback('visible'));
       }
     }
   }
@@ -173,11 +166,11 @@ export class Nag extends Module {
     this.debug('Hiding nag', this.settings.animation.hide);
     if (this.settings.animation.hide === 'fade') {
       // this.$element.fadeOut(this.settings.duration, this.settings.easing, this.settings.onHidden);
-      this.$element.fadeOut(this.settings.duration, this.settings.easing, this.invokeCallback('hidden'));
+      Utils.fadeOut(this.$element, this.settings.duration, this.settings.easing, this.invokeCallback('hidden'))
     }
     else {
       // this.$element.slideUp(this.settings.duration, this.settings.easing, this.settings.onHidden);
-      this.$element.slideUp(this.settings.duration, this.settings.easing, this.invokeCallback('hidden'));
+      Utils.slideUp(this.$element, this.settings.duration, this.invokeCallback('hidden'));
     }
   }
 
@@ -185,7 +178,7 @@ export class Nag extends Module {
     if (typeof expires === 'number') {
       expires = new Date(Date.now() + expires * 864e5);
     }
-    if (expires instanceof Date && expires.getTime() ){
+    if (expires instanceof Date && expires.getTime()) {
       return expires.toUTCString();
     } else {
       this.error(this.settings.error.expiresFormat);
@@ -279,7 +272,7 @@ export class Nag extends Module {
     return false;
   }
 
-  storage_get(key: string) {
+  storage_get(key: string): void {
     let storedValue ;
     storedValue = this.storage.getItem(key);
     if (this.storage === window.localStorage) {
@@ -296,7 +289,7 @@ export class Nag extends Module {
     return storedValue;
   }
 
-  storage_remove(key) {
+  storage_remove(key): void {
     let options = this.get_storageOptions();
     options.expires = this.get_expirationDate(-1);
     if (this.storage === window.localStorage) {
@@ -305,7 +298,7 @@ export class Nag extends Module {
     this.storage.removeItem(key, options);
   }
 
-  storage_set(key, value) {
+  storage_set(key, value): void {
     let options = this.get_storageOptions();
     if (this.storage === window.localStorage && options.expires) {
       this.debug('Storing expiration value in localStorage', key, options.expires);

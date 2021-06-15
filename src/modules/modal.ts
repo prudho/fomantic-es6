@@ -4,7 +4,7 @@ import Module from '../module';
 
 import $, { Cash } from 'cash-dom';
 import { Dimmer } from './dimmer';
-import { Transition } from './transition';
+import Transition from './transition';
 
 const settings = {
   name           : 'Modal',
@@ -113,10 +113,10 @@ const settings = {
 
   templates: {
     getArguments: function(args) {
-      var queryArguments = [].slice.call(args);
-      if ($.isPlainObject(queryArguments[0])){
+      let queryArguments = [].slice.call(args);
+      if ($.isPlainObject(queryArguments[0])) {
         return $.extend({
-          handler:function(){},
+          handler:function() {},
           content:'',
           title: ''
         }, queryArguments[0]);
@@ -132,8 +132,9 @@ const settings = {
       }
     },
     alert: function () {
-      var settings = this.get.settings(),
-          args     = settings.templates.getArguments(arguments)
+      let
+        settings = this.get.settings(),
+        args     = settings.templates.getArguments(arguments)
       ;
       return {
         title  : args.title,
@@ -146,8 +147,9 @@ const settings = {
       }
     },
     confirm: function () {
-      var settings = this.get.settings(),
-          args     = settings.templates.getArguments(arguments)
+      let
+        settings = this.get.settings(),
+        args     = settings.templates.getArguments(arguments)
       ;
       return {
         title  : args.title,
@@ -155,19 +157,20 @@ const settings = {
         actions: [{
           text : settings.text.ok,
           class: settings.className.ok,
-          click: function(){args.handler(true)}
+          click: function() {args.handler(true)}
         },{
           text: settings.text.cancel,
           class: settings.className.cancel,
-          click: function(){args.handler(false)}
+          click: function() {args.handler(false)}
         }]
       }
     },
     prompt: function () {
-      var $this    = this,
-          settings = this.get.settings(),
-          args     = settings.templates.getArguments(arguments),
-          input    = $($.parseHTML(args.content)).filter('.ui.input')
+      let
+        $this    = this,
+        settings = this.get.settings(),
+        args     = settings.templates.getArguments(arguments),
+        input    = $($.parseHTML(args.content)).filter('.ui.input')
       ;
       if (input.length === 0) {
         args.content += '<p><div class="'+settings.className.prompt+'"><input placeholder="'+this.helpers.deQuote(args.placeholder || '')+'" type="text" value="'+this.helpers.deQuote(args.defaultValue || '')+'"></div></p>';
@@ -178,22 +181,23 @@ const settings = {
         actions: [{
           text: settings.text.ok,
           class: settings.className.ok,
-          click: function(){
-            var settings = $this.get.settings(),
-                inputField = $this.get.element().find(settings.selector.prompt)[0]
+          click: function() {
+            let
+              settings = $this.get.settings(),
+              inputField = $this.get.element().find(settings.selector.prompt)[0]
             ;
             args.handler($(inputField).val());
           }
         },{
           text: settings.text.cancel,
           class: settings.className.cancel,
-          click: function(){args.handler(null)}
+          click: function() {args.handler(null)}
         }]
       }
     }
   },
 
-  events: ['show', 'visible', 'hide', 'hidden', 'approve', 'deny', '']
+  events: ['show', 'visible', 'hide', 'hidden', 'approve', 'deny']
 }
 
 class Cache {
@@ -266,13 +270,15 @@ export class Modal extends Module {
     if (this.settings.content !== '') {
       this.$element.find(this.settings.selector.content).html(this.helpers_escape(this.settings.content, this.settings.preserveHTML)).addClass(this.settings.classContent);
     }
-    if (this.has_configActions()){
-      var $actions = this.$element.find(this.settings.selector.actions).addClass(this.settings.classActions);
+    if (this.has_configActions()) {
+      let $actions = this.$element.find(this.settings.selector.actions).addClass(this.settings.classActions);
       this.settings.actions.forEach(function (el) {
-        var icon = el[this.settings.fields.icon] ? '<i class="' + this.helpers_deQuote(el[this.settings.fields.icon]) + ' icon"></i>' : '',
-            text = this.helpers_escape(el[this.settings.fields.text] || '', this.settings.preserveHTML),
-            cls = this.helpers_deQuote(el[this.settings.fields.class] || ''),
-            click = el[this.settings.fields.click] && $.isFunction(el[this.settings.fields.click]) ? el[this.settings.fields.click] : function () {};
+        let
+          icon = el[this.settings.fields.icon] ? '<i class="' + this.helpers_deQuote(el[this.settings.fields.icon]) + ' icon"></i>' : '',
+          text = this.helpers_escape(el[this.settings.fields.text] || '', this.settings.preserveHTML),
+          cls = this.helpers_deQuote(el[this.settings.fields.class] || ''),
+          click = el[this.settings.fields.click] && $.isFunction(el[this.settings.fields.click]) ? el[this.settings.fields.click] : function () {}
+        ;
         $actions.append($(`<button class="${this.settings.className.button + ' ' + cls}">${icon + text}</button>`));
         
         // // Click sur le boutton
@@ -290,10 +296,10 @@ export class Modal extends Module {
     this.create_id();
     this.create_dimmer();
 
-    if ( this.settings.allowMultiple ) {
+    if (this.settings.allowMultiple) {
       this.create_innerDimmer();
     }
-    if (!this.settings.centered){
+    if (!this.settings.centered) {
       this.$element.addClass('top aligned');
     }
     this.refreshModals();
@@ -303,18 +309,18 @@ export class Modal extends Module {
       this.observeChanges();
     }
     this.instantiate();
-    if (this.settings.autoShow){
+    if (this.settings.autoShow) {
       this.show(null);
     }
   }
 
-  instantiate() {
+  instantiate(): void {
     this.verbose('Storing instance of modal');
     this.instance = this;
     this.$element.data(this.moduleNamespace, this.instance);
   }
 
-  destroy() {
+  destroy(): void {
     if (this.observer) {
       this.observer.disconnect();
     }
@@ -330,7 +336,7 @@ export class Modal extends Module {
     this.dimmer.destroy();
   }
 
-  refresh() {
+  refresh(): void {
     this.remove_scrolling();
     this.cacheSizes();
     if (!this.can_useFlex()) {
@@ -340,8 +346,8 @@ export class Modal extends Module {
     this.set_type();
   }
 
-  toggle() {
-    if ( this.is_active() || this.is_animating() ) {
+  toggle(): void {
+    if (this.is_active() || this.is_animating()) {
       this.hide(null);
     }
     else {
@@ -349,12 +355,12 @@ export class Modal extends Module {
     }
   }
 
-  refreshModals() {
+  refreshModals(): void {
     this.$otherModals = this.$element.siblings(this.settings.selector.modal);
     this.$allModals   = this.$otherModals.add(this.$element);
   }
 
-  create_modal() {
+  create_modal(): void {
     this.$element = $(`<div class="${this.settings.className.modal}"/>`);
     if (this.settings.closeIcon) {
       this.$close = $(`<i class="${this.settings.className.close}"/>`);
@@ -372,7 +378,7 @@ export class Modal extends Module {
     this.$context.append(this.$element);
   }
 
-  create_dimmer() {
+  create_dimmer(): void {
     let
       defaultSettings = {
         debug      : this.settings.debug,
@@ -401,14 +407,14 @@ export class Modal extends Module {
     // $dimmer = $dimmable.dimmer('get dimmer');
   }
 
-  create_id() {
+  create_id(): void {
     this.id = (Math.random().toString(16) + '000000000').substr(2, 8);
     this.elementEventNamespace = '.' + this.id;
     this.verbose('Creating unique id for element', this.id);
   }
 
-  create_innerDimmer() {
-    if ( this.$element.find(this.settings.selector.dimmer).length == 0 ) {
+  create_innerDimmer(): void {
+    if (this.$element.find(this.settings.selector.dimmer).length == 0) {
       this.$element.prepend('<div class="ui inverted dimmer"></div>');
     }
   }
@@ -423,21 +429,21 @@ export class Modal extends Module {
     this.$window.on('resize' + this.elementEventNamespace, this.event_resize.bind(this));
   }
 
-  bind_scrollLock() {
+  bind_scrollLock(): void {
     // touch events default to passive, due to changes in chrome to optimize mobile perf
     this.$dimmable.get(0).addEventListener('touchmove', this.event_preventScroll.bind(this), { passive: false });
   }
 
-  unbind_scrollLock() {
+  unbind_scrollLock(): void {
     // INVESTIGATE
-    //this.$dimmable.get(0).removeEventListener('touchmove', this.event_preventScroll.bind(this), { passive: false });
+    // this.$dimmable.get(0).removeEventListener('touchmove', this.event_preventScroll.bind(this), { passive: false });
   }
 
-  event_close() {
+  event_close(): void {
     this.hide(null);
   }
 
-  event_approve() {
+  event_approve(): void {
     if (this.ignoreRepeatedEvents || this.invokeCallback('approve')(this.element, this.$element) === false) {
       this.verbose('Approve callback returned false cancelling hide');
       return;
@@ -454,7 +460,7 @@ export class Modal extends Module {
   //   this.timer = setTimeout(method, delay);
   // }
 
-  event_deny() {
+  event_deny(): void {
     if (this.ignoreRepeatedEvents || this.invokeCallback('deny')(this.element, this.$element) === false) {
       this.verbose('Deny callback returned false cancelling hide');
       return;
@@ -465,7 +471,7 @@ export class Modal extends Module {
     });
   }
 
-  event_keyboard(event) {
+  event_keyboard(event): void {
     let
       keyCode   = event.which,
       escapeKey = 27
@@ -473,7 +479,7 @@ export class Modal extends Module {
     if (keyCode == escapeKey) {
       if (this.settings.closable) {
         this.debug('Escape key pressed hiding modal');
-        if ( this.$element.hasClass(this.settings.className.front) ) {
+        if (this.$element.hasClass(this.settings.className.front)) {
           this.hide(null);
         }
       }
@@ -484,7 +490,7 @@ export class Modal extends Module {
     }
   }
 
-  event_mousedown(event) {
+  event_mousedown(event): void {
     let
       $target   = $(event.target),
       isRtl = this.is_rtl();
@@ -499,7 +505,7 @@ export class Modal extends Module {
     }
   }
 
-  event_mouseup(event) {
+  event_mouseup(event): void {
     if (!this.settings.closable) {
       this.verbose('Dimmer clicked but closable setting is disabled');
       return;
@@ -508,7 +514,7 @@ export class Modal extends Module {
       this.debug('Dimmer clicked but mouse down was initially registered inside the modal');
       return;
     }
-    if (this.initialMouseDownInScrollbar){
+    if (this.initialMouseDownInScrollbar) {
       this.debug('Dimmer clicked but mouse down was initially registered inside the scrollbar');
       return;
     }
@@ -525,27 +531,27 @@ export class Modal extends Module {
           return;
         }
       }
-      else if (!this.hide(null)){
+      else if (!this.hide(null)) {
         return;
       }
       this.remove_clickaway();
     }
   }
 
-  event_resize() {
+  event_resize(): void {
     if (this.dimmer.is_active() && ( this.is_animating() || this.is_active() ) ) {
-    // if ( this.$dimmable.dimmer('is active') && ( this.is_animating() || this.is_active() ) ) {
+    // if (this.$dimmable.dimmer('is active') && (this.is_animating() || this.is_active())) {
       requestAnimationFrame(this.refresh);
     }
   }
 
-  event_preventScroll(event) {
+  event_preventScroll(event): void {
     if (event.target.className.indexOf('dimmer') !== -1) {
       event.preventDefault();
     }
   }
 
-  observeChanges() {
+  observeChanges(): void {
     if ('MutationObserver' in window) {
       this.observer = new MutationObserver((mutations) => {
         this.debug('DOM tree modified, refreshing');
@@ -559,11 +565,7 @@ export class Modal extends Module {
     }
   }
 
-  show(callback) {
-    callback = $.isFunction(callback)
-      ? callback
-      : function(){}
-    ;
+  show(callback: Function = () => {}): void {
     this.refreshModals();
     this.set_dimmerSettings();
     this.set_dimmerStyles();
@@ -571,30 +573,26 @@ export class Modal extends Module {
     this.showModal(callback);
   }
 
-  showDimmer() {
+  showDimmer(): void {
     // if ($dimmable.dimmer('is animating') || !$dimmable.dimmer('is active') ) {
     if (this.dimmer.is_animating() || this.dimmer.is_active() ) {
       this.save_bodyMargin();
       this.debug('Showing dimmer');
       // $dimmable.dimmer('show');
-      this.dimmer.show(undefined);
+      this.dimmer.show();
     }
     else {
       this.debug('Dimmer already visible');
     }
   }
 
-  hide(callback) {
-    callback = $.isFunction(callback)
-      ? callback
-      : function(){}
-    ;
+  hide(callback: Function = () => {}): boolean {
     this.refreshModals();
     return this.hideModal(callback, undefined, undefined);
   }
 
-  hideDimmer() {
-    if ( this.dimmer.is_animating() || (this.dimmer.is_active()) ) {
+  hideDimmer(): void {
+    if (this.dimmer.is_animating() || this.dimmer.is_active()) {
       this.unbind_scrollLock();
       this.dimmer.hide(() => {
         this.restore_bodyMargin();
@@ -608,19 +606,13 @@ export class Modal extends Module {
     }
   }
   
-  hideAll(callback) {
-    let
-      $visibleModals = this.$allModals.filter('.' + this.settings.className.active + ', .' + this.settings.className.animating)
-    ;
-    callback = $.isFunction(callback)
-      ? callback
-      : function(){}
-    ;
-    if ( $visibleModals.length > 0 ) {
+  hideAll(callback: Function = () => {}): boolean {
+    let $visibleModals = this.$allModals.filter('.' + this.settings.className.active + ', .' + this.settings.className.animating);
+    if ($visibleModals.length > 0) {
       this.debug('Hiding all visible modals');
-      var hideOk = true;
+      let hideOk = true;
       //check in reverse order trying to hide most top displayed modal first
-      $($visibleModals.get().reverse()).each(function(index,element){
+      $($visibleModals.get().reverse()).each(function(index,element) {
           if (hideOk) {
             // TODO: hide other modals
             //hideOk = $(element).modal('hide modal', callback, false, true);
@@ -633,7 +625,7 @@ export class Modal extends Module {
     }
   }
 
-  cacheSizes() {
+  cacheSizes(): void {
     this.$element.addClass(this.settings.className.loading);
     let
       scrollHeight = this.$element.prop('scrollHeight'),
@@ -656,12 +648,8 @@ export class Modal extends Module {
     this.debug('Caching modal and container sizes', this.cache);
   }
 
-  showModal(callback) {
-    callback = $.isFunction(callback)
-      ? callback
-      : function(){}
-    ;
-    if ( this.is_animating() || !this.is_active() ) {
+  showModal(callback: Function = () => {}): void {
+    if (this.is_animating() || !this.is_active()) {
       this.showDimmer();
       this.cacheSizes();
       this.set_bodyMargin();
@@ -677,17 +665,17 @@ export class Modal extends Module {
       this.set_type();
       this.set_clickaway();
 
-      if ( !this.settings.allowMultiple && this.others_active() ) {
+      if (!this.settings.allowMultiple && this.others_active()) {
         this.hideOthers(this.showModal.bind(this));
       }
       else {
         this.ignoreRepeatedEvents = false;
-        if ( this.settings.allowMultiple ) {
-          if ( this.others_active() ) {
+        if (this.settings.allowMultiple) {
+          if (this.others_active()) {
             this.$otherModals.filter('.' + this.settings.className.active).find(this.settings.selector.dimmer).addClass('active');
           }
 
-          if ( this.settings.detachable ) {
+          if (this.settings.detachable) {
             this.$element.detach().appendTo(this.$dimmer);
           }
         }
@@ -727,14 +715,8 @@ export class Modal extends Module {
     }
   }
 
-  hideModal(callback, keepDimmed, hideOthersToo) {
-    let
-      $previousModal = this.$otherModals.filter('.' + this.settings.className.active).last()
-    ;
-    callback = $.isFunction(callback)
-      ? callback
-      : function(){}
-    ;
+  hideModal(callback: Function = () => {}, keepDimmed: boolean, hideOthersToo: boolean): boolean {
+    let $previousModal = this.$otherModals.filter('.' + this.settings.className.active).last();
     this.debug('Hiding modal');
     // if (settings.onHide.call(element, $(this)) === false) {
     if (this.invokeCallback('hide')(this.element, this.$element) === false) {
@@ -743,7 +725,7 @@ export class Modal extends Module {
       return false;
     }
 
-    if ( this.is_animating() || this.is_active() ) {
+    if (this.is_animating() || this.is_active()) {
       // if (settings.transition && $.fn.transition !== undefined && $module.transition('is supported')) {
       if (this.settings.transition) {
         this.remove_active();
@@ -760,18 +742,18 @@ export class Modal extends Module {
           if (!this.others_active() && !this.others_animating() && !keepDimmed) {
             this.hideDimmer();
           }
-          if ( settings.keyboardShortcuts && !this.others_active() ) {
+          if (this.settings.keyboardShortcuts && !this.others_active()) {
             this.remove_keyboardShortcuts();
           }
         });
 
         this.transition.on('start', () => {
           this.unbind_scrollLock();
-              if ( settings.allowMultiple ) {
+              if (this.settings.allowMultiple) {
                 $previousModal.addClass(this.settings.className.front);
                 this.$element.removeClass(this.settings.className.front);
 
-                if ( hideOthersToo ) {
+                if (hideOthersToo) {
                   this.$allModals.find(this.settings.selector.dimmer).removeClass('active');
                 }
                 else {
@@ -793,12 +775,12 @@ export class Modal extends Module {
     }
   }
 
-  add_keyboardShortcuts() {
+  add_keyboardShortcuts(): void {
     this.verbose('Adding keyboard shortcuts');
     this.$document.on('keyup' + this.eventNamespace, this.event_keyboard.bind(this));
   }
 
-  remove_keyboardShortcuts() {
+  remove_keyboardShortcuts(): void {
     this.verbose('Removing keyboard shortcuts');
     this.$document.off('keyup' + this.eventNamespace);
   }
@@ -812,7 +794,7 @@ export class Modal extends Module {
     return this.transition !== undefined
       ? this.transition.is_animating()
       // : this.$element.is(':visible')
-      : this.$element.is('visible')
+      : this.$element.is('.visible')
     ;
   }
 
@@ -870,7 +852,7 @@ export class Modal extends Module {
     return this.$dimmable.hasClass(this.settings.className.scrolling);
   }
 
-  can_fit() {
+  can_fit(): boolean {
     let
       contextHeight  = this.cache.contextHeight,
       verticalCenter = this.cache.contextHeight / 2,
@@ -886,14 +868,14 @@ export class Modal extends Module {
     ;
   }
 
-  can_leftBodyScrollbar() {
+  can_leftBodyScrollbar(): boolean {
     if (this.cache.leftBodyScrollbar === undefined) {
       this.cache.leftBodyScrollbar = this.is_rtl() && ((this.is_iframe() && !this.is_firefox()) || this.is_safari() || this.is_edge() || this.is_ie());
     }
     return this.cache.leftBodyScrollbar;
   }
 
-  can_useFlex() {
+  can_useFlex(): boolean {
     if (this.settings.useFlex === 'auto') {
       return this.settings.detachable && !this.is_ie();
     }
@@ -921,14 +903,15 @@ export class Modal extends Module {
     return this.settings;
   }
 
-  set_active() {
+  set_active(): void {
     this.$element.addClass(this.settings.className.active + ' ' + this.settings.className.front);
     this.$otherModals.filter('.' + this.settings.className.active).removeClass(this.settings.className.front);
   }
 
-  set_autofocus() {
+  set_autofocus(): void {
     let
-      $inputs    = this.$element.find('[tabindex], :input').filter(':visible').filter(function() {
+      // $inputs    = this.$element.find('[tabindex], :input').filter(':visible').filter(function() {
+      $inputs    = this.$element.find('[tabindex], input').filter('.visible').filter(function() {
         return $(this).closest('.disabled').length === 0;
       }),
       $autofocus = $inputs.filter('[autofocus]'),
@@ -941,21 +924,22 @@ export class Modal extends Module {
     }
   }
 
-  set_bodyMargin() {
-    var position = this.can_leftBodyScrollbar() ? 'left':'right';
+  set_bodyMargin(): void {
+    let position = this.can_leftBodyScrollbar() ? 'left':'right';
     if (this.settings.detachable || this.can_fit()) {
       this.$body.css('margin-'+position, this.tempBodyMargin + 'px');
     }
     let o = this;
-    this.$body.find(this.settings.selector.bodyFixed.replace('right',position)).each(function(){
-      var el = $(this),
-          attribute = el.css('position') === 'fixed' ? 'padding-'+position : position
+    this.$body.find(this.settings.selector.bodyFixed.replace('right',position)).each(function() {
+      let
+        el = $(this),
+        attribute = el.css('position') === 'fixed' ? 'padding-'+position : position
       ;
       el.css(attribute, 'calc(' + el.css(attribute) + ' + ' + o.tempBodyMargin + 'px)');
     });
   }
 
-  set_clickaway() {
+  set_clickaway(): void {
     if (!this.settings.detachable) {
       this.$element.on('mousedown' + this.elementEventNamespace, this.event_mousedown.bind(this));
     }
@@ -963,7 +947,7 @@ export class Modal extends Module {
     this.$dimmer.on('mouseup' + this.elementEventNamespace, this.event_mouseup.bind(this));
   }
 
-  set_dimmerSettings() {
+  set_dimmerSettings(): void {
     // FIXME
     // if ($.fn.dimmer === undefined) {
     //   this.error(this.settings.error.dimmer);
@@ -992,7 +976,7 @@ export class Modal extends Module {
     this.dimmer.setting(dimmerSettings, undefined);
   }
 
-  set_dimmerStyles() {
+  set_dimmerStyles(): void {
     if (this.settings.inverted) {
       this.$dimmer.addClass(this.settings.className.inverted);
     }
@@ -1007,9 +991,9 @@ export class Modal extends Module {
     }
   }
 
-  set_modalOffset() {
+  set_modalOffset(): void {
     if (!this.settings.detachable) {
-      var canFit = this.can_fit();
+      let canFit = this.can_fit();
       this.$element
         .css({
           top: (!this.$element.hasClass('aligned') && canFit)
@@ -1024,24 +1008,22 @@ export class Modal extends Module {
         }) 
       ;
     } else {
-      this.$element
-        .css({
-          marginTop: (!this.$element.hasClass('aligned') && this.can_fit())
-            ? -(this.cache.height / 2)
-            : this.settings.padding / 2,
-          marginLeft: -(this.cache.width / 2)
-        }) 
-      ;
+      this.$element.css({
+        marginTop: (!this.$element.hasClass('aligned') && this.can_fit())
+          ? -(this.cache.height / 2)
+          : this.settings.padding / 2,
+        marginLeft: -(this.cache.width / 2)
+      });
     }
     this.verbose('Setting modal offset for legacy mode');
   }
 
-  set_legacy() {
+  set_legacy(): void {
     this.$element.addClass(this.settings.className.legacy);
   }
 
-  set_screenHeight() {
-    if ( this.can_fit() ) {
+  set_screenHeight(): void {
+    if (this.can_fit()) {
       this.$body.css('height', '');
     }
     else if (!this.$element.hasClass('bottom')) {
@@ -1050,13 +1032,13 @@ export class Modal extends Module {
     }
   }
 
-  set_scrolling() {
+  set_scrolling(): void {
     this.$dimmable.addClass(this.settings.className.scrolling);
     this.$element.addClass(this.settings.className.scrolling);
     this.unbind_scrollLock();
   }
 
-  set_type() {
+  set_type(): void {
     if (this.can_fit()) {
       this.verbose('Modal fits on screen');
       if (!this.others_active() && !this.others_animating()) {
@@ -1064,7 +1046,7 @@ export class Modal extends Module {
         this.bind_scrollLock();
       }
     }
-    else if (!this.$element.hasClass('bottom')){
+    else if (!this.$element.hasClass('bottom')) {
       this.verbose('Modal cannot fit on screen setting to scrolling');
       this.set_scrolling();
     } else {
@@ -1072,18 +1054,20 @@ export class Modal extends Module {
     }
   }
 
-  set_undetached() {
+  set_undetached(): void {
     this.$dimmable.addClass(this.settings.className.undetached);
   }
 
-  save_bodyMargin() {
+  save_bodyMargin(): void {
     this.initialBodyMargin = this.$body.css('margin-'+(this.can_leftBodyScrollbar() ? 'left':'right'));
-    var bodyMarginRightPixel = parseInt(this.initialBodyMargin.replace(/[^\d.]/g, '')),
-        bodyScrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    let 
+      bodyMarginRightPixel = parseInt(this.initialBodyMargin.replace(/[^\d.]/g, '')),
+      bodyScrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+    ;
     this.tempBodyMargin = bodyMarginRightPixel + bodyScrollbarWidth;
   }
 
-  save_focus() {
+  save_focus(): void {
     let
       $activeElement = $(document.activeElement),
       inCurrentModal = $activeElement.closest(this.$element).length > 0
@@ -1093,18 +1077,18 @@ export class Modal extends Module {
     }
   }
 
-  remove_active() {
+  remove_active(): void {
     this.$element.removeClass(this.settings.className.active);
   }
 
-  remove_bodyStyle() {
+  remove_bodyStyle(): void {
     if (this.$body.attr('style') === '') {
       this.verbose('Removing style attribute');
       this.$body.removeAttr('style');
     }
   }
 
-  remove_clickaway() {
+  remove_clickaway(): void {
     if (!this.settings.detachable) {
       this.$element.off('mousedown' + this.elementEventNamespace);
     }           
@@ -1112,37 +1096,38 @@ export class Modal extends Module {
     this.$dimmer.off('mouseup' + this.elementEventNamespace);
   }
 
-  remove_dimmerStyles() {
+  remove_dimmerStyles(): void {
     this.$dimmer.removeClass(this.settings.className.inverted);
     this.$dimmable.removeClass(this.settings.className.blurring);
   }
 
-  remove_legacy() {
+  remove_legacy(): void {
     this.$element.removeClass(this.settings.className.legacy);
   }
 
-  remove_screenHeight() {
+  remove_screenHeight(): void {
     this.debug('Removing page height');
     this.$body.css('height', '');
   }
 
-  remove_scrolling() {
+  remove_scrolling(): void {
     this.$dimmable.removeClass(this.settings.className.scrolling);
     this.$element.removeClass(this.settings.className.scrolling);
   }
 
-  restore_bodyMargin() {
-    var position = this.can_leftBodyScrollbar() ? 'left':'right';
+  restore_bodyMargin(): void {
+    let position = this.can_leftBodyScrollbar() ? 'left':'right';
     this.$body.css('margin-'+position, this.initialBodyMargin);
-    this.$body.find(this.settings.selector.bodyFixed.replace('right',position)).each(function(){
-      var el = $(this),
-          attribute = el.css('position') === 'fixed' ? 'padding-'+position : position
+    this.$body.find(this.settings.selector.bodyFixed.replace('right',position)).each(function() {
+      let
+        el = $(this),
+        attribute = el.css('position') === 'fixed' ? 'padding-'+position : position
       ;
       el.css(attribute, '');
     });
   }
 
-  restore_focus() {
+  restore_focus(): void {
     if (this.$focusedElement && this.$focusedElement.length > 0 && this.settings.restoreFocus) {
       this.$focusedElement.trigger('focus');
     }
@@ -1156,8 +1141,8 @@ export class Modal extends Module {
     return (this.$otherModals.filter('.' + this.settings.className.animating).length > 0);
   }
 
-  attachEvent(selector, event) {
-    var $toggle = $(selector);
+  attachEvent(selector, event): void {
+    let $toggle = $(selector);
     event = $.isFunction(this[event])
       ? this[event]
       : this.toggle
@@ -1174,15 +1159,9 @@ export class Modal extends Module {
     }
   }
 
-  hideOthers(callback) {
-    let
-      $visibleModals = this.$otherModals.filter('.' + this.settings.className.active + ', .' + this.settings.className.animating)
-    ;
-    callback = $.isFunction(callback)
-      ? callback
-      : function(){}
-    ;
-    if ( $visibleModals.length > 0 ) {
+  hideOthers(callback: Function = () => {}): void {
+    let $visibleModals = this.$otherModals.filter('.' + this.settings.className.active + ', .' + this.settings.className.animating);
+    if ($visibleModals.length > 0) {
       this.debug('Hiding other modals', this.$otherModals);
       // TODO
       // $visibleModals.modal('hide modal', callback, true);
@@ -1194,7 +1173,7 @@ export class Modal extends Module {
   }
 
   helpers_escape(string: string, preserveHTML: boolean): string {
-    if (preserveHTML){
+    if (preserveHTML) {
       return string;
     }
     let

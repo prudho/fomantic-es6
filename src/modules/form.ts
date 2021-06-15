@@ -2,8 +2,14 @@
 
 import Module from '../module';
 
+import Utils from '../utils';
+
+import Calendar from './calendar';
+import Checkbox from './checkbox';
+import Dropdown from './dropdown';
+import Transition from './transition';
+
 import $, { Cash } from 'cash-dom';
-import cash from 'cash-dom';
 
 const settings = {
   name              : 'Form',
@@ -250,7 +256,7 @@ const settings = {
         max,
         parts
       ;
-      if ( !range || ['', '..'].indexOf(range) !== -1) {
+      if (!range || ['', '..'].indexOf(range) !== -1) {
         // do nothing
       }
       else if (range.indexOf('..') == -1) {
@@ -497,7 +503,7 @@ const settings = {
 
       // verify card types
       if (requiredTypes) {
-        $.each(requiredTypes, function(index, type){
+        $.each(requiredTypes, function(index, type) {
           // verify each card type
           validation = cards[type];
           if (validation) {
@@ -852,7 +858,7 @@ export class Form extends Module {
         escape : 27
       }
     ;
-    if ( key == keyCode.escape) {
+    if (key == keyCode.escape) {
       this.verbose('Escape key pressed blurring field');
       $field[0].blur();
     }
@@ -906,20 +912,29 @@ export class Form extends Module {
 
     $fieldGroup.removeClass(this.settings.className.error);
 
-    if (this.settings.inline && $prompt.is(':visible')) {
+    // if (this.settings.inline && $prompt.is(':visible')) {
+    if (this.settings.inline && $prompt.is('.visible')) {
       this.verbose('Removing prompt for field', identifier);
       // if (this.settings.transition  && this.can_useElement('transition') && this.$element.transition('is supported')) {
       if (this.settings.transition  && this.can_useElement('transition')) {
-        $prompt.transition(this.settings.transition + ' out', this.settings.duration, function() {
+        // $prompt.transition(this.settings.transition + ' out', this.settings.duration, function() {
+        //   $prompt.remove();
+        // });
+
+        new Transition($prompt, {
+          animation: this.settings.transition + ' out',
+          duration: this.settings.duration
+        }).on('complete', () => {
           $prompt.remove();
         });
       }
       else {
-        $prompt
-          .fadeOut(this.settings.duration, function(){
-            $prompt.remove();
-          })
-        ;
+        // $prompt.fadeOut(this.settings.duration, function() {
+        //   $prompt.remove();
+        // });
+        Utils.fadeOut($prompt, this.settings.duration, 'linear', () => {
+          $prompt.remove();
+        });
       }
     }
   }
@@ -1014,7 +1029,7 @@ export class Form extends Module {
     if (isDisabled) {
       this.debug('Field is disabled. Skipping', identifier);
     }
-    else if (field.optional && this.is_blank($field)){
+    else if (field.optional && this.is_blank($field)) {
       this.debug('Field is optional and blank. Skipping', identifier);
     }
     else if (field.depends && this.is_empty($dependsField)) {
@@ -1027,11 +1042,11 @@ export class Form extends Module {
       $.each(field.rules, (_index, rule: any) => {
         if (this.has_field(identifier)) {
           let invalidFields: any = this.validate_rule(field, rule, true) || [];
-          if (invalidFields.length>0){
+          if (invalidFields.length>0) {
             this.debug('Field is invalid', identifier, rule.type);
             fieldErrors.push(this.get_prompt(rule, field));
             fieldValid = false;
-            if (showErrors){
+            if (showErrors) {
               $(invalidFields).closest(this.$group).addClass(this.settings.className.error);
             }
           }
@@ -1101,7 +1116,7 @@ export class Form extends Module {
         }
         focusElement.focus();
         // only remove tabindex if it was dynamically created above
-        if (!hasTabIndex){
+        if (!hasTabIndex) {
           focusElement.removeAttr('tabindex');
         }
       }
@@ -1118,7 +1133,7 @@ export class Form extends Module {
       ancillary    = this.get_ancillaryValue(rule),
       ruleName     = this.get_ruleName(rule),
       ruleFunction = this.settings.rules[ruleName],
-      invalidFields = [],
+      invalidFields: any = [],
       isCheckbox = $field.is(this.settings.selector.checkbox),
       isValid = (field) => {
         let value = (isCheckbox ? $(field).filter(':checked').val() : $(field).val());
@@ -1130,7 +1145,7 @@ export class Form extends Module {
         return ruleFunction.call(field, value, ancillary, this.$element);
       }
     ;
-    if ( !$.isFunction(ruleFunction) ) {
+    if (!$.isFunction(ruleFunction) ) {
       this.error(this.settings.error.noRule, ruleName);
       return;
     }
@@ -1197,10 +1212,10 @@ export class Form extends Module {
     if (this.$field.filter('#' + identifier).length > 0 ) {
       return true;
     }
-    else if ( this.$field.filter('[name="' + identifier +'"]').length > 0 ) {
+    else if (this.$field.filter('[name="' + identifier +'"]').length > 0 ) {
       return true;
     }
-    else if ( this.$field.filter('[data-' + this.settings.metadata.validate + '="'+ identifier +'"]').length > 0 ) {
+    else if (this.$field.filter('[data-' + this.settings.metadata.validate + '="'+ identifier +'"]').length > 0 ) {
       return true;
     }
     return false;
@@ -1214,6 +1229,25 @@ export class Form extends Module {
       ? rule.value
       : rule.type.match(this.settings.regExp.bracket)[1] + ''
     ;
+  }
+
+  get_selector(identifier) {
+    identifier = this.escape_string(identifier);
+
+    let t: Cash;
+    if ((t=this.$field.filter('#' + identifier)).length > 0 ) {
+      return '#' + identifier;
+    }
+    if ((t=this.$field.filter('[name="' + identifier +'"]')).length > 0 ) {
+      return '[name="' + identifier +'"]';
+    }
+    if ((t=this.$field.filter('[name="' + identifier +'[]"]')).length > 0 ) {
+      return '[name="' + identifier +'[]"]';
+    }
+    if ((t=this.$field.filter('[data-' + this.settings.metadata.validate + '="'+ identifier +'"]')).length > 0 ) {
+      return '[data-' + this.settings.metadata.validate + '="'+ identifier +'"]';
+    }
+    return "input";
   }
 
   get_field(identifier) {
@@ -1316,7 +1350,7 @@ export class Form extends Module {
   }
 
   get_ruleName(rule) {
-    if ( this.is_bracketedRule(rule) ) {
+    if (this.is_bracketedRule(rule) ) {
       return rule.type.replace(rule.type.match(this.settings.regExp.bracket)[0], '');
     }
     return rule.type;
@@ -1590,7 +1624,7 @@ export class Form extends Module {
         $element    = $field.parent(),
         $calendar   = $field.closest(this.settings.selector.uiCalendar),
         isMultiple  = Array.isArray(value),
-        isCheckbox  = $element.is(this.settings.selector.uiCheckbox)  && this.can_useElement('checkbox'),
+        isCheckbox  = $element.is(this.settings.selector.uiCheckbox) && this.can_useElement('checkbox'),
         isDropdown  = $element.is(this.settings.selector.uiDropdown) && this.can_useElement('dropdown'),
         isRadio     = ($field.is(this.settings.selector.radio) && isCheckbox),
         isCalendar  = ($calendar.length > 0  && this.can_useElement('calendar')),
@@ -1740,11 +1774,13 @@ export class Form extends Module {
   }
 
   can_useElement(element): boolean {
-    if ($.fn[element] !== undefined) {
-      return true;
-    }
-    this.error(this.settings.error.noElement.replace('{element}', element));
-    return false;
+    return true;
+    // IS THIS REALLY NECESSARY ?
+    // if ($.fn[element] !== undefined) {
+    //   return true;
+    // }
+    // this.error(this.settings.error.noElement.replace('{element}', element));
+    // return false;
   }
 
   add_errors(errors) {
@@ -1779,7 +1815,7 @@ export class Form extends Module {
     }
     // For each new rule, check if there's not already one with the same type
     $.each(newValidation.rules, (_index, rule) => {
-      // if ($.grep(this.validation[name].rules, function(item){ return item.type == rule.type; }).length == 0) {
+      // if ($.grep(this.validation[name].rules, function(item) { return item.type == rule.type; }).length == 0) {
       //   this.validation[name].rules.push(rule);
       // }
       if (this.validation[name].rules.filter(item => item.type == rule.type).length == 0) {
@@ -1818,11 +1854,16 @@ export class Form extends Module {
         // if (this.settings.transition && this.can_useElement('transition') && this.$element.transition('is supported')) {
         if (this.settings.transition && this.can_useElement('transition')) {
           this.verbose('Displaying error with css transition', this.settings.transition);
-          $prompt.transition(this.settings.transition + ' in', this.settings.duration);
+          // $prompt.transition(this.settings.transition + ' in', this.settings.duration);
+          new Transition($prompt, {
+            animation: this.settings.transition + ' in',
+            duration: this.settings.duration
+          });
         }
         else {
           this.verbose('Displaying error with fallback javascript animation');
-          $prompt.fadeIn(this.settings.duration);
+          // $prompt.fadeIn(this.settings.duration);
+          Utils.fadeIn(this.settings.duration);
         }
       }
       else {

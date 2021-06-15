@@ -13,16 +13,16 @@ export default abstract class Module {
   eventNamespace: string;
   moduleNamespace: string;
 
-  constructor(selector: string, parameters, settings) {
+  constructor(selector: any, parameters, settings) {
     this.selector = selector;
 
-    // if (Array.isArray(this.selector)) {
-    //   this.element = document.querySelector(this.selector);
-    // } else {
-    //   this.element = this.selector
-    // }
-
-    this.element = document.querySelector(this.selector);
+    if (typeof selector === 'string') {
+      this.element = document.querySelector(this.selector);
+    } else if (Array.isArray(this.selector)) {
+      this.element = document.querySelector(this.selector);
+    } else {
+      this.element = this.selector;
+    }
 
     this.$element = $(this.selector);
     this.settings = $.extend(settings, parameters);
@@ -33,7 +33,7 @@ export default abstract class Module {
     this.moduleNamespace = 'module-' + this.settings.namespace;
   }
 
-  invokeCallback(name, ...args) {
+  invokeCallback(name: string, ...args): Function {
     let method = this.callbacks.find(obj => { return obj.name === name });
 
     if (method !== undefined) {
@@ -47,7 +47,7 @@ export default abstract class Module {
     }
   }
 
-  on(event, callback, once: boolean = false) {
+  on(event, callback, once: boolean = false): void {
     if (this.settings.events.indexOf(event) != -1) {
       this.register_callback(event, callback, once === undefined ? false : once);
     } else {
@@ -55,7 +55,7 @@ export default abstract class Module {
     }
   }
 
-  once(event, callback) {
+  once(event, callback): void {
     this.on(event, callback, true);
   }
 
@@ -68,11 +68,11 @@ export default abstract class Module {
     }
   }
 
-  bind(event, callback) {
+  bind(event, callback): void {
     this.on(event, callback);
   }
 
-  unbind(event) {
+  unbind(event): void {
     this.off(event);
   }
 
@@ -80,7 +80,7 @@ export default abstract class Module {
     return (this.callbacks.find(obj => { return obj.name === callbackName }));
   }
 
-  register_callback(eventName, callback, once) {
+  register_callback(eventName, callback, once): void {
     if (!this.get_registered_callback(eventName) !== undefined) {
       this.callbacks.push({name: eventName , callback: callback, once: once});
     }
@@ -88,7 +88,7 @@ export default abstract class Module {
 
   setting(name, value = undefined): any {
     this.debug('Changing setting', name, value);
-    if ( $.isPlainObject(name) ) {
+    if ($.isPlainObject(name)) {
       $.extend(true, this.settings, name);
     }
     else if (value !== undefined) {
@@ -104,7 +104,7 @@ export default abstract class Module {
     }
   }
 
-  debug(...args) {
+  debug(...args): void {
     if (!this.settings.silent && this.settings.debug) {
       if (this.settings.performance) {
         this.performance_log(args);
@@ -115,7 +115,7 @@ export default abstract class Module {
     }
   }
 
-  verbose(...args) {
+  verbose(...args): void {
     if (!this.settings.silent && this.settings.verbose && this.settings.debug) {
       if (this.settings.performance) {
         this.performance_log(args);
@@ -126,14 +126,14 @@ export default abstract class Module {
     }
   }
 
-  error(...args) {
+  error(...args): void {
     if (!this.settings.silent) {
       this.error = Function.prototype.bind.call(console.error, console, this.settings.name + ':');
       this.error.apply(console, args);
     }
   }
 
-  performance_log(message) {
+  performance_log(message): void {
     let
       currentTime: number,
       executionTime,

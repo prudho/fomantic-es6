@@ -13,18 +13,18 @@
 
   <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', () => {
-      const api = new fomantic.Dimmer('.ui.segment', {
+      const api = new fomantic.Api({
         debug: true,
-        verbose: true
-      })
-
-      document.querySelector('.ui.show.button').addEventListener('click', () => {
-        dimmer.show();
+        verbose: true,
+        url: 'http://api.github.com/search/repositories?q={query}',
+        on: false,
+        action: 'search',
+        urlData: {
+          query: 'pru'
+        }
       });
 
-      document.querySelector('.ui.hide.button').addEventListener('click', () => {
-        dimmer.hide();
-      });
+      api.query();
     });
   </script>
 </body>

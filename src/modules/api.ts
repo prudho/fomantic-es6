@@ -287,7 +287,7 @@ export class Api extends Module {
       if (xhr !== undefined) {
         this.debug('XHR produced a server error', status, httpMessage);
         // make sure we have an error to display to console
-        if ( (xhr.status < 200 || xhr.status >= 300) && httpMessage !== undefined && httpMessage !== '') {
+        if ((xhr.status < 200 || xhr.status >= 300) && httpMessage !== undefined && httpMessage !== '') {
           this.error(this.settings.error.statusMessage + httpMessage, this.ajaxSettings.url);
         }
         this.settings.onError.call(this.context, errorMessage, this.$element, xhr);
@@ -312,11 +312,11 @@ export class Api extends Module {
     }
   }
 
-  event_xhr_always() {
+  event_xhr_always(): void {
     // nothing special
   }
 
-  event_xhr_complete() {
+  event_xhr_complete(): void {
     // nothing special
   }
 
@@ -343,7 +343,7 @@ export class Api extends Module {
       module.debug('Response completed early delaying state change by', timeLeft);
     }
     setTimeout(function() {
-      if ( module.is.validResponse(response) ) {
+      if (module.is.validResponse(response)) {
         module.request.resolveWith(context, [response, xhr]);
       }
       else {
@@ -366,7 +366,7 @@ export class Api extends Module {
       module.debug('Response completed early delaying state change by', timeLeft);
     }
     setTimeout(function() {
-      if ( module.is.abortedRequest(xhr) ) {
+      if (module.is.abortedRequest(xhr)) {
         module.request.rejectWith(context, [xhr, 'aborted', httpMessage]);
       }
       else {
@@ -381,7 +381,7 @@ export class Api extends Module {
       return false;
     }
     else if (this.settings.on == 'auto') {
-      if ( this.$element.is('input') ) {
+      if (this.$element.is('input')) {
         return (this.element.oninput !== undefined)
           ? 'input'
           : (this.element.onpropertychange !== undefined)
@@ -389,7 +389,7 @@ export class Api extends Module {
             : 'keyup'
         ;
       }
-      else if ( this.$element.is('form') ) {
+      else if (this.$element.is('form')) {
         return 'submit';
       }
       else {
@@ -492,7 +492,7 @@ export class Api extends Module {
       if (!settings.throttleFirstRequest && !this.timer) {
         this.debug('Sending request', this.data, this.ajaxSettings.method);
         this.send_request();
-        this.timer = setTimeout(function(){}, settings.throttle);
+        this.timer = setTimeout(function() {}, settings.throttle);
       }
       else {
         this.debug('Throttling request', settings.throttle);
@@ -510,7 +510,7 @@ export class Api extends Module {
 
   abort() {
     let xhr = this.get_xhr();
-    if ( xhr && xhr.state() !== 'resolved') {
+    if (xhr && xhr.state() !== 'resolved') {
       this.debug('Cancelling API request');
       xhr.abort();
     }
@@ -536,7 +536,7 @@ export class Api extends Module {
     ;
 
     if (responder) {
-      if ( $.isFunction(responder) ) {
+      if ($.isFunction(responder)) {
         this.debug('Using specified synchronous callback', responder);
         response = responder.call(this.context, this.requestSettings);
       }
@@ -547,7 +547,7 @@ export class Api extends Module {
       // simulating response
       mockedXHR.resolveWith(this.context, [ response, textStatus, { responseText: response }]);
     }
-    else if ( $.isFunction(asyncResponder) ) {
+    else if ($.isFunction(asyncResponder)) {
       asyncCallback = function(response) {
         this.debug('Async callback returned response', response);
 
@@ -640,14 +640,13 @@ export class Api extends Module {
   }
 
   add_urlData(url, urlData = {}) {
-    let
-      requiredVariables,
-      optionalVariables
-    ;
     if (url) {
-      requiredVariables = url.match(this.settings.regExp.required);
-      optionalVariables = url.match(this.settings.regExp.optional);
-      urlData           = urlData || this.settings.urlData;
+      let
+        requiredVariables = url.match(this.settings.regExp.required),
+        optionalVariables = url.match(this.settings.regExp.optional)
+      ;
+      urlData = urlData || this.settings.urlData;
+      console.log(url, urlData, requiredVariables, optionalVariables)
       if (requiredVariables) {
         this.debug('Looking for required URL variables', requiredVariables);
         $.each(requiredVariables, (_index, templatedString: string) => {
@@ -795,7 +794,7 @@ export class Api extends Module {
     return (this.request && this.request.state() == 'rejected');
   }
 
-  was_successful() {
+  was_successful(): boolean {
     return (this.request && this.request.state() == 'resolved');
   }
 
@@ -804,8 +803,8 @@ export class Api extends Module {
   }
 
   get_defaultData() {
-    let data = {value: null, text: null};
-    if ( !$.isWindow(this.element) ) {
+    let data: any = {};
+    if (!$.isWindow(this.element)) {
       if (this.is_input()) {
         data.value = this.$element.val();
       }
@@ -912,28 +911,28 @@ export class Api extends Module {
     return this.xhr || false;
   }
 
-  set_error() {
+  set_error(): void {
     this.verbose('Adding error state to element', this.$context);
     this.$context.addClass(this.settings.className.error);
   }
 
-  set_loading() {
+  set_loading(): void {
     this.verbose('Adding loading state to element', this.$context);
     this.$context.addClass(this.settings.className.loading);
     this.requestStartTime = new Date().getTime();
   }
 
-  remove_error() {
+  remove_error(): void {
     this.verbose('Removing error state from element', this.$context);
     this.$context.removeClass(this.settings.className.error);
   }
 
-  remove_loading() {
+  remove_loading(): void {
     this.verbose('Removing loading state from element', this.$context);
     this.$context.removeClass(this.settings.className.loading);
   }
 
-  write_cachedResponse(url, response) {
+  write_cachedResponse(url, response): void {
     if (response && response === '') {
       this.debug('Response empty, not caching', response);
       return;
@@ -942,7 +941,7 @@ export class Api extends Module {
       this.error(this.settings.error.noStorage);
       return;
     }
-    if ( $.isPlainObject(response) ) {
+    if ($.isPlainObject(response)) {
       response = JSON.stringify(response);
     }
     sessionStorage.setItem(url, response);

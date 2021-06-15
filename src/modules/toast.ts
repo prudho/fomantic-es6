@@ -3,7 +3,7 @@
 import Module from '../module';
 
 import $, { Cash } from 'cash-dom';
-import { Transition } from './transition';
+import Transition from './transition';
 
 const settings = {
   name           : 'Toast',
@@ -161,7 +161,7 @@ export class Toast extends Module {
         this.settings.showProgress = false;
       }
       this.create_toast();
-      if (this.settings.closeOnClick && (this.settings.closeIcon || $(this.$toast).find(this.settings.selector.input).length > 0 || this.has_configActions())){
+      if (this.settings.closeOnClick && (this.settings.closeIcon || $(this.$toast).find(this.settings.selector.input).length > 0 || this.has_configActions())) {
         this.settings.closeOnClick = false;
       }
       if (!this.settings.closeOnClick) {
@@ -170,6 +170,7 @@ export class Toast extends Module {
       this.bind_events();
     }
     this.instantiate();
+    
     if (this.$toastBox) {
       this.show();
     }
@@ -293,7 +294,7 @@ export class Toast extends Module {
         this.$toast.addClass(this.settings.className.actions);
       }
     }
-    if (this.settings.displayTime === 'auto'){
+    if (this.settings.displayTime === 'auto') {
       this.settings.displayTime = Math.max(this.settings.minDisplayTime, this.$toast.text().split(" ").length / this.settings.wordsPerMinute * 60000);
     }
     this.$toastBox.append(this.$toast);
@@ -367,7 +368,7 @@ export class Toast extends Module {
     }
   }
 
-  show(callback = () => {}) {
+  show(callback: Function = () => {}) {
     this.debug('Showing toast');
     //if (this.settings.onShow.call(this.$toastBox, this.element) === false) {
     if (this.invokeCallback('show')(this.$toastBox, this.element) === false) {
@@ -377,13 +378,13 @@ export class Toast extends Module {
     this.animate_show(callback);
   }
 
-  close(callback = () => {}) {
+  close(callback: Function = () => {}) {
     this.remove_visible();
     this.unbind_events();
     this.animate_close(callback);
   }
 
-  animate_show(callback = () => {}): void {
+  animate_show(callback: Function = () => {}): void {
     // if (this.settings.transition && this.can_useElement('transition') && $module.transition('is supported')) {
     if (this.settings.transition) {
       this.set_visible();
@@ -403,7 +404,8 @@ export class Toast extends Module {
     }
   }
 
-  animate_close(callback = () => {}): void {
+  animate_close(callback: Function = () => {}): void {
+    callback = $.isFunction(callback) ? callback : () => {};
     this.debug('Closing toast');
     if (this.invokeCallback('hide')(this.$toastBox, this.element) === false) {
       this.debug('onHide callback returned false, cancelling toast animation');
@@ -422,22 +424,21 @@ export class Toast extends Module {
 
       // TODO
 
-      // this.transition.on('before_hide', (callback) => {
-      //   callback = $.isFunction(callback)?callback : function(){};
-      //   if (this.settings.transition.closeEasing !== ''){
-      //       if (this.$toastBox) {
-      //         this.$toastBox.css('opacity', 0);
-      //         this.$toastBox.wrap('<div/>').parent().hide(this.settings.transition.closeDuration, this.settings.transition.closeEasing, function () {
-      //           if (this.$toastBox) {
-      //             this.$toastBox.parent().remove();
-      //             callback.call(this.$toastBox);
-      //           }
-      //         });
-      //       }
-      //   } else {
-      //     callback.call(this.$toastBox);
-      //   }
-      // });
+      this.transition.on('before_hide', (callback: Function = () => {}) => {
+        if (this.settings.transition.closeEasing !== '') {
+            if (this.$toastBox) {
+              this.$toastBox.css('opacity', 0);
+              // this.$toastBox.wrap('<div/>').parent().hide(this.settings.transition.closeDuration, this.settings.transition.closeEasing, function () {
+              //   if (this.$toastBox) {
+              //     this.$toastBox.parent().remove();
+              //     callback.call(this.$toastBox);
+              //   }
+              // });
+            }
+        } else {
+          callback.call(this.$toastBox);
+        }
+      });
 
       this.transition.on('complete', () => {
         callback.call(this.$toastBox, this.element);
@@ -496,7 +497,7 @@ export class Toast extends Module {
   event_click(event) {
     if ($(event.target).closest('a').length === 0) {
       this.invokeCallback('click')(this.$toastBox, this.element)
-      this.close(null);
+      this.close();
     }
   }
 
@@ -505,7 +506,7 @@ export class Toast extends Module {
       this.verbose('Approve callback returned false cancelling close');
       return;
     }
-    this.close(null);
+    this.close();
   }
 
   event_deny() {
@@ -513,7 +514,7 @@ export class Toast extends Module {
       this.verbose('Deny callback returned false cancelling close');
       return;
     }
-    this.close(null);
+    this.close();
   }
 
   can_useElement(element) {
@@ -578,7 +579,7 @@ export class Toast extends Module {
   }
 
   helpers_escape(string: string, preserveHTML: boolean) {
-    if (preserveHTML){
+    if (preserveHTML) {
       return string;
     }
     let

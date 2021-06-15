@@ -9,28 +9,28 @@
 </head>
 <body style="padding: 1rem;">
 
-    <div id="popup" class="ui icon button" data-content="Add users to your feed">
-        <i class="add icon"></i>
-    </div>
+  <div id="btn_toast" class="ui icon button">
+    <i class="bell outline icon"></i>
+  </div>
 
   <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', () => {
-        const test = new fomantic.Toast('body', {
+      const toast = new fomantic.Toast('body', {
+        debug: true,
+        verbose: true,
+        message: 'message',
+        title: 'title'
+      });
+
+      document.querySelector('#btn_toast').addEventListener('click', () => {
+        new fomantic.Toast('body', {
           debug: true,
           verbose: true,
-          message: 'message',
-          title: 'title',
-          transition: false
+          message: 'world !',
+          title: 'Hello',
+          showIcon: 'exclamation'
         });
-
-        // test.on('hide', function(one, two) {
-        //     console.log(this, one, two);
-        //     return false;
-        // })
-
-        
-
-        
+      });
     });
   </script>
 </body>

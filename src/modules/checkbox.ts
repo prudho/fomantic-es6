@@ -18,25 +18,25 @@ const settings = {
   fireOnInit          : false,
   enableEnterKey      : true,
 
-  onChange            : function(){},
+  onChange            : function() {},
 
-  beforeChecked       : function(){},
-  beforeUnchecked     : function(){},
-  beforeDeterminate   : function(){},
-  beforeIndeterminate : function(){},
+  beforeChecked       : function() {},
+  beforeUnchecked     : function() {},
+  beforeDeterminate   : function() {},
+  beforeIndeterminate : function() {},
 
-  onChecked           : function(){},
-  onUnchecked         : function(){},
+  onChecked           : function() {},
+  onUnchecked         : function() {},
 
   onDeterminate       : function() {},
   onIndeterminate     : function() {},
 
-  onEnable            : function(){},
-  onDisable           : function(){},
+  onEnable            : function() {},
+  onDisable           : function() {},
 
   // preserve misspelled callbacks (will be removed in 3.0)
-  onEnabled           : function(){},
-  onDisabled          : function(){},
+  onEnabled           : function() {},
+  onDisabled          : function() {},
 
   className       : {
     checked       : 'checked',
@@ -61,7 +61,7 @@ const settings = {
   events: ['change', 'beforeChecked', 'beforeUnchecked', 'beforeDeterminate', 'beforeIndeterminate', 'checked', 'unchecked', 'determinate', 'indeterminate', 'enable', 'disable']
 }
 
-export class Checkbox extends Module {
+export default class Checkbox extends Module {
   $input: Cash;
   $label: Cash;
   
@@ -265,12 +265,12 @@ export class Checkbox extends Module {
   }
 
   check() {
-    if ( !this.should_allowCheck() ) {
+    if (!this.should_allowCheck()) {
       return;
     }
     this.debug('Checking checkbox', this.$input);
     this.set_checked();
-    if ( !this.should_ignoreCallbacks() ) {
+    if (!this.should_ignoreCallbacks()) {
       this.settings.onChecked.call(this.input);
       this.trigger_change();
     }
@@ -278,12 +278,12 @@ export class Checkbox extends Module {
   }
 
   uncheck() {
-    if ( !this.should_allowUncheck() ) {
+    if (!this.should_allowUncheck()) {
       return;
     }
     this.debug('Unchecking checkbox');
     this.set_unchecked();
-    if ( !this.should_ignoreCallbacks() ) {
+    if (!this.should_ignoreCallbacks()) {
       this.settings.onUnchecked.call(this.input);
       this.trigger_change();
     }
@@ -291,39 +291,39 @@ export class Checkbox extends Module {
   }
 
   indeterminate() {
-    if ( this.should_allowIndeterminate() ) {
+    if (this.should_allowIndeterminate()) {
       this.debug('Checkbox is already indeterminate');
       return;
     }
     this.debug('Making checkbox indeterminate');
     this.set_indeterminate();
-    if ( !this.should_ignoreCallbacks() ) {
+    if (!this.should_ignoreCallbacks()) {
       this.settings.onIndeterminate.call(this.input);
       this.trigger_change();
     }
   }
 
   determinate() {
-    if ( this.should_allowDeterminate() ) {
+    if (this.should_allowDeterminate()) {
       this.debug('Checkbox is already determinate');
       return;
     }
     this.debug('Making checkbox determinate');
     this.set_determinate();
-    if ( !this.should_ignoreCallbacks() ) {
+    if (!this.should_ignoreCallbacks()) {
       this.settings.onDeterminate.call(this.input);
       this.trigger_change();
     }
   }
 
   enable() {
-    if ( this.is_enabled() ) {
+    if (this.is_enabled()) {
       this.debug('Checkbox is already enabled');
       return;
     }
     this.debug('Enabling checkbox');
     this.set_enabled();
-    if ( !this.should_ignoreCallbacks() ) {
+    if (!this.should_ignoreCallbacks()) {
       this.settings.onEnable.call(this.input);
       // preserve legacy callbacks
       this.settings.onEnabled.call(this.input);
@@ -332,13 +332,13 @@ export class Checkbox extends Module {
   }
 
   disable() {
-    if ( this.is_disabled() ) {
+    if (this.is_disabled()) {
       this.debug('Checkbox is already disabled');
       return;
     }
     this.debug('Disabling checkbox');
     this.set_disabled();
-    if ( !this.should_ignoreCallbacks() ) {
+    if (!this.should_ignoreCallbacks()) {
       this.settings.onDisable.call(this.input);
       // preserve legacy callbacks
       this.settings.onDisabled.call(this.input);

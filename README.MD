@@ -27,7 +27,7 @@ npm run build
 | Module        | Depends on    | Done  | Comment |
 | ------------- |:-------------:| :----:| ------- |
 | Transition    | none          |   ✔️  |         |
-| Dimmer        | Transition    |   ✔️  |         |
+| Dimmer        | Transition    |   ✔️  | new callbacks ! |
 | Progress      | none          |   ✔️  |         |
 | Rating        | none          |   ✔️  |         |
 | Popup         | Transition    |   ✔️  |         |
@@ -37,16 +37,16 @@ npm run build
 | Calendar      | Popup         |   ⚠️  | range is broken, halp ! |
 | Checkbox      | none          |   ⚠️  | grouped checkbox must be rethinked |
 | Dropdown      | Transition    |   ⚠️  | not finished and utterly broken |
-| Tab           | none          |   ⚠️  | not finished and utterly broken |
-| Accordion     | Transition    |   ❌  |         |
-| Embed         | ...           |   ❌  |         |
-| Modal         | ...           |   ❌  |         |
-| Nag           | ...           |   ❌  |         |
-| Search        | ...           |   ❌  |         |
-| Shape         | ...           |   ❌  |         |
-| Sidebar       | ...           |   ❌  |         |
-| API           | ...           |   ❌  |         |
-| Form          | ...           |   ❌  |         |
+| Tab           | none          |   ⚠️  | need to find a replacement for $.address (state library) |
+| Accordion     | Transition    |   ⚠️  |         |
+| Embed         | ...           |   ⚠️  |         |
+| Modal         | ...           |   ⚠️  |         |
+| Nag           | ...           |   ⚠️  |         |
+| Sidebar       | ...           |   ⚠️  |         |
+| API           | ...           |   ⚠️  | needs intesive tests |
+| Form          | ...           |   ⚠️  |         |
+| Search        | API, Transition |   ⚠️  | needs API debugging |
+| Shape         | ...           |   ⚠️  |         |
 | State         | ...           |   ❌  |         |
 | Visibility    | ...           |   ❌  |         |
 | Site          | ...           |   ❌  |         |

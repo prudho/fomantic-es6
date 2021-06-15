@@ -2,7 +2,7 @@
 
 import Module from '../module';
 
-import { Transition } from './transition';
+import Transition from './transition';
 
 import $, { Cash } from 'cash-dom';
 
@@ -14,7 +14,7 @@ const settings = {
   performance            : true,
 
   on                     : 'click',    // what event should show menu action on item selection
-  action                 : 'activate', // action on item selection (nothing, activate, select, combo, hide, function(){})
+  action                 : 'activate', // action on item selection (nothing, activate, select, combo, hide, function() {})
 
   values                 : false,      // specify values to use for dropdown
 
@@ -84,17 +84,17 @@ const settings = {
   },
 
   /* Callbacks */
-  onChange      : function(value, text, $selected){},
-  onAdd         : function(value, text, $selected){},
-  onRemove      : function(value, text, $selected){},
-  onSearch      : function(searchTerm){},
+  onChange      : function(value, text, $selected) {},
+  onAdd         : function(value, text, $selected) {},
+  onRemove      : function(value, text, $selected) {},
+  onSearch      : function(searchTerm) {},
 
-  onLabelSelect : function($selectedLabels){},
+  onLabelSelect : function($selectedLabels) {},
   onLabelCreate : function(value, text) { return $(this); },
   onLabelRemove : function(value) { return true; },
   onNoResults   : function(searchTerm) { return true; },
-  onShow        : function(){},
-  onHide        : function(){},
+  onShow        : function() {},
+  onHide        : function() {},
 
   /* Component */
   name           : 'Dropdown',
@@ -174,8 +174,8 @@ const settings = {
     icon         : ':scope > .dropdown.icon',
     input        : ':scope > input[type="hidden"], :scope > select',
     item         : '.item',
-    label        : '> .label',
-    remove       : '> .label > .delete.icon',
+    label        : ':scope > .label',
+    remove       : ':scope > .label > .delete.icon',
     siblingLabel : '.label',
     menu         : '.menu',
     message      : '.message',
@@ -230,7 +230,7 @@ const settings = {
       return String(string).replace(/"/g,encode ? "&quot;" : "");
     },
     escape: function(string, preserveHTML) {
-      if (preserveHTML){
+      if (preserveHTML) {
         return string;
       }
       let
@@ -312,7 +312,7 @@ const settings = {
           if (option[fields.icon]) {
             html += '<i class="'+deQuote(option[fields.icon])+' '+(option[fields.iconClass] ? deQuote(option[fields.iconClass]) : className.icon)+'"></i>';
           }
-          if (hasDescription){
+          if (hasDescription) {
             html += '<span class="'+ className.description +'">'+ escape(option[fields.description] || '', preserveHTML) + '</span>';
             html += (!isMenu) ? '<span class="'+ className.text + '">' : '';
           }
@@ -325,7 +325,7 @@ const settings = {
             html += '<div class="' + itemType + '">';
             html += settings.templates.menu(option, fields, preserveHTML, className);
             html += '</div>';
-          } else if (hasDescription){
+          } else if (hasDescription) {
             html += '</span>';
           }
           html += '</div>';
@@ -342,7 +342,7 @@ const settings = {
             html += groupName;
             html += '</div>';
           }
-          if (option[fields.divider]){
+          if (option[fields.divider]) {
             html += '<div class="'+className.divider+'"></div>';
           }
         }
@@ -371,7 +371,7 @@ const settings = {
   events: []
 }
 
-export class Dropdown extends Module {
+export default class Dropdown extends Module {
   initialLoad: boolean;
   internalChange: boolean = false;
   activated: boolean = false;
@@ -407,6 +407,7 @@ export class Dropdown extends Module {
   classObserver: MutationObserver;
 
   timer;
+  itemTimer;
 
   constructor(selector: string, parameters) {
     super(selector, parameters, settings);
@@ -693,7 +694,7 @@ export class Dropdown extends Module {
         .on('touchmove'  + this.elementNamespace, this.event_test_touch.bind(this))
       ;
     }
-    this.$document.on(this.clickEvent + this.elementNamespace, this.event_test_hide);
+    this.$document.on(this.clickEvent + this.elementNamespace, this.event_test_hide.bind(this));
   }
 
   unbind_intent() {
@@ -778,7 +779,7 @@ export class Dropdown extends Module {
       this.$element
         .on('mousedown' + this.eventNamespace, this.event_mousedown.bind(this))
         .on('mouseup'   + this.eventNamespace, this.event_mouseup.bind(this))
-        .on('focus'     + this.eventNamespace, this.event_focus)
+        .on('focus'     + this.eventNamespace, this.event_focus.bind(this))
         .on(this.clickEvent  + this.eventNamespace, this.settings.selector.clearIcon, this.event_clearIcon_click.bind(this))
       ;
       if (this.has_menuSearch()) {
@@ -789,9 +790,9 @@ export class Dropdown extends Module {
       }
     }
     this.$menu
-      .on((this.hasTouch ? 'touchstart' : 'mouseenter') + this.eventNamespace, this.settings.selector.item, this.event_item_mouseenter)
-      .on('mouseleave' + this.eventNamespace, this.settings.selector.item, this.event_item_mouseleave)
-      .on('click'      + this.eventNamespace, this.settings.selector.item, this.event_item_click)
+      .on((this.hasTouch ? 'touchstart' : 'mouseenter') + this.eventNamespace, this.settings.selector.item, this.event_item_mouseenter.bind(this))
+      .on('mouseleave' + this.eventNamespace, this.settings.selector.item, this.event_item_mouseleave.bind(this))
+      .on('click'      + this.eventNamespace, this.settings.selector.item, this.event_item_click.bind(this))
     ;
   }
 
@@ -982,13 +983,13 @@ export class Dropdown extends Module {
 
   event_item_click(event, skipRefocus) {
     let
-      $choice        = $(this),
+      $choice        = $(event.currentTarget),
       $target        = (event)
         ? $(event.target)
         : $(''),
-      $subMenu       = $choice.find(selector.menu),
-      text           = module.get.choiceText($choice),
-      value          = module.get.choiceValue($choice, text),
+      $subMenu       = $choice.find(this.settings.selector.menu),
+      text           = this.get_choiceText($choice),
+      value          = this.get_choiceValue($choice, text),
       hasSubMenu     = ($subMenu.length > 0),
       isBubbledEvent = ($subMenu.find($target).length > 0)
     ;
@@ -996,54 +997,54 @@ export class Dropdown extends Module {
     if (document.activeElement.tagName.toLowerCase() !== 'input') {
       $(document.activeElement).trigger('blur');
     }
-    if (!isBubbledEvent && (!hasSubMenu || settings.allowCategorySelection)) {
-      if (module.is.searchSelection()) {
-        if (settings.allowAdditions) {
-          module.remove.userAddition();
+    if (!isBubbledEvent && (!hasSubMenu || this.settings.allowCategorySelection)) {
+      if (this.is_searchSelection()) {
+        if (this.settings.allowAdditions) {
+          this.remove_userAddition();
         }
-        module.remove.searchTerm();
-        if (!module.is.focusedOnSearch() && !(skipRefocus == true)) {
-          module.focusSearch(true);
+        this.remove_searchTerm();
+        if (!this.is_focusedOnSearch() && !(skipRefocus == true)) {
+          this.focusSearch(true);
         }
       }
-      if (!settings.useLabels) {
-        module.remove.filteredItem();
-        module.set.scrollPosition($choice);
+      if (!this.settings.useLabels) {
+        this.remove_filteredItem();
+        this.set_scrollPosition($choice);
       }
-      module.determine.selectAction.call(this, text, value);
+      this.determine_selectAction.call(this, $target, text, value);
     }
   }
 
   event_item_mouseenter(event) {
     let
       $target        = $(event.target),
-      $item          = $(this),
-      $subMenu       = $item.children(selector.menu),
-      $otherMenus    = $item.siblings(selector.item).children(selector.menu),
+      $item          = $(event.currentTarget),
+      $subMenu       = $item.children(this.settings.selector.menu),
+      $otherMenus    = $item.siblings(this.settings.selector.item).children(this.settings.selector.menu),
       hasSubMenu     = ($subMenu.length > 0),
       isBubbledEvent = ($subMenu.find($target).length > 0)
     ;
     if (!isBubbledEvent && hasSubMenu) {
-      clearTimeout(module.itemTimer);
-      module.itemTimer = setTimeout(function() {
-        module.verbose('Showing sub-menu', $subMenu);
+      clearTimeout(this.itemTimer);
+      this.itemTimer = setTimeout(function() {
+        this.verbose('Showing sub-menu', $subMenu);
         $.each($otherMenus, function() {
           module.animate.hide(false, $(this));
         });
         module.animate.show(false, $subMenu);
-      }, settings.delay.show);
+      }, this.settings.delay.show);
       event.preventDefault();
     }
   }
 
   event_item_mouseleave(event) {
-    let $subMenu = $(this).children(selector.menu);
+    let $subMenu = $(event.currentTarget).children(this.settings.selector.menu);
     if ($subMenu.length > 0) {
-      clearTimeout(module.itemTimer);
-      module.itemTimer = setTimeout(function() {
-        module.verbose('Hiding sub-menu', $subMenu);
-        module.animate.hide(false, $subMenu);
-      }, settings.delay.hide);
+      clearTimeout(this.itemTimer);
+      this.itemTimer = setTimeout(() => {
+        this.verbose('Hiding sub-menu', $subMenu);
+        this.animate_hide(() => {}, $subMenu);
+      }, this.settings.delay.hide);
     }
   }
 
@@ -1081,13 +1082,13 @@ export class Dropdown extends Module {
         if (this.is_searchSelection()) {
           this.remove_searchTerm();
         }
-        if (this.is_multiple()){
+        if (this.is_multiple()) {
           event.preventDefault();
         }
       }
 
       // visible menu keyboard shortcuts
-      if (this.is_visible() ) {
+      if (this.is_visible()) {
 
         // enter (select or open sub-menu)
         if (pressedKey == this.settings.keys.enter || delimiterPressed) {
@@ -1322,7 +1323,7 @@ export class Dropdown extends Module {
   }
 
   event_test_hide(event) {
-    if (this.determine_eventInModule(event, this.hide)){
+    if (this.determine_eventInModule(event, this.hide)) {
       if (this.element.id && $(event.target).attr('for') === this.element.id) {
         event.preventDefault();
       }
@@ -1674,7 +1675,7 @@ export class Dropdown extends Module {
     ;
     if (this.settings.allowAdditions || (hasSelected && !this.is_multiple())) {
       this.debug('Forcing partial selection to selected item', $selectedItem);
-      this.event_item_click.call($selectedItem, {}, true);
+      this.event_item_click.call(this, {currentTarget: $selectedItem}, true);
     }
     else {
       this.remove_searchTerm();
@@ -1863,7 +1864,7 @@ export class Dropdown extends Module {
   }
 
   queryRemote(query, callback, callbackParameters: any = {}) {
-    if (!Array.isArray(callbackParameters)){
+    if (!Array.isArray(callbackParameters)) {
       callbackParameters = [callbackParameters];
     }
     let
@@ -1888,7 +1889,7 @@ export class Dropdown extends Module {
         },
         onSuccess: (response) => {
           let values = response[this.settings.fields.remoteValues];
-          if (!Array.isArray(values)){
+          if (!Array.isArray(values)) {
             values = [];
           }
           this.remove_message();
@@ -1959,7 +1960,8 @@ export class Dropdown extends Module {
       $target      = $(event.target),
       $label       = $target.closest(this.settings.selector.siblingLabel),
       inVisibleDOM = document.body.contains(event.target),
-      notOnLabel   = (this.$element.find($label).length === 0 || !(this.is_multiple() && this.settings.useLabels)),
+      // notOnLabel   = (this.$element.find($label).length === 0 || !(this.is_multiple() && this.settings.useLabels)),
+      notOnLabel   = (this.$element.find(this.settings.selector.siblingLabel).length === 0 || !(this.is_multiple() && this.settings.useLabels)),
       notInMenu    = ($target.closest(this.$menu).length === 0)
     ;
     callback = $.isFunction(callback)
@@ -1968,7 +1970,7 @@ export class Dropdown extends Module {
     ;
     if (inVisibleDOM && notOnLabel && notInMenu) {
       this.verbose('Triggering event', callback);
-      callback();
+      callback.call(this);
       return true;
     }
     else {
@@ -1977,16 +1979,16 @@ export class Dropdown extends Module {
     }
   }
 
-  determine_selectAction(text, value) {
+  determine_selectAction($target, text, value) {
     this.selectActionActive = true;
     this.verbose('Determining action', this.settings.action);
     if ($.isFunction( this.action[this.settings.action] ) ) {
       this.verbose('Triggering preset action', this.settings.action, text, value);
-      this.action[ this.settings.action ].call(this.element, text, value, this);
+      this.action[ this.settings.action ].call(this.element, text, value, $target);
     }
     else if ($.isFunction(this.settings.action)) {
       this.verbose('Triggering user action', this.settings.action, text, value);
-      this.settings.action.call(this.element, text, value, this);
+      this.settings.action.call(this.element, text, value, $target);
     }
     else {
       this.error(this.settings.error.action, this.settings.action);
@@ -2439,7 +2441,7 @@ export class Dropdown extends Module {
       range,
       rangeLength
     ;
-    if (returnEndPos && 'selectionEnd' in input){
+    if (returnEndPos && 'selectionEnd' in input) {
       return input.selectionEnd;
     }
     else if (!returnEndPos && 'selectionStart' in input) {
@@ -2554,7 +2556,7 @@ export class Dropdown extends Module {
           return;
         }
         if (isMultiple) {
-          // if ($.inArray(module.escape_htmlEntities(String(optionValue)), value.map(function(v){return String(v);})) !== -1) {
+          // if ($.inArray(module.escape_htmlEntities(String(optionValue)), value.map(function(v) {return String(v);})) !== -1) {
           if (value.map((v) => {return String(v);}).indexOf(module.escape_htmlEntities(String(optionValue))) !== -1) {
             $selectedItem = ($selectedItem)
               ? $selectedItem.add($choice)
@@ -2937,7 +2939,7 @@ export class Dropdown extends Module {
     $item       = $item || this.get_selectedItem();
     $menu       = $item.closest(this.settings.selector.menu);
     hasActive   = ($item && $item.length > 0);
-    if (this.get_activeItem().length === 0){
+    if (this.get_activeItem().length === 0) {
       forceScroll = false;
     }
     if ($item && $menu.length > 0 && hasActive) {
@@ -3134,7 +3136,7 @@ export class Dropdown extends Module {
     $element.addClass(this.settings.className.upward);
   }
 
-  set_value(value, text, $selected, preventChangeTrigger: boolean = false) {
+  set_value(value, text = value, $selected, preventChangeTrigger: boolean = false) {
     if (value !== undefined && value !== '' && !(Array.isArray(value) && value.length === 0)) {
       this.$input.removeClass(this.settings.className.noselection);
     } else {
@@ -3202,9 +3204,9 @@ export class Dropdown extends Module {
       escapedValue = escapedValue.toLowerCase();
     }
     $label = $('<a />')
+      .html(this.settings.templates.label(escapedValue, text, this.settings.preserveHTML, this.settings.className))
       .addClass(this.settings.className.label)
       .attr('data-' + this.settings.metadata.value, escapedValue)
-      .html(this.settings.templates.label(escapedValue, text, this.settings.preserveHTML, this.settings.className))
     ;
     $label = this.settings.onLabelCreate.call($label, escapedValue, text);
 
@@ -3217,16 +3219,28 @@ export class Dropdown extends Module {
     }
     if (shouldAnimate === true) {
       this.debug('Animating in label', $label);
-      $label
+      // $label
+      //   .addClass(this.settings.className.hidden)
+      //   .insertBefore($next)
+      //   .transition({
+      //     animation  : settings.label.transition,
+      //     debug      : settings.debug,
+      //     verbose    : settings.verbose,
+      //     duration   : settings.label.duration
+      //   })
+      // ;
+
+      let $lbl = $label
         .addClass(this.settings.className.hidden)
         .insertBefore($next)
-        .transition({
-          animation  : settings.label.transition,
-          debug      : settings.debug,
-          verbose    : settings.verbose,
-          duration   : settings.label.duration
-        })
       ;
+
+      new Transition($lbl, {
+        animation  : this.settings.label.transition,
+        debug      : this.settings.debug,
+        verbose    : this.settings.verbose,
+        duration   : this.settings.label.duration
+      });
     }
     else {
       this.debug('Adding selection label', $label);
@@ -3503,7 +3517,7 @@ export class Dropdown extends Module {
     if (!Array.isArray(values)) {
       values = [values];
     }
-    // values = $.grep(values, function(value){
+    // values = $.grep(values, function(value) {
     //   return (removedValue != value);
     // });
     values = values.filter((value) => {

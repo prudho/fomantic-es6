@@ -51,10 +51,10 @@ const settings = {
     support     : 'This browser does not support CSS animations'
   },
 
-  events: ['start', 'complete', 'show', 'hide']
+  events: ['start', 'complete', 'show', 'hide', 'before_hide']
 }
 
-export class Transition extends Module {
+export default class Transition extends Module {
   animationEnd: string;
   cache: any;
   timer: any;
@@ -136,7 +136,7 @@ export class Transition extends Module {
         this.verbose('Animation is outward, hiding element');
         this.restore_conditions();
         this.hide();
-      } else if ( this.is_inward() ) {
+      } else if (this.is_inward()) {
         this.verbose('Animation is outward, showing element');
         this.restore_conditions();
         this.show();
@@ -164,15 +164,18 @@ export class Transition extends Module {
     if (this.is_animating()) {
       this.reset();
     }
-    // FIXME or INVESTIGATE
-    //element.blur(); // previous comment: IE will trigger focus change if element is not blurred before hiding
+    // IE will trigger focus change if element is not blurred before hiding
+    this.$element.trigger('blur');
     this.remove_display();
     this.remove_visible();
-    this.set_hidden();
-    this.force_hidden();
-    this.invokeCallback('hide')(this.$element);
-    this.invokeCallback('complete')(this.$element);
-    // module.repaint(); already commented
+
+    if (this.invokeCallback('before_hide').call(this.element) !== false) {
+      this.set_hidden();
+      this.force_hidden();
+      this.invokeCallback('hide')(this.$element);
+      this.invokeCallback('complete')(this.$element);
+      // module.repaint(); already commented
+    }
   }
 
   toggle(): void {
@@ -298,7 +301,7 @@ export class Transition extends Module {
       animation
     ;
     for (animation in animations) {
-      if (element.style[animation] !== undefined){
+      if (element.style[animation] !== undefined) {
         return animations[animation];
       }
     }
@@ -380,7 +383,7 @@ export class Transition extends Module {
     }
     if (shouldDetermine && this.$element.data(this.settings.metadata.displayType) === undefined) {
       let currentDisplay = this.$element.css('display');
-      if (currentDisplay === '' || currentDisplay === 'none'){
+      if (currentDisplay === '' || currentDisplay === 'none') {
       // create fake element to determine display state
         this.can_transition(true);
       } else {
@@ -515,7 +518,7 @@ export class Transition extends Module {
       elementClass = this.$element.attr('class');
       tagName      = this.$element.prop('tagName');
 
-      $clone = $('<' + tagName + ' />').addClass( elementClass ).insertAfter(this.$element);
+      $clone = $(`<${tagName} />`).addClass( elementClass ).insertAfter(this.$element);
 
       currentAnimation = $clone
         .addClass(animation)
@@ -602,7 +605,7 @@ export class Transition extends Module {
 
   remove_looping(): void {
     this.debug('Transitions are no longer looping');
-    if ( this.is_looping() ) {
+    if (this.is_looping()) {
       this.reset();
       this.$element.removeClass(this.settings.className.looping);
     }
@@ -664,7 +667,7 @@ export class Transition extends Module {
       inlineDisplay: string   = this.$element[0].style.display,
       mustStayHidden: boolean = !displayType || (inlineDisplay === 'none' && this.settings.skipInlineHidden) || this.$element[0].tagName.match(/(script|link|style)/i)
     ;
-    if (mustStayHidden){
+    if (mustStayHidden) {
       this.remove_transition();
       return false;
     }

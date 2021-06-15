@@ -27,6 +27,9 @@ export default [
 			'src/modules/accordion.ts',
 			'src/modules/checkbox.ts',
 			'src/modules/tab.ts',
+			'src/modules/search.ts',
+			'src/modules/shape.ts',
+			'src/modules/api.ts'
 		],
 		output: {
 			name: 'fomantic',
@@ -60,7 +63,7 @@ export default [
 			{ file: pkg.module, format: 'es' }
 		],
 		plugins: [
-            multiEntry(),
+			multiEntry(),
 			babel({
 				exclude: ['node_modules/**']
 			})

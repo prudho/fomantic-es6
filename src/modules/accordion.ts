@@ -1,8 +1,11 @@
-"use strict";
+'use strict';
 
-import Module from "../module";
+import Module from '../module';
+import Utils from '../utils';
 
-import $, { Cash } from "cash-dom";
+import Transition from './transition';
+
+import $, { Cash } from 'cash-dom';
 
 // Adds easing
 // $.extend( $.easing, {
@@ -12,52 +15,51 @@ import $, { Cash } from "cash-dom";
 // });
 
 const settings = {
-  name: "Accordion",
-  namespace: "accordion",
+  name           : 'Accordion',
+  namespace      : 'accordion',
 
-  silent: false,
-  debug: false,
-  verbose: false,
-  performance: true,
+  silent         : false,
+  debug          : false,
+  verbose        : false,
+  performance    : true,
 
-  on: "click", // event on title that opens accordion
+  on             : 'click', // event on title that opens accordion
 
-  observeChanges: true, // whether accordion should automatically refresh on DOM insertion
+  observeChanges : true, // whether accordion should automatically refresh on DOM insertion
 
-  exclusive: true, // whether a single accordion content panel should be open at once
-  collapsible: true, // whether accordion content can be closed
-  closeNested: false, // whether nested content should be closed when a panel is closed
+  exclusive      : true, // whether a single accordion content panel should be open at once
+  collapsible    : true, // whether accordion content can be closed
+  closeNested    : false, // whether nested content should be closed when a panel is closed
   animateChildren: true, // whether children opacity should be animated
 
-  duration: 350, // duration of animation
-  easing: "easeOutQuad", // easing equation for animation
-
-  onOpening: function () {}, // callback before open animation
-  onClosing: function () {}, // callback before closing animation
-  onChanging: function () {}, // callback before closing or opening animation
-
-  onOpen: function () {}, // callback after open animation
-  onClose: function () {}, // callback after closing animation
-  onChange: function () {}, // callback after closing or opening animation
+  duration       : 350, // duration of animation
+  easing         : 'easeOutQuad', // easing equation for animation
 
   error: {
-    method: "The method you called is not defined",
+    method: 'The method you called is not defined',
   },
 
   className: {
-    active: "active",
-    animating: "animating",
-    transition: "transition",
+    active    : 'active',
+    animating : 'animating',
+    transition: 'transition',
   },
 
   selector: {
-    accordion: ".accordion",
-    title: ".title",
-    trigger: ".title",
-    content: ".content",
+    accordion: '.accordion',
+    title    : '.title',
+    trigger  : '.title',
+    content  : '.content',
   },
 
-  events: ["opening", "closing", "changing", "open", "close", "change"],
+  events: [
+    'opening',  // callback before open animation
+    'closing',  // callback before closing animation
+    'changing', // callback before closing or opening animation
+    'open',     // callback after open animation
+    'close',    // callback after closing animation
+    'change'    // callback after closing or opening animation
+  ],
 };
 
 export class Accordion extends Module {
@@ -107,11 +109,10 @@ export class Accordion extends Module {
         this.debug("DOM tree modified, updating selector cache");
         this.refresh();
       });
-      // INVESTIGATE
-      // this.observer.observe(this.element, {
-      //   childList : true,
-      //   subtree   : true
-      // });
+      this.observer.observe(this.element, {
+        childList : true,
+        subtree   : true
+      });
       this.debug("Setting up mutation observer", this.observer);
     }
   }
@@ -140,7 +141,8 @@ export class Accordion extends Module {
       isAnimating = $activeContent.hasClass(this.settings.className.animating),
       isActive = $activeContent.hasClass(this.settings.className.active),
       isOpen = isActive && !isAnimating,
-      isOpening = !isActive && isAnimating;
+      isOpening = !isActive && isAnimating
+    ;
     this.debug("Toggling visibility of content", $activeTitle);
     if (isOpen || isOpening) {
       if (this.settings.collapsible) {
@@ -154,12 +156,12 @@ export class Accordion extends Module {
   }
 
   open(query): void {
-    let $activeTitle =
-        query !== undefined
-          ? typeof query === "number"
-            ? this.$title.eq(query)
-            : $(query).closest(this.settings.selector.title)
-          : $(this).closest(this.settings.selector.title),
+    let 
+      $activeTitle = query !== undefined
+        ? typeof query === "number"
+          ? this.$title.eq(query)
+          : $(query).closest(this.settings.selector.title)
+        : $(this).closest(this.settings.selector.title),
       $activeContent = $activeTitle.next(this.$content),
       isAnimating = $activeContent.hasClass(this.settings.className.animating),
       isActive = $activeContent.hasClass(this.settings.className.active),
@@ -169,18 +171,37 @@ export class Accordion extends Module {
       return;
     }
     this.debug("Opening accordion content", $activeTitle);
-    this.settings.onOpening.call($activeContent);
-    this.settings.onChanging.call($activeContent);
+    // this.settings.onOpening.call($activeContent);
+    // this.settings.onChanging.call($activeContent);
+    this.invokeCallback('opening').call($activeContent);
+    this.invokeCallback('changind').call($activeContent);
     if (this.settings.exclusive) {
       this.closeOthers.call(this, $activeTitle);
     }
     $activeTitle.addClass(this.settings.className.active);
     $activeContent
       //.stop(true, true)
-      .addClass(this.settings.className.animating);
+      .addClass(this.settings.className.animating)
+    ;
     if (this.settings.animateChildren) {
-      if ($.fn.transition !== undefined && $module.transition("is supported")) {
-        $activeContent.children().transition({
+      // if ($.fn.transition !== undefined && $module.transition("is supported")) {
+      if (true) {
+        // $activeContent.children().transition({
+        //   animation: "fade in",
+        //   queue: false,
+        //   useFailSafe: true,
+        //   debug: settings.debug,
+        //   verbose: settings.verbose,
+        //   duration: settings.duration,
+        //   skipInlineHidden: true,
+        //   onComplete: function () {
+        //     $activeContent
+        //       .children()
+        //       .removeClass(this.settings.className.transition);
+        //   },
+        // });
+
+        const transition = new Transition($activeContent.children(), {
           animation: "fade in",
           queue: false,
           useFailSafe: true,
@@ -188,12 +209,14 @@ export class Accordion extends Module {
           verbose: settings.verbose,
           duration: settings.duration,
           skipInlineHidden: true,
-          onComplete: function () {
-            $activeContent
-              .children()
-              .removeClass(this.settings.className.transition);
-          },
         });
+
+        transition.on('complete', () => {
+          $activeContent
+            .children()
+            .removeClass(this.settings.className.transition)
+          ;
+        })
       } else {
         // $activeContent
         //   .children()
@@ -215,13 +238,16 @@ export class Accordion extends Module {
     //     this.settings.onChange.call(this);
     //   })
     // ;
-    slideDown($activeContent, this.settings.duration, () => {
+    Utils.slideDown($activeContent, this.settings.duration, () => {
       $activeContent
         .removeClass(this.settings.className.animating)
-        .addClass(this.settings.className.active);
+        .addClass(this.settings.className.active)
+      ;
       this.reset_display.call(this);
-      this.settings.onOpen.call(this);
-      this.settings.onChange.call(this);
+      // this.settings.onOpen.call(this);
+      // this.settings.onChange.call(this);
+      this.invokeCallback('open').call(this);
+      this.invokeCallback('change').call(this);
     });
   }
 
@@ -239,25 +265,35 @@ export class Accordion extends Module {
       isClosing = isActive && isAnimating;
     if ((isActive || isOpening) && !isClosing) {
       this.debug("Closing accordion content", $activeContent);
-      settings.onClosing.call($activeContent);
-      settings.onChanging.call($activeContent);
+      // settings.onClosing.call($activeContent);
+      // settings.onChanging.call($activeContent);
+      this.invokeCallback('closing').call($activeContent);
+      this.invokeCallback('changing').call($activeContent);
       $activeTitle.removeClass(this.settings.className.active);
       $activeContent
         // .stop(true, true)
-        .addClass(this.settings.className.animating);
+        .addClass(this.settings.className.animating)
+      ;
       if (this.settings.animateChildren) {
-        if (
-          $.fn.transition !== undefined &&
-          $module.transition("is supported")
-        ) {
-          $activeContent.children().transition({
+        // if ($.fn.transition !== undefined && $module.transition("is supported")) {
+        if (true) {
+          // $activeContent.children().transition({
+          //   animation: "fade out",
+          //   queue: false,
+          //   useFailSafe: true,
+          //   debug: this.settings.debug,
+          //   verbose: this.settings.verbose,
+          //   duration: this.settings.duration,
+          //   skipInlineHidden: true,
+          // });
+          new Transition($activeContent, {
             animation: "fade out",
             queue: false,
             useFailSafe: true,
             debug: this.settings.debug,
             verbose: this.settings.verbose,
             duration: this.settings.duration,
-            skipInlineHidden: true,
+            skipInlineHidden: true
           });
         } else {
           // $activeContent
@@ -280,35 +316,36 @@ export class Accordion extends Module {
       //     this.settings.onChange.call(this);
       //   })
       // ;
-      slideUp($activeContent, this.settings.duration, () => {
+      Utils.slideUp($activeContent, this.settings.duration, () => {
         $activeContent
           .removeClass(this.settings.className.animating)
           .removeClass(this.settings.className.active);
         this.reset_display.call(this);
-        this.settings.onClose.call(this);
-        this.settings.onChange.call(this);
+        // this.settings.onClose.call(this);
+        // this.settings.onChange.call(this);
+        this.invokeCallback('close').call(this);
+        this.invokeCallback('change').call(this);
       });
     }
   }
 
   closeOthers(index): void {
-    let $activeTitle =
-        index !== undefined
-          ? typeof index === "number"
-            ? this.$title.eq(index)
-            : $(index).closest(this.settings.selector.title)
-          : $(this).closest(this.settings.selector.title),
+    let 
+      $activeTitle = index !== undefined
+        ? typeof index === "number"
+          ? this.$title.eq(index)
+          : $(index).closest(this.settings.selector.title)
+        : $(this).closest(this.settings.selector.title),
       $parentTitles = $activeTitle
         .parents(this.settings.selector.content)
         .prev(this.settings.selector.title),
       $activeAccordion = $activeTitle.closest(this.settings.selector.accordion),
-      activeSelector =
-        this.settings.selector.title + "." + this.settings.className.active,
-      activeContent =
-        this.settings.selector.content + "." + this.settings.className.active,
+      activeSelector = this.settings.selector.title + "." + this.settings.className.active,
+      activeContent = this.settings.selector.content + "." + this.settings.className.active,
       $openTitles = $activeAccordion.find(activeSelector).not($parentTitles),
       $nestedTitles,
-      $openContents;
+      $openContents
+    ;
     if (this.settings.closeNested) {
       $openContents = $openTitles.next(this.$content);
     } else {
@@ -325,17 +362,24 @@ export class Accordion extends Module {
       $openContents.removeClass(this.settings.className.animating);
       //.stop(true, true)
       if (this.settings.animateChildren) {
-        if (
-          $.fn.transition !== undefined &&
-          $module.transition("is supported")
-        ) {
-          $openContents.children().transition({
+        // if ($.fn.transition !== undefined && ) {
+        if (true) {
+          // $openContents.children().transition({
+          //   animation: "fade out",
+          //   useFailSafe: true,
+          //   debug: this.settings.debug,
+          //   verbose: this.settings.verbose,
+          //   duration: settings.duration,
+          //   skipInlineHidden: true,
+          // });
+
+          new Transition($openContents.children(), {
             animation: "fade out",
             useFailSafe: true,
             debug: this.settings.debug,
             verbose: this.settings.verbose,
             duration: settings.duration,
-            skipInlineHidden: true,
+            skipInlineHidden: true
           });
         } else {
           // $openContents
@@ -353,7 +397,7 @@ export class Accordion extends Module {
       //     this.reset_display.call(this);
       //   })
       // ;
-      slideUp($openContents, this.settings.duration, () => {
+      Utils.slideUp($openContents, this.settings.duration, () => {
         $(this).removeClass(this.settings.className.active);
         this.reset_display.call(this);
       });
@@ -376,66 +420,3 @@ export class Accordion extends Module {
     }
   }
 }
-
-/* SLIDE UP */
-let slideUp = (target, duration = 500, callback) => {
-  target = target[0];
-
-  target.style.transitionProperty = "height, margin, padding";
-  target.style.transitionDuration = duration + "ms";
-  target.style.boxSizing = "border-box";
-  target.style.height = target.offsetHeight + "px";
-  target.offsetHeight;
-  target.style.overflow = "hidden";
-  target.style.height = 0;
-  target.style.paddingTop = 0;
-  target.style.paddingBottom = 0;
-  target.style.marginTop = 0;
-  target.style.marginBottom = 0;
-  window.setTimeout(() => {
-    target.style.display = "none";
-    target.style.removeProperty("height");
-    target.style.removeProperty("padding-top");
-    target.style.removeProperty("padding-bottom");
-    target.style.removeProperty("margin-top");
-    target.style.removeProperty("margin-bottom");
-    target.style.removeProperty("overflow");
-    target.style.removeProperty("transition-duration");
-    target.style.removeProperty("transition-property");
-    callback();
-    //alert("!");
-  }, duration);
-};
-
-/* SLIDE DOWN */
-let slideDown = (target, duration = 500, callback) => {
-  target = target[0];
-
-  target.style.removeProperty("display");
-  let display = window.getComputedStyle(target).display;
-  if (display === "none") display = "block";
-  target.style.display = display;
-  let height = target.offsetHeight;
-  target.style.overflow = "hidden";
-  target.style.height = 0;
-  target.style.paddingTop = 0;
-  target.style.paddingBottom = 0;
-  target.style.marginTop = 0;
-  target.style.marginBottom = 0;
-  target.offsetHeight;
-  target.style.boxSizing = "border-box";
-  target.style.transitionProperty = "height, margin, padding";
-  target.style.transitionDuration = duration + "ms";
-  target.style.height = height + "px";
-  target.style.removeProperty("padding-top");
-  target.style.removeProperty("padding-bottom");
-  target.style.removeProperty("margin-top");
-  target.style.removeProperty("margin-bottom");
-  window.setTimeout(() => {
-    target.style.removeProperty("height");
-    target.style.removeProperty("overflow");
-    target.style.removeProperty("transition-duration");
-    target.style.removeProperty("transition-property");
-    callback();
-  }, duration);
-};

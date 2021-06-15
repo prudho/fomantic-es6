@@ -7,7 +7,7 @@
   <script src="../dist/fomantic.umd.js"></script>
   
 </head>
-<body>
+<body style="padding: 1rem;">
   <div class="ui container">
     <div id="tabs" class="ui top attached tabular menu">
       <a class="item active" data-tab="first">First</a>
@@ -82,10 +82,14 @@
 
   <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', () => {
-      const test = new fomantic.Tab('#tabs', {
+      const tab = new fomantic.Tab('#tabs', {
         debug: true,
         verbose: true
       });
+
+      tab.on('firstLoad', (one, two, three, four) => {
+        console.log(one, two, three, four);
+      })
 
       // const test2 = new fomantic.Tab('#tabs2', {
       //   debug: true,

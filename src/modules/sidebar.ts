@@ -600,7 +600,7 @@ export class Sidebar extends Module {
       },
       transition
     ;
-    for (transition in transitions){
+    for (transition in transitions) {
       if (element.style[transition] !== undefined) {
         return transitions[transition];
       }

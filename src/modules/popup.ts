@@ -2,7 +2,7 @@
 
 import Module from '../module';
 
-import { Transition } from './transition';
+import Transition from './transition';
 
 import $, { Cash } from 'cash-dom';
 
@@ -602,12 +602,10 @@ export class Popup extends Module {
     }
   }
 
-  animate_show(callback) {
-    callback = $.isFunction(callback) ? callback : function() {};
+  animate_show(callback: Function = () => {}) {
     // if (this.settings.transition && $.fn.transition !== undefined && this.$element.transition('is supported')) {
     if (this.settings.transition) {
       this.set_visible();
-      console.log(this.$popup)
       let transition = new Transition(this.$popup, {
         animation  : (this.settings.transition.showMethod || this.settings.transition) + ' in',
         queue      : false,
@@ -627,7 +625,7 @@ export class Popup extends Module {
     }
   }
 
-  hide(callback = () => {}): void {
+  hide(callback: Function = () => {}): void {
     if (this.is_visible() || this.is_animating()) {
       
       if (this.invokeCallback('hide').call(this.$popup, this.element) === false) {
@@ -641,8 +639,7 @@ export class Popup extends Module {
     }
   }
 
-  animate_hide(callback) {
-    callback = $.isFunction(callback) ? callback : function(){};
+  animate_hide(callback: Function = () => {}): void {
     this.debug('Hiding pop-up');
     // if (this.settings.transition && $.fn.transition !== undefined && this.$element.transition('is supported')) {
     if (this.settings.transition) {
