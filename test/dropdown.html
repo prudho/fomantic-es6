@@ -2,30 +2,29 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>Rollupmantic</title>
+  <title>Fomantic - Dropdown</title>
   <link rel="stylesheet" href="./styles.css">
   <script src="../dist/fomantic.umd.js"></script>
   
 </head>
 <body style="padding: 1rem;">
 
-    <div id="dropdown" class="ui search selection dropdown">
-        <input type="hidden" name="gender">
-        <i class="dropdown icon"></i>
-        <div class="default text">Gender</div>
-        <div class="menu">
-            <div class="item" data-value="1">Male</div>
-            <div class="item" data-value="0">Female</div>
-        </div>
+  <div id="dropdown" class="ui clearable selection dropdown">
+    <input type="hidden" name="gender">
+    <i class="dropdown icon"></i>
+    <div class="default text">Gender</div>
+    <div class="menu">
+      <div class="item" data-value="1">Male</div>
+      <div class="item" data-value="0">Female</div>
     </div>
+  </div>
 
-    <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', () => {
-            const test = new fomantic.Dropdown('#dropdown', {
-                debug: true,
-                verbose: true,
-                on: 'hover'
-            });
-        });
-    </script>
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+      const test = new fomantic.Dropdown('#dropdown', {
+        debug: true,
+        verbose: true
+      });
+    });
+  </script>
 </body>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Fomantic - API</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./legacy/jquery-3.6.0.min.js"></script>
+  <script src="./legacy/components/api.js"></script>
+  
+</head>
+<body>
+
+  <div class="ui button">Click me</div>
+
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+      const api = $('.ui.button').api({
+        debug: true,
+        verbose: true,
+        url: 'http://api.github.com/search/repositories?q={query}',
+        on: false,
+        action: 'search',
+        urlData: {
+          query: 'pru'
+        }
+      });
+
+      api.api('query');
+    });
+  </script>
+</body>

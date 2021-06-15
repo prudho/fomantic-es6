@@ -27,7 +27,7 @@ npm run build
 | Module        | Depends on    | Done  | Comment |
 | ------------- |:-------------:| :----:| ------- |
 | Transition    | none          |   ✔️  |         |
-| Dimmer        | Transition    |   ✔️  |         |
+| Dimmer        | Transition    |   ✔️  | new callbacks ! |
 | Progress      | none          |   ✔️  |         |
 | Rating        | none          |   ✔️  |         |
 | Popup         | Transition    |   ✔️  |         |
@@ -37,16 +37,16 @@ npm run build
 | Calendar      | Popup         |   ⚠️  | range is broken, halp ! |
 | Checkbox      | none          |   ⚠️  | grouped checkbox must be rethinked |
 | Dropdown      | Transition    |   ⚠️  | not finished and utterly broken |
-| Tab           | none          |   ⚠️  | not finished and utterly broken |
-| Accordion     | Transition    |   ❌  |         |
-| Embed         | ...           |   ❌  |         |
-| Modal         | ...           |   ❌  |         |
-| Nag           | ...           |   ❌  |         |
-| Search        | ...           |   ❌  |         |
-| Shape         | ...           |   ❌  |         |
-| Sidebar       | ...           |   ❌  |         |
-| API           | ...           |   ❌  |         |
-| Form          | ...           |   ❌  |         |
+| Tab           | none          |   ⚠️  | need to find a replacement for $.address (state library) |
+| Accordion     | Transition    |   ⚠️  |         |
+| Embed         | ...           |   ⚠️  |         |
+| Modal         | ...           |   ⚠️  |         |
+| Nag           | ...           |   ⚠️  |         |
+| Sidebar       | ...           |   ⚠️  |         |
+| API           | ...           |   ⚠️  | needs intesive tests |
+| Form          | ...           |   ⚠️  |         |
+| Search        | API, Transition |   ⚠️  | needs API debugging |
+| Shape         | ...           |   ⚠️  |         |
 | State         | ...           |   ❌  |         |
 | Visibility    | ...           |   ❌  |         |
 | Site          | ...           |   ❌  |         |
@@ -55,6 +55,6 @@ npm run build
 
 [jQuery's related discussion](https://github.com/fomantic/Fomantic-UI/issues/374)
 
-jQuery is heavily used in FUI actually, and remove all its references from code is a real PITA (trust me, i've tried and others too...). But we can reduce its footprint on the code by using a lighter compatible library. [Cash](https://github.com/kenwheeler/cash) seems to be a great solution. The only caveat I saw for now is the lack on jQuery's animation methods, but we'll find a lightweight alternative too !
+jQuery is heavily used in FUI actually, and remove all its references from code is a real PITA (trust me, i've tried and others too...). But we can reduce its footprint on the code by using a lighter compatible library. [Cash](https://github.com/fabiospampinato/cash) seems to be a great solution. The only caveat I saw for now is the lack on jQuery's animation methods, but we'll find a lightweight alternative too !
 
 ### To be continued...

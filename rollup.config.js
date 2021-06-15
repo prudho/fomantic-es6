@@ -1,38 +1,51 @@
-import resolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
+import resolve from '@rollup/plugin-node-resolve';
 import multiEntry from 'rollup-plugin-multi-entry';
-import babel from 'rollup-plugin-babel';
+// import commonjs from '@rollup/plugin-commonjs';
+
+import typescript from '@rollup/plugin-typescript';
 import pkg from './package.json';
 
 export default [
 	// browser-friendly UMD build
 	{
 		input: [
-			'src/modules/rating.js',
-			'src/modules/transition.js',
-			'src/modules/progress.js',
-			'src/modules/dimmer.js',
-			'src/modules/popup.js',
-			'src/modules/toast.js',
-			'src/modules/calendar.js',
-			'src/modules/dropdown.js',
-			'src/modules/checkbox.js',
-			'src/modules/sticky.js',
-			'src/modules/tab.js',
-			'src/modules/slider.js'
+			'src/modules/rating.ts',
+			'src/modules/transition.ts',
+			'src/modules/toast.ts',
+			'src/modules/dimmer.ts',
+			'src/modules/modal.ts',
+			'src/modules/form.ts',
+			'src/modules/slider.ts',
+			'src/modules/popup.ts',
+			'src/modules/progress.ts',
+			'src/modules/nag.ts',
+			'src/modules/calendar.ts',
+			'src/modules/dropdown.ts',
+			'src/modules/sticky.ts',
+			'src/modules/embed.ts',
+			'src/modules/sidebar.ts',
+			'src/modules/accordion.ts',
+			'src/modules/checkbox.ts',
+			'src/modules/tab.ts',
+			'src/modules/search.ts',
+			'src/modules/shape.ts',
+			'src/modules/api.ts'
 		],
 		output: {
 			name: 'fomantic',
 			file: pkg.browser,
-			format: 'umd'
+			format: 'umd',
+      globals: {
+        'cash-dom': '$'
+      }
 		},
 		plugins: [
-			resolve(), // so Rollup can find `ms`
-            commonjs(), // so Rollup can convert `ms` to an ES module
-            multiEntry(),
-            babel({
-				exclude: ['node_modules/**']
-			})
+      resolve(), // so Rollup can find `cash-dom`
+      multiEntry(),
+      typescript({
+        target: 'es6'
+      })
+      // commonjs(), // so Rollup can convert `ms` to an ES module
 		]
 	},
 
@@ -50,7 +63,7 @@ export default [
 			{ file: pkg.module, format: 'es' }
 		],
 		plugins: [
-            multiEntry(),
+			multiEntry(),
 			babel({
 				exclude: ['node_modules/**']
 			})

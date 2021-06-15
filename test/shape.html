@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Fomantic - Shape</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="../dist/fomantic.umd.js"></script>
+  
+</head>
+<body style="padding: 1rem;">
+  
+  <div id="shape" class="ui text shape">
+    <div class="sides">
+      <div class="active ui header side">Did you know? This side starts visible.</div>
+      <div class="ui header side">Help, its another side!</div>
+      <div class="ui header side">This is the last side</div>
+    </div>
+  </div>
+
+  <div class="ui icon buttons">
+    <div id="btn_flip_left" class="ui button"><i class="left long arrow icon"></i></div>
+    <div id="btn_flip_up" class="ui button"><i class="up long arrow icon"></i></div>
+    <div id="btn_flip_down" class="ui icon button"><i class="down long arrow icon"></i></div>
+    <div id="btn_flip_right" class="ui icon button"><i class="right long arrow icon"></i></div>
+  </div>
+
+  <div class="ui icon buttons">
+    <div id="btn_flip_over" class="ui button"><i class="retweet icon"></i></div>
+    <div id="btn_flip_back" class="ui button"><i class="flipped retweet icon"></i></div>
+  </div>
+
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+      const shape = new fomantic.Shape('#shape', {
+        debug: true,
+        verbose: true
+      });
+
+      document.querySelector('#btn_flip_left').addEventListener('click', () => {
+        shape.flip_left();
+      });
+
+      document.querySelector('#btn_flip_up').addEventListener('click', () => {
+        shape.flip_up();
+      });
+
+      document.querySelector('#btn_flip_down').addEventListener('click', () => {
+        shape.flip_down();
+      });
+
+      document.querySelector('#btn_flip_right').addEventListener('click', () => {
+        shape.flip_right();
+      });
+
+      document.querySelector('#btn_flip_over').addEventListener('click', () => {
+        shape.flip_over();
+      });
+
+      document.querySelector('#btn_flip_back').addEventListener('click', () => {
+        shape.flip_back();
+      });
+    });
+  </script>
+</body>

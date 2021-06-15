@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Fomantic - Transition</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="../dist/fomantic.umd.js"></script>
+  
+</head>
+<body style="padding: 1rem;">
+  
+  <button id="btn_transition" class="ui button">
+    Click me
+  </button>
+
+  <img id="image" src="./images/leaf.png" class="ui image" style="display: none;">
+
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+      const transition = new fomantic.Transition('#image', {
+        debug: true,
+        verbose: true,
+        animation: 'scale',
+        duration: 1000
+      });
+
+      document.querySelector('#btn_transition').addEventListener('click', () => {
+        transition.toggle();
+      });
+    });
+  </script>
+</body>

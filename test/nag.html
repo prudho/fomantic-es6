@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Fomantic - Nag</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="../dist/fomantic.umd.js"></script>
+  
+</head>
+<body style="padding: 1rem;">
+  
+  <div id="nag" class="ui inline cookie nag">
+    <span class="title">
+      We use cookies to ensure you get the best experience on our website
+    </span>
+    <i class="close icon"></i>
+  </div>
+
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+      const nag = new fomantic.Nag('#nag', {
+        debug: true,
+        verbose: true
+      });
+
+      // test.on('rate', (one) => {
+      //   console.log(one);
+      // });
+
+      // test.on('beforeRate', (one, two) => {
+      //   console.log(one, two);
+      //   return false;
+      // });
+    });
+  </script>
+</body>
