@@ -1,10 +1,78 @@
 "use strict";
 
-import Module from '../module';
+import { Module, ModuleOptions } from '../module';
 
 import $, { Cash } from 'cash-dom';
 
-const settings = {
+export interface ProgressOptions extends ModuleOptions {
+  random: {
+    min: number;
+    max: number;
+  }
+
+  duration: number;
+
+  updateInterval: number;
+
+  autoSuccess: boolean;
+  showActivity: boolean;
+  limitValues: boolean;
+
+  label: string
+  precision: number;
+  framerate: number;
+
+  percent: boolean;
+  total: boolean;
+  value: boolean;
+
+  failSafeDelay: number;
+
+  error: {
+    method          : string
+    nonNumeric      : string
+    tooHigh         : string
+    tooLow          : string
+    sumExceedsTotal : string
+  }
+
+  regExp: {
+    variable: RegExp;
+  }
+
+  metadata: {
+    percent : string,
+    total   : string,
+    value   : string
+  }
+
+  selector: {
+    bar      : string,
+    label    : string,
+    progress : string
+  }
+
+  text: {
+    active  : string,
+    error   : string,
+    success : string,
+    warning : string,
+    percent : string,
+    ratio   : string,
+    bars    : Array<string>
+  }
+
+  className: {
+    active  : string,
+    error   : string,
+    success : string,
+    warning : string
+  }
+
+  events: Array<string>
+}
+
+const settings: ProgressOptions = {
   name         : 'Progress',
   namespace    : 'progress',
 
@@ -20,7 +88,7 @@ const settings = {
 
   duration       : 300,
 
-  updateInterval : 'auto',
+  updateInterval : null,
 
   autoSuccess    : true,
   showActivity   : true,
@@ -62,10 +130,10 @@ const settings = {
   },
 
   text : {
-    active  : false,
-    error   : false,
-    success : false,
-    warning : false,
+    active  : null,
+    error   : null,
+    success : null,
+    warning : null,
     percent : '{percent}%',
     ratio   : '{value} of {total}',
     bars    : ['']
@@ -82,6 +150,8 @@ const settings = {
 }
 
 export class Progress extends Module {
+  settings: ProgressOptions;
+
   $bars: Cash;
   $progresses: Cash;
   $label: Cash
@@ -101,7 +171,7 @@ export class Progress extends Module {
 
   instance: Progress;
 
-  constructor(selector: string, parameters) {
+  constructor(selector: string, parameters: ProgressOptions) {
     super(selector, parameters, settings);
 
     this.$bars = $(this.element).find(this.settings.selector.bar);
@@ -256,7 +326,7 @@ export class Progress extends Module {
   }
 
   has_total(): boolean {
-    return (this.get_total() !== false);
+    return (this.get_total() !== null);
   }
 
   is_complete(): boolean {
@@ -343,7 +413,7 @@ export class Progress extends Module {
       percent = (this.animating)
         ? this.get_displayPercent(index)
         : this.get_percent(index),
-      left = (total !== false)
+      left = (total !== null)
         ? Math.max(0, total - value)
         : (100 - percent)
     ;
@@ -359,8 +429,8 @@ export class Progress extends Module {
     return templateText;
   }
 
-  get_total(): number|boolean {
-    return this.total !== undefined ? this.total : false;
+  get_total(): number {
+    return this.total !== undefined ? this.total : null;
   }
 
   get_transitionEnd(): string {
@@ -382,7 +452,7 @@ export class Progress extends Module {
   }
 
   get_updateInterval() {
-    if (this.settings.updateInterval == 'auto') {
+    if (this.settings.updateInterval == null) {
       return this.settings.duration;
     }
     return this.settings.updateInterval;
@@ -470,18 +540,12 @@ export class Progress extends Module {
     this.$element.attr('data-percent', percents);
   }
 
-  set_duration(duration = this.settings.duration): void {
-    duration = (typeof duration == 'number')
-      ? duration + 'ms'
-      : duration
-    ;
-    this.verbose('Setting progress bar transition duration', duration);
-    this.$bars.css({
-      'transition-duration':  duration
-    });
+  set_duration(duration: number = this.settings.duration): void {
+    this.verbose('Setting progress bar transition duration', duration+ 'ms');
+    this.$bars.css({ 'transition-duration':  duration+ 'ms' });
   }
 
-  set_error(text: string = this.settings.text.error, keepState): void {
+  set_error(text: string = this.settings.text.error, keepState: boolean): void {
     this.debug('Setting error state');
     this.$element.addClass(this.settings.className.error);
     this.remove_active();

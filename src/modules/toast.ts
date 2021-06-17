@@ -1,11 +1,117 @@
 'use strict';
 
-import Module from '../module';
+import { Module, ModuleOptions } from '../module';
 
 import $, { Cash } from 'cash-dom';
-import Transition from './transition';
+import { Transition } from './transition';
 
-const settings = {
+export interface ToastOptions extends ModuleOptions {
+  context        : string;
+
+  position       : string;
+  horizontal     : boolean;
+  class          : string;
+  classProgress  : boolean;
+  classActions   : boolean;
+  classImage     : string;
+
+  title          : string;
+  message        : string;
+  displayTime    : number;
+  minDisplayTime : number;
+  wordsPerMinute : number;
+  showIcon       : boolean;
+  newestOnTop    : boolean;
+  showProgress?  : string;
+  pauseOnHover   : boolean;
+  progressUp     : boolean;
+  opacity        : number;
+  compact        : boolean;
+  closeIcon      : boolean;
+  closeOnClick   : boolean;
+  cloneModule    : boolean;
+  actions?       : [];
+  preserveHTML   : boolean;
+  showImage?     : string;
+
+  // transition settings
+  transition     : {
+    showMethod   : string;
+    showDuration : number;
+    hideMethod   : string;
+    hideDuration : number;
+    closeEasing  : string;
+    closeDuration: number;
+  }
+
+  error: {
+    method       : string;
+    noElement    : string;
+    verticalCard : string;
+    noTransition : string;
+  }
+
+  className      : {
+    container    : string;
+    box          : string;
+    progress     : string;
+    toast        : string;
+    icon         : string;
+    visible      : string;
+    content      : string;
+    title        : string;
+    message      : string;
+    actions      : string;
+    extraContent : string;
+    button       : string;
+    buttons      : string;
+    close        : string;
+    image        : string;
+    vertical     : string;
+    horizontal   : string;
+    attached     : string;
+    inverted     : string;
+    compact      : string;
+    pausable     : string;
+    progressing  : string;
+    top          : string;
+    bottom       : string;
+    left         : string;
+    basic        : string;
+    unclickable  : string;
+  }
+
+  icons          : {
+    info         : string;
+    success      : string;
+    warning      : string;
+    error        : string;
+  }
+
+  selector       : {
+    container    : string;
+    box          : string;
+    toast        : string;
+    title        : string;
+    message      : string;
+    image        : string;
+    icon         : string;
+    input        : string;
+    approve      : string;
+    deny         : string;
+  }
+
+  fields         : {
+    class        : string;
+    text         : string;
+    icon         : string;
+    click        : string;
+  }
+
+  events: Array<string>;
+}
+
+const settings: ToastOptions = {
   name           : 'Toast',
   namespace      : 'toast',
 
@@ -30,7 +136,6 @@ const settings = {
   wordsPerMinute : 120,
   showIcon       : false,
   newestOnTop    : false,
-  showProgress   : false,
   pauseOnHover   : true,
   progressUp     : false, //if true, the bar will start at 0% and increase to 100%
   opacity        : 1,
@@ -38,9 +143,7 @@ const settings = {
   closeIcon      : false,
   closeOnClick   : true,
   cloneModule    : true,
-  actions        : false,
   preserveHTML   : true,
-  showImage      : false,
 
   // transition settings
   transition     : {
@@ -55,7 +158,8 @@ const settings = {
   error: {
     method       : 'The method you called is not defined.',
     noElement    : 'This module requires ui {element}',
-    verticalCard : 'Vertical but not attached actions are not supported for card layout'
+    verticalCard : 'Vertical but not attached actions are not supported for card layout',
+    noTransition : 'This module requires ui transitions <https://github.com/Semantic-Org/UI-Transition>'
   },
 
   className      : {
@@ -102,7 +206,7 @@ const settings = {
     title        : '.header',
     message      : '.message:not(.ui)',
     image        : '> img.image, > .image > img',
-    icon         : '> i.icon',
+    icon         : ':scope> i.icon',
     input        : 'input:not([type="hidden"]), textarea, select, button, .ui.button, ui.dropdown',
     approve      : '.actions .positive, .actions .approve, .actions .ok',
     deny         : '.actions .negative, .actions .deny, .actions .cancel'
@@ -119,6 +223,8 @@ const settings = {
 }
 
 export class Toast extends Module {
+  settings: ToastOptions;
+
   $toastBox: Cash;
   $toast: Cash;
   $progress: Cash;
@@ -138,13 +244,11 @@ export class Toast extends Module {
 
     this.$toastBox    = $(`<div class="${this.settings.className.box}"/>`);
     this.$toast       = $('<div/>');
-    this.$progress    = $(`<div class="${this.settings.className.progress+' '+this.settings.class}"/>`);
+    this.$progress    = $(`<div class="${this.settings.className.progress} ${this.settings.class}"/>`);
     this.$progressBar = $(`<div class="bar"/>`);
 
     this.$close       = $(`<i class="close icon"/>`);
-    this.$context     = (this.settings.context)
-      ? $(this.settings.context)
-      : $('body');
+    this.$context     = (this.settings.context) ? $(this.settings.context) : $('body');
 
     this.isToastComponent = this.$element.hasClass('toast') || this.$element.hasClass('message') || this.$element.hasClass('card');
     
@@ -158,7 +262,7 @@ export class Toast extends Module {
     }
     if (this.isToastComponent || this.settings.message !== '' || this.settings.title !== '' || this.get_iconClass() !== '' || this.settings.showImage || this.has_configActions()) {
       if (typeof this.settings.showProgress !== 'string' || [this.settings.className.top, this.settings.className.bottom].indexOf(this.settings.showProgress) === -1) {
-        this.settings.showProgress = false;
+        this.settings.showProgress = null;
       }
       this.create_toast();
       if (this.settings.closeOnClick && (this.settings.closeIcon || $(this.$toast).find(this.settings.selector.input).length > 0 || this.has_configActions())) {
@@ -195,12 +299,12 @@ export class Toast extends Module {
       this.$progressBar = undefined;
       this.$close = undefined;
     }
-    this.$element.removeAttr(this.settings.moduleNamespace);
+    this.$element.removeAttr(this.moduleNamespace);
   }
 
   create_container() {
     this.verbose('Creating container');
-    this.$context.append($(`<div class="${this.settings.position + ' ' + this.settings.className.container + ' ' +(this.settings.horizontal ? this.settings.className.horizontal : '')}"/>`));
+    this.$context.append($(`<div class="${this.settings.position} ${this.settings.className.container} ${(this.settings.horizontal ? this.settings.className.horizontal : '')}"/>`));
   }
 
   create_toast() {
@@ -211,11 +315,11 @@ export class Toast extends Module {
       this.$toast = $('<div/>');
       let $content = $(`<div class="${this.settings.className.content}"/>`);
       if (iconClass !== '') {
-        this.$toast.append($(`<i class="${this.settings.iconClass + ' ' + this.settings.className.icon}"/>`));
+        this.$toast.append($(`<i class="${iconClass} ${this.settings.className.icon}"/>`));
       }
 
       if (this.settings.showImage) {
-        this.$toast.append($(`<img src="${this.settings.showImage}" class="${this.settings.className.image + ' ' + this.settings.classImage}">`));
+        this.$toast.append($(`<img src="${this.settings.showImage}" class="${this.settings.className.image} ${this.settings.classImage}">`));
       }
       if (this.settings.title !== '') {
         $content.append($(`<div class="${this.settings.className.title}">${this.settings.title}</div>`));
@@ -262,7 +366,7 @@ export class Toast extends Module {
     this.$actions = this.$toast.find('.actions');
     if (this.has_configActions()) {
       if (this.$actions.length === 0) {
-        this.$actions = $(`<div class="${this.settings.className.actions + ' ' + (this.settings.classActions || '')}"/>`).appendTo(this.$toast);
+        this.$actions = $(`<div class="${this.settings.className.actions} ${(this.settings.classActions || '')}"/>`).appendTo(this.$toast);
       }
       if (this.$toast.hasClass('card') && !this.$actions.hasClass(this.settings.className.attached)) {
         this.$actions.addClass(this.settings.className.extraContent);
@@ -272,12 +376,12 @@ export class Toast extends Module {
         }
       }
       this.settings.actions.forEach(function (el) {
-        let icon = el[this.settings.fields.icon] ? '<i class="' + this.helpers_deQuote(el[this.settings.fields.icon]) + ' icon"></i>' : '',
+        let icon = el[this.settings.fields.icon] ? '<i class="${this.helpers_deQuote(el[this.settings.fields.icon])} icon"></i>' : '',
           text = this.helpers_escape(el[this.settings.fields.text] || '', this.settings.preserveHTML),
           cls = this.helpers_deQuote(el[this.settings.fields.class] || ''),
           click = el[this.settings.fields.click] && $.isFunction(el[this.settings.fields.click]) ? el[this.settings.fields.click] : function () {}
         ;
-        this.$actions.append($(`<button class="${this.settings.className.button + ' ' + cls}">${icon + text}</div>`));
+        this.$actions.append($(`<button class="${this.settings.className.button} ${cls}">${icon + text}</div>`));
         this.$actions.on('click', () => {
           if (click.call(this.element, this.$element) === false) {
             return;
@@ -294,7 +398,7 @@ export class Toast extends Module {
         this.$toast.addClass(this.settings.className.actions);
       }
     }
-    if (this.settings.displayTime === 'auto') {
+    if (this.settings.displayTime === null) {
       this.settings.displayTime = Math.max(this.settings.minDisplayTime, this.$toast.text().split(" ").length / this.settings.wordsPerMinute * 60000);
     }
     this.$toastBox.append(this.$toast);
@@ -313,7 +417,7 @@ export class Toast extends Module {
         }
       } else {
         this.$toast.wrap(
-          $(`<div class="${this.settings.className.vertical + ' ' + this.settings.className.attached + ' ' + (this.settings.compact ? this.settings.className.compact : '')}"/>`)
+          $(`<div class="${this.settings.className.vertical} ${this.settings.className.attached} ${(this.settings.compact ? this.settings.className.compact : '')}"/>`)
         );
         if (this.$actions.hasClass(this.settings.className.left)) {
           this.$toast.addClass(this.settings.className.left).parent().addClass(this.settings.className.left).prepend(this.$actions);
@@ -329,7 +433,7 @@ export class Toast extends Module {
     if (this.settings.displayTime > 0) {
       let progressingClass = this.settings.className.progressing+' '+(this.settings.pauseOnHover ? this.settings.className.pausable:'');
       if (!!this.settings.showProgress) {
-        let $progress = $(`<div class="${this.settings.className.progress + ' ' + (this.settings.classProgress || this.settings.class)}" data-percent=""/>`);
+        let $progress = $(`<div class="${this.settings.className.progress} ${(this.settings.classProgress || this.settings.class)}" data-percent=""/>`);
         if (!this.settings.classProgress) {
           if (this.$toast.hasClass('toast') && !this.$toast.hasClass(this.settings.className.inverted)) {
             $progress.addClass(this.settings.className.inverted);
@@ -337,7 +441,7 @@ export class Toast extends Module {
             $progress.removeClass(this.settings.className.inverted);
           }
         }
-        let $progressBar = $(`<div class="${'bar '+(this.settings.progressUp ? 'up ' : 'down ')+progressingClass}"/>`);
+        let $progressBar = $(`<div class="bar ${(this.settings.progressUp ? 'up ' : 'down ')+progressingClass}"/>`);
         $progress
           .addClass(this.settings.showProgress)
           .append($progressBar)
@@ -468,9 +572,7 @@ export class Toast extends Module {
   bind_events(): void {
     this.debug('Binding events to toast');
     if (this.settings.closeOnClick || this.settings.closeIcon) {
-      (this.settings.closeIcon ? this.$close : this.$toast)
-          .on('click' + this.eventNamespace, this.event_click.bind(this))
-      ;
+      (this.settings.closeIcon ? this.$close : this.$toast).on('click' + this.eventNamespace, this.event_click.bind(this));
     }
     if (this.$animationObject) {
       this.$animationObject.on('animationend' + this.eventNamespace, this.close.bind(this));
@@ -484,9 +586,7 @@ export class Toast extends Module {
   unbind_events(): void {
     this.debug('Unbinding events to toast');
     if (this.settings.closeOnClick || this.settings.closeIcon) {
-      (this.settings.closeIcon ? this.$close : this.$toast)
-        .off('click' + this.eventNamespace)
-      ;
+      (this.settings.closeIcon ? this.$close : this.$toast).off('click' + this.eventNamespace);
     }
     if (this.$animationObject) {
       this.$animationObject.off('animationend' + this.eventNamespace);
@@ -502,7 +602,8 @@ export class Toast extends Module {
   }
 
   event_approve() {
-    if (this.settings.onApprove.call(this.element, this.$element) === false) {
+    // if (this.settings.onApprove.call(this.element, this.$element) === false) {
+    if (this.invokeCallback('approve').call(this.element, this.$element) === false) {
       this.verbose('Approve callback returned false cancelling close');
       return;
     }
@@ -510,7 +611,8 @@ export class Toast extends Module {
   }
 
   event_deny() {
-    if (this.settings.onDeny.call(this.element, this.$element) === false) {
+    // if (this.settings.onDeny.call(this.element, this.$element) === false) {
+    if (this.invokeCallback('deny').call(this.element, this.$element) === false) {
       this.verbose('Deny callback returned false cancelling close');
       return;
     }

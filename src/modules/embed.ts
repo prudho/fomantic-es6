@@ -1,10 +1,66 @@
 "use strict";
 
-import Module from '../module';
+import { Module, ModuleOptions } from '../module'
 
 import $, { Cash } from 'cash-dom';
 
-const settings = {
+export interface EmbedOptions extends ModuleOptions {
+  icon       : boolean;
+  source     : boolean;
+  url        : boolean;
+  id         : boolean;
+  placeholder: string
+
+  // standard video settings
+  autoplay  : boolean;
+  color     : string;
+  hd        : boolean;
+  brandedUI : boolean;
+
+  // additional parameters to include with the embed
+  parameters: boolean;
+
+  metadata    : {
+    id          : string;
+    icon        : string;
+    placeholder : string;
+    source      : string;
+    url         : string;
+  }
+
+  error : {
+    noURL  : string;
+    method : string;
+  }
+
+  className : {
+    active : string;
+    embed  : string;
+  }
+
+  selector : {
+    embed       : string;
+    placeholder : string;
+    icon        : string;
+  }
+
+  sources: {}
+
+  templates: {
+    iframe : Function;
+    placeholder : Function;
+  }
+
+  // NOT YET IMPLEMENTED
+  api     : false,
+  onPause : Function;
+  onPlay  : Function;
+  onStop  : Function;
+
+  events: Array<string>;
+}
+
+const settings: EmbedOptions = {
   name        : 'Embed',
   namespace   : 'embed',
 
@@ -13,13 +69,14 @@ const settings = {
   verbose     : false,
   performance : true,
 
-  icon     : false,
-  source   : false,
-  url      : false,
-  id       : false,
+  icon       : false,
+  source     : false,
+  url        : false,
+  id         : false,
+  placeholder: null,
 
   // standard video settings
-  autoplay  : 'auto',
+  autoplay  : null,
   color     : '#444444',
   hd        : true,
   brandedUI : false,
@@ -128,6 +185,8 @@ const settings = {
 }
 
 export class Embed extends Module {
+  settings: EmbedOptions;
+
   $placeholder: Cash;
   $icon: Cash;
   $embed: Cash;
@@ -316,8 +375,8 @@ export class Embed extends Module {
   }
 
   should_autoplay(): boolean {
-    return (this.settings.autoplay === 'auto')
-      ? (this.settings.placeholder || this.$element.data(this.settings.metadata.placeholder) !== undefined)
+    return (this.settings.autoplay === null)
+      ? (this.settings.placeholder !== null || this.$element.data(this.settings.metadata.placeholder) !== undefined)
       : this.settings.autoplay
     ;
   }

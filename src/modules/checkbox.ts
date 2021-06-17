@@ -1,10 +1,57 @@
 "use strict";
 
-import Module from '../module';
+import { Module, ModuleOptions } from '../module';
 
 import $, { Cash } from 'cash-dom';
 
-const settings = {
+export interface CheckboxOptions extends ModuleOptions {
+  uncheckable: string;
+  fireOnInit: boolean;
+  enableEnterKey: boolean;
+
+  onChange: Function;
+
+  beforeChecked: Function;
+  beforeUnchecked: Function;
+  beforeDeterminate: Function;
+  beforeIndeterminate: Function;
+
+  onChecked: Function;
+  onUnchecked: Function;
+
+  onDeterminate: Function;
+  onIndeterminate: Function;
+
+  onEnable: Function;
+  onDisable: Function;
+
+  onEnabled: Function;
+  onDisabled: Function;
+
+  className       : {
+    checked       : string;
+    indeterminate : string;
+    disabled      : string;
+    hidden        : string;
+    radio         : string;
+    readOnly      : string;
+  }
+
+  error: {
+    method: string;
+  }
+
+  selector : {
+    checkbox : string;
+    label    : string;
+    input    : string;
+    link     : string;
+  };
+
+  events: Array<string>;
+}
+
+const settings: CheckboxOptions = {
   name                : 'Checkbox',
   namespace           : 'checkbox',
 
@@ -61,7 +108,7 @@ const settings = {
   events: ['change', 'beforeChecked', 'beforeUnchecked', 'beforeDeterminate', 'beforeIndeterminate', 'checked', 'unchecked', 'determinate', 'indeterminate', 'enable', 'disable']
 }
 
-export default class Checkbox extends Module {
+export class Checkbox extends Module {
   $input: Cash;
   $label: Cash;
   

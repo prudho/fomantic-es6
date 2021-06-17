@@ -1,12 +1,153 @@
 "use strict";
 
-import Module from '../module';
+import { Module, ModuleOptions } from '../module'
 
-import Transition from './transition';
+import { Transition } from './transition';
 
 import $, { Cash } from 'cash-dom';
 
-const settings = {
+export interface PopupOptions extends ModuleOptions {
+  // whether it should use dom mutation observers
+  observeChanges : boolean;
+
+  // when to show popup
+  on             : string;
+
+  // element to use to determine if popup is out of boundary
+  boundary       : Window,
+
+  // whether to add touchstart events when using hover
+  addTouchEvents : boolean;
+
+  // default position relative to element
+  position       : string;
+
+  // if given position should be used regardless if popup fits
+  forcePosition  : boolean;
+
+  // name of variation to use
+  variation      : string;
+
+  // whether popup should be moved to context
+  movePopup      : boolean;
+
+  // element which popup should be relative to
+  target?         : string;
+
+  // jq selector or element that should be used as popup
+  popup?          : string;
+
+  // popup should remain inline next to activator
+  inline         : boolean;
+
+  // popup should be removed from page on hide
+  preserve       : boolean;
+
+  // popup should not close when being hovered on
+  hoverable      : boolean;
+
+  // explicitly set content
+  content        : boolean;
+
+  // explicitly set html
+  html           : boolean;
+
+  // explicitly set title
+  title          : boolean;
+
+  // whether automatically close on clickaway when on click
+  closable?       : boolean;
+
+  // automatically hide on scroll
+  hideOnScroll   : boolean;
+
+  // hide other popups on show
+  exclusive      : boolean;
+
+  // context to attach popups
+  context        : string;
+
+  // context for binding scroll events
+  scrollContext  : Window,
+
+  // position to prefer when calculating new position
+  prefer         : string;
+
+  // specify position to appear even if it doesn't fit
+  lastResort     : boolean;
+
+  // number of pixels from edge of popup to pointing arrow center (used from centering)
+  arrowPixelsFromEdge: number;
+
+  // delay used to prevent accidental refiring of animations due to user error
+  delay : {
+    show : number;
+    hide : number;
+  },
+
+  // whether fluid variation should assign width explicitly
+  setFluidWidth  : boolean;
+
+  // transition settings
+  duration       : number;
+  transition     : string;
+
+  // distance away from activating element in px
+  distanceAway   : number;
+
+  // number of pixels an element is allowed to be "offstage" for a position to be chosen (allows for rounding)
+  jitter         : number;
+
+  // offset on aligning axis from calculated position
+  offset         : number;
+
+  // maximum times to look for a position before failing (9 positions total)
+  maxSearchDepth : number;
+
+  error: {
+    invalidPosition : string;
+    cannotPlace     : string;
+    method          : string;
+    noTransition    : string;
+    notFound        : string;
+  },
+
+  metadata: {
+    activator : string;
+    content   : string;
+    html      : string;
+    offset    : string;
+    position  : string;
+    title     : string;
+    variation : string;
+  },
+
+  className   : {
+    active       : string;
+    basic        : string;
+    animating    : string;
+    dropdown     : string;
+    fluid        : string;
+    loading      : string;
+    popup        : string;
+    position     : string;
+    visible      : string;
+    popupVisible : string;
+  },
+
+  selector    : {
+    popup    : string;
+  },
+
+  templates: {
+    escape: Function;
+    popup: Function;
+  }
+
+  events: Array<string>
+}
+
+const settings: PopupOptions = {
 
   name           : 'Popup',
     
@@ -42,10 +183,10 @@ const settings = {
   movePopup      : true,
 
   // element which popup should be relative to
-  target         : false,
+  target         : null,
 
   // jq selector or element that should be used as popup
-  popup          : false,
+  popup          : null,
 
   // popup should remain inline next to activator
   inline         : false,
@@ -69,7 +210,7 @@ const settings = {
   closable       : true,
 
   // automatically hide on scroll
-  hideOnScroll   : 'auto',
+  hideOnScroll   : null,
 
   // hide other popups on show
   exclusive      : false,
@@ -194,6 +335,8 @@ const settings = {
 }
 
 export class Popup extends Module {
+  settings: PopupOptions;
+
   $window: Cash = $(window);
   $document: Cash = $(document);
   $body: Cash = $('body');
@@ -365,7 +508,7 @@ export class Popup extends Module {
   }
 
   bind_close() {
-    if (this.settings.hideOnScroll === true || (this.settings.hideOnScroll == 'auto' && this.settings.on != 'click')) {
+    if (this.settings.hideOnScroll === true || (this.settings.hideOnScroll == null && this.settings.on != 'click')) {
       this.bind_closeOnScroll();
     }
     if (this.is_closable()) {
@@ -428,7 +571,7 @@ export class Popup extends Module {
       if (mutation.removedNodes) {
         [].forEach.call(mutation.removedNodes, (node) => {
           // INVESTIGATE this.element.toString()
-          if (node == this.element || $(node).find(this.element.toString()).length > 0) {
+          if (node == this.element || $(node).find(this.selector).length > 0) {
             this.debug('Element removed from DOM, tearing down events');
             this.destroy();
           }
@@ -654,7 +797,8 @@ export class Popup extends Module {
       transition.on('complete', () => {
         this.reset();
         callback.call(this.$popup, this.element);
-        this.invokeCallback('hidden').call(this.$popup, this.element)
+        // INVESTIGATE: broken when using in calendar
+        //this.invokeCallback('hidden').call(this.$popup, this.element)
       });
     }
     else {
@@ -699,7 +843,7 @@ export class Popup extends Module {
   }
 
   is_closable(): boolean {
-    if (this.settings.closable == 'auto') {
+    if (this.settings.closable == null) {
       if (this.settings.on == 'hover') {
         return false;
       }

@@ -1,9 +1,9 @@
 'use strict';
 
-import Module from '../module';
+import { Module, ModuleOptions } from '../module';
 import Utils from '../utils';
 
-import Transition from './transition';
+import { Transition } from './transition';
 
 import $, { Cash } from 'cash-dom';
 
@@ -14,7 +14,40 @@ import $, { Cash } from 'cash-dom';
 //   }
 // });
 
-const settings = {
+export interface AccordionOptions extends ModuleOptions {
+  on: string;
+
+  observeChanges: boolean;
+
+  exclusive: boolean;
+  collapsible: boolean;
+  closeNested: boolean;
+  animateChildren: boolean;
+
+  duration: number;
+  easing: string;
+
+  error: {
+    method: string;
+  }
+  
+  className: {
+    active    : string;
+    animating : string;
+    transition: string;
+  }
+
+  selector: {
+    accordion: string;
+    title    : string;
+    trigger  : string;
+    content  : string;
+  }
+
+  events: Array<string>;
+}
+
+const settings: AccordionOptions = {
   name           : 'Accordion',
   namespace      : 'accordion',
 
@@ -63,6 +96,8 @@ const settings = {
 };
 
 export class Accordion extends Module {
+  settings: AccordionOptions;
+
   $title: Cash;
   $content: Cash;
 
@@ -70,7 +105,7 @@ export class Accordion extends Module {
 
   instance: Accordion;
 
-  constructor(selector, parameters) {
+  constructor(selector, parameters: AccordionOptions) {
     super(selector, parameters, settings);
 
     this.$title = this.$element.find(this.settings.selector.title);

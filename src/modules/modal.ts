@@ -1,16 +1,129 @@
 "use strict";
 
-import Module from '../module';
+import { Module, ModuleOptions } from '../module';
 
 import $, { Cash } from 'cash-dom';
 import { Dimmer } from './dimmer';
-import Transition from './transition';
+import { Transition } from './transition';
 
-const settings = {
+export interface ModalOptions extends ModuleOptions {
+  useFlex        : boolean;
+  offset         : number;
+
+  observeChanges : boolean;
+
+  allowMultiple  : boolean;
+  detachable     : boolean;
+  closable       : boolean;
+  autofocus      : boolean;
+  restoreFocus   : boolean;
+  autoShow       : boolean;
+
+  inverted       : boolean;
+  blurring       : boolean;
+
+  centered       : boolean;
+
+  dimmerSettings : {
+    closable : boolean;
+    useCSS   : boolean;
+  }
+
+  // whether to use keyboard shortcuts
+  keyboardShortcuts: boolean;
+
+  context    : string;
+
+  queue      : boolean;
+  duration   : number;
+  transition : string;
+
+  // padding with edge of page
+  padding    : number;
+  scrollbarWidth: number;
+
+  //dynamic content
+  title        : string;
+  content      : string;
+  class        : string;
+  classTitle   : string;
+  classContent : string;
+  classActions : string;
+  closeIcon    : boolean;
+  actions      : [];
+  preserveHTML : boolean;
+
+  fields         : {
+    class        : string;
+    text         : string;
+    icon         : string;
+    click        : string;
+  }
+
+  selector    : {
+    title    : string;
+    content  : string;
+    actions  : string;
+    close    : string;
+    approve  : string;
+    deny     : string;
+    modal    : string;
+    dimmer   : string;
+    bodyFixed: string;
+    prompt   : string;
+  }
+
+  error : {
+    dimmer      : string;
+    method      : string;
+    notFound    : string;
+    noTransition: string
+  }
+
+  className : {
+    active     : string;
+    animating  : string;
+    blurring   : string;
+    inverted   : string;
+    legacy     : string;
+    loading    : string;
+    scrolling  : string;
+    undetached : string;
+    front      : string;
+    close      : string;
+    button     : string;
+    modal      : string;
+    title      : string;
+    content    : string;
+    actions    : string;
+    template   : string;
+    ok         : string;
+    cancel     : string;
+    prompt     : string;
+  }
+
+  text: {
+    ok    : string;
+    cancel: string;
+  }
+
+  templates: {
+    getArguments: Function;
+    alert: Function;
+    confirm: Function;
+    prompt: Function;
+  }
+
+  onHidden: Function;
+
+  events: Array<string>;
+}
+
+const settings: ModalOptions = {
   name           : 'Modal',
   namespace      : 'modal',
 
-  useFlex        : 'auto',
+  useFlex        : null,
   offset         : 0,
 
   silent         : false,
@@ -58,7 +171,7 @@ const settings = {
   classContent : '',
   classActions : '',
   closeIcon    : false,
-  actions      : false,
+  actions      : [],
   preserveHTML : true,
 
   fields         : {
@@ -81,9 +194,10 @@ const settings = {
     prompt   : '.ui.input > input'
   },
   error : {
-    dimmer    : 'UI Dimmer, a required component is not included in this page',
-    method    : 'The method you called is not defined.',
-    notFound  : 'The element you specified could not be found'
+    dimmer      : 'UI Dimmer, a required component is not included in this page',
+    method      : 'The method you called is not defined.',
+    notFound    : 'The element you specified could not be found',
+    noTransition: 'This module requires ui transitions <https://github.com/Semantic-Org/UI-Transition>'
   },
   className : {
     active     : 'active',
@@ -197,6 +311,8 @@ const settings = {
     }
   },
 
+  onHidden: null,
+
   events: ['show', 'visible', 'hide', 'hidden', 'approve', 'deny']
 }
 
@@ -216,6 +332,8 @@ class Cache {
 }
 
 export class Modal extends Module {
+  settings: ModalOptions;
+  
   id: string;
   elementEventNamespace: string;
   observer: MutationObserver;
@@ -876,7 +994,7 @@ export class Modal extends Module {
   }
 
   can_useFlex(): boolean {
-    if (this.settings.useFlex === 'auto') {
+    if (this.settings.useFlex === null) {
       return this.settings.detachable && !this.is_ie();
     }
     if (this.settings.useFlex && this.is_ie()) {

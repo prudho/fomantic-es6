@@ -1,10 +1,53 @@
 "use strict";
 
-import Module from '../module'
+import { Module, ModuleOptions } from '../module';
 
 import $, { Cash } from 'cash-dom';
 
-const settings = {
+export interface TransitionOptions extends ModuleOptions {
+  autostart?: boolean;
+  interval?: number;
+  reverse?: string | boolean;
+
+  useFailSafe?: boolean;
+  failSafeDelay?: number;
+  allowRepeats?: boolean;
+  displayType?: string;
+
+  animation: string;
+  duration?: number;
+
+  queue?: boolean;
+
+  skipInlineHidden?: boolean;
+
+  metadata?: {
+    displayType: string
+  }
+
+  className?: {
+    animating  : string,
+    disabled   : string,
+    hidden     : string,
+    inward     : string,
+    loading    : string,
+    looping    : string,
+    outward    : string,
+    transition : string,
+    visible    : string
+  }
+
+  error?: {
+    noAnimation : string,
+    repeated    : string,
+    method      : string,
+    support     : string
+  }
+
+  events?: Array<string>
+}
+
+const settings: TransitionOptions = {
   name          : 'Transition',
   namespace     : 'transition',
 
@@ -20,13 +63,15 @@ const settings = {
   useFailSafe   : true, // whether timeout should be used to ensure callback fires in cases animationend does not
   failSafeDelay : 100, // delay in ms for fail safe
   allowRepeats  : false, // whether EXACT animation can occur twice in a row
-  displayType   : false, // Override final display type on visible
+  displayType   : null, // Override final display type on visible
 
   // animation
   animation     : 'fade',
-  duration      : false,
 
   queue         : true, // new animations will occur after previous ones
+
+  // whether initially inline hidden objects should be skipped for transition
+  skipInlineHidden: false,
 
   metadata : {
     displayType: 'display'
@@ -54,7 +99,9 @@ const settings = {
   events: ['start', 'complete', 'show', 'hide', 'before_hide']
 }
 
-export default class Transition extends Module {
+export class Transition extends Module {
+  settings: TransitionOptions;
+
   animationEnd: string;
   cache: any;
   timer: any;
@@ -62,7 +109,7 @@ export default class Transition extends Module {
 
   instance: Transition;
 
-  constructor(selector, parameters) {
+  constructor(selector, parameters: TransitionOptions) {
     super(selector, parameters, settings);
     
     this.initialize();
@@ -75,8 +122,8 @@ export default class Transition extends Module {
     this.animationEnd = this.get_animationEndEvent();
 
     if (this.settings.autostart) {
-      if (this.settings.interval) {
-        this.delay(this.settings.animate);
+      if (this.settings.interval !== 0) {
+        this.delay(this.settings.interval);
       } else  {
         this.animate();
       }
@@ -190,22 +237,18 @@ export default class Transition extends Module {
     }
   }
 
-  delay(interval): void {
+  delay(interval: number = this.settings.interval): void {
     let
-      direction = this.get_animationDirection(),
+      direction: string = this.get_animationDirection(),
       shouldReverse: boolean,
       delay
     ;
-    if (!direction) {
+    if (direction === '') {
       direction = this.can_transition()
         ? this.get_direction()
         : 'static'
       ;
     }
-    interval = (interval !== undefined)
-      ? interval
-      : this.settings.interval
-    ;
     shouldReverse = (this.settings.reverse == 'auto' && direction == this.settings.className.outward);
     delay = this.settings.interval
     /*delay = (shouldReverse || this.settings.reverse == true)
@@ -216,15 +259,14 @@ export default class Transition extends Module {
     setTimeout(this.animate.bind(this), delay);
   }
 
-  queue(animation): void {
-    let module = this;
+  queue(animation: string): void {
     this.debug('Queueing animation of', animation);
     this.queuing = true;
-    this.$element.one(this.animationEnd + '.queue' + this.eventNamespace, function() {
-      module.queuing = false;
+    this.$element.one(this.animationEnd + '.queue' + this.eventNamespace, () => {
+      this.queuing = false;
       // === module.settings.animation = animation; ===
       //module.repaint(); INVESTIGATE
-      module.animate.apply(module, module.settings);
+      this.animate.apply(this, this.settings);
     });
   }
 
@@ -322,20 +364,18 @@ export default class Transition extends Module {
     ;
   }
 
-  get_animationDirection(animation: any = this.settings.animation) {
-    let
-      direction,
-      module = this
-    ;
+  get_animationDirection(animation: any = this.settings.animation): string {
+    let direction: string;
+
     if (typeof animation === 'string') {
       animation = animation.split(' ');
       // search animation name for out/in class
       animation.forEach(word => {
-        if (word === module.settings.className.inward) {
-          direction = module.settings.className.inward;
+        if (word === this.settings.className.inward) {
+          direction = this.settings.className.inward;
         }
-        else if (word === module.settings.className.outward) {
-          direction = module.settings.className.outward;
+        else if (word === this.settings.className.outward) {
+          direction = this.settings.className.outward;
         }
       });
     }
@@ -343,7 +383,7 @@ export default class Transition extends Module {
     if (direction) {
       return direction;
     }
-    return false;
+    return '';
   }
 
   get_currentAnimation() {
@@ -353,7 +393,7 @@ export default class Transition extends Module {
     ;
   }
 
-  get_direction(): void {
+  get_direction(): string {
     return this.is_hidden() || !this.is_visible()
       ? this.settings.className.inward
       : this.settings.className.outward
@@ -417,13 +457,9 @@ export default class Transition extends Module {
   }
 
   set_duration(duration = this.settings.duration): void {
-    duration = (typeof duration == 'number')
-      ? duration + 'ms'
-      : duration
-    ;
-    if (duration || duration === 0) {
-      this.verbose('Setting animation duration', duration);
-      this.$element.css({ 'animation-duration':  duration });
+    if (duration !== null) {
+      this.verbose('Setting animation duration', duration + 'ms');
+      this.$element.css({ 'animation-duration': duration + 'ms' });
     }
   }
 
@@ -665,7 +701,7 @@ export default class Transition extends Module {
       displayType: string     = this.get_displayType(),
       overrideStyle: string   = userStyle + 'display: ' + displayType + ' !important;',
       inlineDisplay: string   = this.$element[0].style.display,
-      mustStayHidden: boolean = !displayType || (inlineDisplay === 'none' && this.settings.skipInlineHidden) || this.$element[0].tagName.match(/(script|link|style)/i)
+      mustStayHidden: boolean = displayType == null || (inlineDisplay === 'none' && this.settings.skipInlineHidden) || this.$element[0].tagName.match(/(script|link|style)/i) !== null
     ;
     if (mustStayHidden) {
       this.remove_transition();

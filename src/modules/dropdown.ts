@@ -1,17 +1,238 @@
 "use strict";
 
-import Module from '../module';
+import { Module, ModuleOptions } from '../module'
 
-import Transition from './transition';
+import { Transition } from './transition';
 
 import $, { Cash } from 'cash-dom';
 
-const settings = {
+export interface DropdownOptions extends ModuleOptions {
+  on: string;
+  action: 'nothing' | 'activate' | 'select' | 'combo' | 'hide' | Function;
+
+  values: boolean;
+
+  clearable: boolean;
+
+  apiSettings: boolean;
+  selectOnKeydown: boolean;
+  minCharacters: number;
+
+  filterRemoteData: boolean;
+  saveRemoteData: boolean;
+
+  throttle: number;
+
+  context: Window;
+  direction: string;
+  keepOnScreen: boolean;
+
+  match: 'both' | 'text' | 'label';
+  fullTextSearch: boolean;
+  ignoreDiacritics: boolean;
+  hideDividers: boolean;
+
+  placeholder: string;
+  preserveHTML: boolean;
+  sortSelect: boolean;
+
+  forceSelection: boolean;
+
+  allowAdditions: boolean;
+  ignoreCase: boolean;
+  ignoreSearchCase: boolean;
+  hideAdditions: boolean;
+
+  maxSelections: boolean;
+  useLabels: boolean;
+  delimiter: string;
+
+  showOnFocus: boolean;
+  allowReselection: boolean;
+  allowTab: boolean;
+  allowCategorySelection: boolean;
+
+  fireOnInit: boolean;
+
+  transition: string;
+  duration: number;
+  displayType: boolean;
+
+  glyphWidth: number;
+
+  headerDivider: boolean;
+
+  label: {
+    transition : string;
+    duration   : number;
+    variation  : boolean;
+  }
+
+  delay : {
+    hide   : number;
+    show   : number;
+    search : number;
+    touch  : number;
+  }
+
+  onChange      : Function;
+  onAdd         : Function;
+  onRemove      : Function;
+  onSearch      : Function;
+
+  onLabelSelect : Function;
+  onLabelCreate : Function;
+  onLabelRemove : Function;
+  onNoResults   : Function;
+  onShow        : Function;
+  onHide        : Function;
+
+  message: {
+    addResult     : string;
+    count         : string;
+    maxSelections : string;
+    noResults     : string;
+    serverError   : string;
+  }
+
+  error : {
+    action          : string;
+    alreadySetup    : string;
+    labels          : string;
+    missingMultiple : string;
+    method          : string;
+    noAPI           : string;
+    noStorage       : string;
+    noTransition    : string;
+    noNormalize     : string;
+  }
+
+  regExp : {
+    escape   : RegExp;
+    quote    : RegExp;
+  }
+
+  metadata : {
+    defaultText     : string;
+    defaultValue    : string;
+    placeholderText : string;
+    text            : string;
+    value           : string;
+  }
+
+  // property names for remote query
+  fields: {
+    remoteValues         : string;
+    values               : string;
+    disabled             : string;
+    name                 : string;
+    description          : string;
+    descriptionVertical  : string;
+    value                : string;
+    text                 : string;
+    type                 : string;
+    image                : string;
+    imageClass           : string;
+    icon                 : string;
+    iconClass            : string;
+    class                : string;
+    divider              : string;
+  }
+
+  keys : {
+    backspace  : number;
+    delimiter  : number;
+    deleteKey  : number;
+    enter      : number;
+    escape     : number;
+    pageUp     : number;
+    pageDown   : number;
+    leftArrow  : number;
+    upArrow    : number;
+    rightArrow : number;
+    downArrow  : number;
+  }
+
+  selector : {
+    addition     : string;
+    divider      : string;
+    dropdown     : string;
+    hidden       : string;
+    icon         : string;
+    input        : string;
+    item         : string;
+    label        : string;
+    remove       : string;
+    siblingLabel : string;
+    menu         : string;
+    message      : string;
+    menuIcon     : string;
+    search       : string;
+    sizer        : string;
+    text         : string;
+    unselectable : string;
+    clearIcon    : string;
+  }
+
+  className : {
+    active              : string;
+    addition            : string;
+    animating           : string;
+    description         : string;
+    descriptionVertical : string;
+    disabled            : string;
+    empty               : string;
+    dropdown            : string;
+    filtered            : string;
+    hidden              : string;
+    icon                : string;
+    image               : string;
+    item                : string;
+    label               : string;
+    loading             : string;
+    menu                : string;
+    message             : string;
+    multiple            : string;
+    placeholder         : string;
+    sizer               : string;
+    search              : string;
+    selected            : string;
+    selection           : string;
+    text                : string;
+    upward              : string;
+    leftward            : string;
+    visible             : string;
+    clearable           : string;
+    noselection         : string;
+    delete              : string;
+    header              : string;
+    divider             : string;
+    groupIcon           : string;
+    unfilterable        : string;
+  }
+
+  templates: {
+    deQuote: Function;
+    escape: Function;
+    dropdown: Function;
+    menu: Function;
+    label: Function;
+    message: Function;
+    addition: Function;
+  }
+
+  events: Array<string>;
+}
+
+const settings: DropdownOptions = {
+  /* Component */
+  name           : 'Dropdown',
+  namespace      : 'dropdown',
   
-  silent                 : false,
-  debug                  : false,
-  verbose                : false,
-  performance            : true,
+  silent      : false,
+  debug       : false,
+  verbose     : false,
+  performance : true,
 
   on                     : 'click',    // what event should show menu action on item selection
   action                 : 'activate', // action on item selection (nothing, activate, select, combo, hide, function() {})
@@ -95,10 +316,6 @@ const settings = {
   onNoResults   : function(searchTerm) { return true; },
   onShow        : function() {},
   onHide        : function() {},
-
-  /* Component */
-  name           : 'Dropdown',
-  namespace      : 'dropdown',
 
   message: {
     addResult     : 'Add <b>{term}</b>',
@@ -371,7 +588,9 @@ const settings = {
   events: []
 }
 
-export default class Dropdown extends Module {
+export class Dropdown extends Module {
+  settings: DropdownOptions;
+
   initialLoad: boolean;
   internalChange: boolean = false;
   activated: boolean = false;
@@ -683,7 +902,7 @@ export default class Dropdown extends Module {
   setup_menu(values) {
     this.$menu.html(this.settings.templates.menu(values, this.settings.fields, this.settings.preserveHTML, this.settings.className));
     this.$item = this.$menu.find(this.settings.selector.item);
-    this.$divider = this.settings.settings.hideDividers ? this.$item.parent().children(this.settings.selector.divider) : $();
+    this.$divider = this.settings.hideDividers ? this.$item.parent().children(this.settings.selector.divider) : $();
   }
 
   bind_intent() {
@@ -734,22 +953,22 @@ export default class Dropdown extends Module {
     this.verbose('Binding mouse events');
     if (this.is_multiple()) {
       this.$element
-        .on(this.clickEvent   + this.eventNamespace, this.settings.selector.label,  this.event_label_click)
-        .on(this.clickEvent   + this.eventNamespace, this.settings.selector.remove, this.event_remove_click)
+        .on(this.clickEvent   + this.eventNamespace, this.settings.selector.label,  this.event_label_click.bind(this))
+        .on(this.clickEvent   + this.eventNamespace, this.settings.selector.remove, this.event_remove_click.bind(this))
       ;
     }
     if (this.is_searchSelection()) {
       this.$element
-        .on('mousedown' + this.eventNamespace, this.event_mousedown.bind(this))
-        .on('mouseup'   + this.eventNamespace, this.event_mouseup.bind(this))
-        .on('mousedown' + this.eventNamespace, this.settings.selector.menu,   this.event_menu_mousedown.bind(this))
-        .on('mouseup'   + this.eventNamespace, this.settings.selector.menu,   this.event_menu_mouseup.bind(this))
-        .on(this.clickEvent  + this.eventNamespace, this.settings.selector.icon,   this.event_icon_click.bind(this))
-        .on(this.clickEvent  + this.eventNamespace, this.settings.selector.clearIcon, this.event_clearIcon_click.bind(this))
-        .on('focus'     + this.eventNamespace, this.settings.selector.search, this.event_search_focus.bind(this))
-        .on(this.clickEvent  + this.eventNamespace, this.settings.selector.search, this.event_search_focus.bind(this))
-        .on('blur'      + this.eventNamespace, this.settings.selector.search, this.event_search_blur.bind(this))
-        .on(this.clickEvent  + this.eventNamespace, this.settings.selector.text,   this.event_text_focus.bind(this))
+        .on('mousedown'     + this.eventNamespace, this.event_mousedown.bind(this))
+        .on('mouseup'       + this.eventNamespace, this.event_mouseup.bind(this))
+        .on('mousedown'     + this.eventNamespace, this.settings.selector.menu,      this.event_menu_mousedown.bind(this))
+        .on('mouseup'       + this.eventNamespace, this.settings.selector.menu,      this.event_menu_mouseup.bind(this))
+        .on(this.clickEvent + this.eventNamespace, this.settings.selector.icon,      this.event_icon_click.bind(this))
+        .on(this.clickEvent + this.eventNamespace, this.settings.selector.clearIcon, this.event_clearIcon_click.bind(this))
+        .on('focus'         + this.eventNamespace, this.settings.selector.search,    this.event_search_focus.bind(this))
+        .on(this.clickEvent + this.eventNamespace, this.settings.selector.search,    this.event_search_focus.bind(this))
+        .on('blur'          + this.eventNamespace, this.settings.selector.search,    this.event_search_blur.bind(this))
+        .on(this.clickEvent + this.eventNamespace, this.settings.selector.text,      this.event_text_focus.bind(this))
       ;
       if (this.is_multiple()) {
         this.$element
@@ -761,9 +980,10 @@ export default class Dropdown extends Module {
     else {
       if (this.settings.on == 'click') {
         this.$element
-          .on(this.clickEvent + this.eventNamespace, this.settings.selector.icon, this.event_icon_click.bind(this))
+          // .on(this.clickEvent + this.eventNamespace, this.settings.selector.icon, this.event_icon_click.bind(this))
           .on(this.clickEvent + this.eventNamespace, this.event_test_toggle.bind(this))
         ;
+        this.$icon.on(this.clickEvent + this.eventNamespace, this.event_icon_click.bind(this));
       }
       else if (settings.on == 'hover') {
         this.$element
@@ -772,9 +992,7 @@ export default class Dropdown extends Module {
         ;
       }
       else {
-        this.$element
-          .on(settings.on + this.eventNamespace, this.toggle.bind(this))
-        ;
+        this.$element.on(settings.on + this.eventNamespace, this.toggle.bind(this));
       }
       this.$element
         .on('mousedown' + this.eventNamespace, this.event_mousedown.bind(this))
@@ -991,7 +1209,8 @@ export default class Dropdown extends Module {
       text           = this.get_choiceText($choice),
       value          = this.get_choiceValue($choice, text),
       hasSubMenu     = ($subMenu.length > 0),
-      isBubbledEvent = ($subMenu.find($target).length > 0)
+      // isBubbledEvent = ($subMenu.find($target).length > 0)
+      isBubbledEvent = ($subMenu.find(event.target).length > 0)
     ;
     // prevents IE11 bug where menu receives focus even though `tabindex=-1`
     if (document.activeElement.tagName.toLowerCase() !== 'input') {
@@ -1061,8 +1280,8 @@ export default class Dropdown extends Module {
           ? $currentlySelected
           : $activeItem,
         $visibleItems = ($selectedItem.length > 0)
-          ? $selectedItem.siblings(':not(.' + this.settings.className.filtered +')').addBack()
-          : this.$menu.children(':not(.' + this.settings.className.filtered +')'),
+          ? $selectedItem.siblings(`:not(.${this.settings.className.filtered})`).addBack()
+          : this.$menu.children(`:not(.${this.settings.className.filtered})`),
         $subMenu              = $selectedItem.children(this.settings.selector.menu),
         $parentMenu           = $selectedItem.closest(this.settings.selector.menu),
         inVisibleMenu         = ($parentMenu.hasClass(this.settings.className.visible) || $parentMenu.hasClass(this.settings.className.animating) || $parentMenu.parent(this.settings.selector.menu).length > 0),
@@ -1230,27 +1449,27 @@ export default class Dropdown extends Module {
 
   event_label_click(event) {
     let
-      $label        = $(this),
-      $labels       = $module.find(selector.label),
-      $activeLabels = $labels.filter('.' + className.active),
-      $nextActive   = $label.nextAll('.' + className.active),
-      $prevActive   = $label.prevAll('.' + className.active),
+      $label        = $(event.currentTarget),
+      $labels       = this.$element.find(this.settings.selector.label),
+      $activeLabels = $labels.filter('.' + this.settings.className.active),
+      $nextActive   = $label.nextAll('.' + this.settings.className.active),
+      $prevActive   = $label.prevAll('.' + this.settings.className.active),
       $range = ($nextActive.length > 0)
         ? $label.nextUntil($nextActive).add($activeLabels).add($label)
         : $label.prevUntil($prevActive).add($activeLabels).add($label)
     ;
     if (event.shiftKey) {
-      $activeLabels.removeClass(className.active);
-      $range.addClass(className.active);
+      $activeLabels.removeClass(this.settings.className.active);
+      $range.addClass(this.settings.className.active);
     }
     else if (event.ctrlKey) {
-      $label.toggleClass(className.active);
+      $label.toggleClass(this.settings.className.active);
     }
     else {
-      $activeLabels.removeClass(className.active);
-      $label.addClass(className.active);
+      $activeLabels.removeClass(this.settings.className.active);
+      $label.addClass(this.settings.className.active);
     }
-    settings.onLabelSelect.apply(this, $labels.filter('.' + className.active));
+    settings.onLabelSelect.apply(this, $labels.filter('.' + this.settings.className.active));
     event.stopPropagation();
   }
 
@@ -1284,14 +1503,14 @@ export default class Dropdown extends Module {
   }
 
   event_remove_click(event) {
-    let $label = $(this).parent();
-    if ($label.hasClass(className.active)) {
+    let $label = $(event.currentTarget).parent();
+    if ($label.hasClass(this.settings.className.active)) {
       // remove all selected labels
-      module.remove.activeLabels();
+      this.remove_activeLabels();
     }
     else {
       // remove this label only
-      module.remove.activeLabels( $label );
+      this.remove_activeLabels($label);
     }
     event.stopPropagation();
   }
@@ -1490,7 +1709,8 @@ export default class Dropdown extends Module {
           verbose    : this.settings.verbose,
           duration   : this.settings.transition.showDuration || this.settings.duration,
           queue      : true,
-          displayType: this.get_displayType() 
+          displayType: this.get_displayType(),
+          autostart: false
         });
 
         this.menuTransition.on('start', start);
@@ -1498,6 +1718,8 @@ export default class Dropdown extends Module {
         this.menuTransition.on('complete', () => {
           callback.call(this.element);
         });
+
+        this.menuTransition.animate();
       }
       else {
         this.error(this.settings.error.noTransition, transition);
@@ -1540,7 +1762,7 @@ export default class Dropdown extends Module {
     }
   }
 
-  animate_hide(callback = () => {}, $subMenu = null) {
+  animate_hide(callback = () => {}, $subMenu = undefined) {
     let
       $currentMenu = $subMenu || this.$menu,
       start = ($subMenu)
@@ -1571,7 +1793,8 @@ export default class Dropdown extends Module {
           debug      : this.settings.debug,
           verbose    : this.settings.verbose,
           queue      : false,
-          displayType: this.get_displayType()
+          displayType: this.get_displayType(),
+          autostart: false
         });
 
         this.menuTransition.on('start', start);
@@ -1579,6 +1802,8 @@ export default class Dropdown extends Module {
         this.menuTransition.on('complete', () => {
           callback.call(this.element);
         });
+
+        this.menuTransition.animate();
       }
       else {
         this.error(this.settings.error.transition);
@@ -1607,7 +1832,8 @@ export default class Dropdown extends Module {
   hideSubMenus() {
     let $subMenus = this.$menu.children(this.settings.selector.item).find(this.settings.selector.menu);
     this.verbose('Hiding sub menus', $subMenus);
-    $subMenus.transition('hide');
+    // INVESTIGATE
+    // $subMenus.transition('hide');
   }
 
   delay_show() {
@@ -1622,7 +1848,7 @@ export default class Dropdown extends Module {
     this.timer = setTimeout(this.hide, this.settings.delay.hide);
   }
 
-  scrollPage(direction: string, $selectedItem) {
+  scrollPage(direction: string, $selectedItem: Cash = this.get_selectedItem()) {
     let
       $currentItem  = $selectedItem || this.get_selectedItem(),
       $menu         = $currentItem.closest(this.settings.selector.menu),
@@ -1690,7 +1916,7 @@ export default class Dropdown extends Module {
       this.filter(query);
     }
     else {
-      this.hide(null,true);
+      this.hide(null, true);
     }
   }
 
@@ -1785,7 +2011,7 @@ export default class Dropdown extends Module {
       module: Dropdown = this
     ;
     // avoid loop if we're matching nothing
-    if (this.has_query() ) {
+    if (this.has_query()) {
       results = [];
 
       this.verbose('Searching for matching values', searchTerm);
@@ -1834,10 +2060,18 @@ export default class Dropdown extends Module {
     this.debug('Showing only matched items', searchTerm);
     this.remove_filteredItem();
     if (results) {
-      this.$item
-        .not(results)
-        .addClass(this.settings.className.filtered)
-      ;
+      // TRICKY BUT WORKING MOVE...
+      // this.$item
+      //   .not(results)
+      //   .addClass(this.settings.className.filtered)
+      // ;
+      results.forEach(element => {
+        this.$item.each((_index, item) => {
+          if (element !== item) {
+            $(item).addClass(this.settings.className.filtered);
+          }
+        });
+      });
     }
 
     if (!this.has_query()) {
@@ -2204,7 +2438,7 @@ export default class Dropdown extends Module {
     return (document.activeElement === this.$search[0]);
   }
 
-  is_hidden($subMenu): boolean {
+  is_hidden($subMenu = null): boolean {
     return !this.is_visible($subMenu);
   }
 
@@ -2293,7 +2527,7 @@ export default class Dropdown extends Module {
     return (overflowY == 'auto' || overflowY == 'scroll');
   }
 
-  is_visible($subMenu: Cash): boolean {
+  is_visible($subMenu: Cash = null): boolean {
     return ($subMenu)
       ? $subMenu.hasClass(this.settings.className.visible)
       : this.$menu.hasClass(this.settings.className.visible)
@@ -3507,8 +3741,7 @@ export default class Dropdown extends Module {
     this.$element.find(this.settings.selector.label).removeClass(this.settings.className.active);
   }
 
-  remove_activeLabels($activeLabels) {
-    $activeLabels = $activeLabels || this.$element.find(this.settings.selector.label).filter('.' + this.settings.className.active);
+  remove_activeLabels($activeLabels = this.$element.find(this.settings.selector.label).filter('.' + this.settings.className.active)) {
     this.verbose('Removing active label selections', $activeLabels);
     this.remove_labels($activeLabels);
   }

@@ -1,6 +1,6 @@
 "use strict";
 
-import Module from '../module';
+import { Module, ModuleOptions } from '../module'
 
 import $, { Cash } from 'cash-dom';
 
@@ -13,7 +13,70 @@ const
   BIG_BACKSTEP    = -2
 ;
 
-const settings = {
+export interface SliderOptions extends ModuleOptions {
+  error    : {
+    method    : string;
+    notrange : string;
+  }
+
+  metadata: {
+    thumbVal        : string;
+    secondThumbVal  : string;
+  }
+
+  min              : number;
+  max              : number;
+  step             : number;
+  start            : number;
+  end              : number;
+  labelType        : string;
+  showLabelTicks   : boolean;
+  smooth           : boolean;
+  autoAdjustLabels : boolean;
+  labelDistance    : number;
+  preventCrossover : boolean;
+  fireOnInit       : boolean;
+  interpretLabel   : Function;
+
+  //the decimal place to round to if step is undefined
+  decimalPlaces  : number;
+
+  // page up/down multiplier. How many more times the steps to take on page up/down press
+  pageMultiplier : number;
+
+  selector: {}
+
+  className     : {
+    reversed :string;
+    disabled : string;
+    labeled  : string;
+    ticked   : string;
+    vertical : string;
+    range    : string;
+    smooth   : string;
+  }
+
+  keys : {
+    pageUp     : number;
+    pageDown   : number;
+    leftArrow  : number;
+    upArrow    : number;
+    rightArrow : number;
+    downArrow  : number;
+  }
+
+  labelTypes    : {
+    number  : string;
+    letter  : string;
+  }
+
+  onChange : Function;
+  onMove   : Function;
+
+  events: Array<string>;
+}
+
+const settings: SliderOptions = {
   silent       : false,
   debug        : false,
   verbose      : false,
@@ -44,7 +107,7 @@ const settings = {
   labelDistance    : 100,
   preventCrossover : true,
   fireOnInit       : false,
-  interpretLabel   : false,
+  interpretLabel   : null,
 
   //the decimal place to round to if step is undefined
   decimalPlaces  : 2,
@@ -87,6 +150,8 @@ const settings = {
 }
 
 export class Slider extends Module {
+  settings: SliderOptions;
+
   $window: Cash = $(window);
   $currThumb: Cash;
   $thumb: Cash;
@@ -723,7 +788,7 @@ export class Slider extends Module {
   }
 
   read_settings(): void {
-    if (this.settings.start !== false) {
+    if (this.settings.start !== null) {
       if (this.is_range()) {
         this.debug('Start position set from settings', this.settings.start, this.settings.end);
         this.set_rangeValue(this.settings.start, this.settings.end);

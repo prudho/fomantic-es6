@@ -1,6 +1,6 @@
 "use strict";
 
-import Module from '../module';
+import { Module, ModuleOptions } from '../module';
 
 import $, { Cash } from 'cash-dom';
 
@@ -31,11 +31,85 @@ const serializeObject = function (form) {
 	return obj;
 };
 
+export interface ApiOptions extends ModuleOptions {
+  api?: object;
+  cache?: string;
+  interruptRequests?: boolean;
+  on?: string;
+  stateContext?: string;
+  loadingDuration?: number;
+  hideError?: boolean;
+  errorDuration?: number;
+  encodeParameters?: boolean;
+  action?: boolean;
+  url?: boolean;
+  base?: string;
+  urlData?: {};
+  defaultData?: boolean;
+  serializeForm?: boolean;
+  throttle?: number;
+  throttleFirstRequest?: boolean;
 
-const settings = {
+  method?            : string;
+  data?              : {};
+  dataType?          : string;
+
+  mockResponse?      : boolean;
+  mockResponseAsync? : boolean;
+
+  response?          : boolean;
+  responseAsync?     : boolean;
+
+  rawResponse?       : boolean;
+
+  successTest?       : Function;
+
+  error? : {
+    beforeSend        : string;
+    error             : string;
+    exitConditions    : string;
+    JSONParse         : string;
+    legacyParameters  : string;
+    method            : string;
+    missingAction     : string;
+    missingSerialize  : string;
+    missingURL        : string;
+    noReturnedValue   : string;
+    noStorage         : string;
+    parseError        : string;
+    requiredParameter : string;
+    statusMessage     : string;
+    timeout           : string;
+  }
+
+  regExp?  : {
+    required : RegExp;
+    optional : RegExp;
+  }
+
+  className?: {
+    loading : string;
+    error   : string;
+  }
+
+  selector?: {
+    disabled : string;
+    form     : string;
+  }
+
+  metadata?: {
+    action  : string;
+    url     : string;
+  }
+
+  events?: Array<string>
+}
+
+const settings: ApiOptions = {
   name              : 'API',
   namespace         : 'api',
 
+  silent            : false,
   debug             : false,
   verbose           : false,
   performance       : true,
@@ -44,7 +118,7 @@ const settings = {
   api               : {},
 
   // whether to cache responses
-  cache             : true,
+  cache             : null,
 
   // whether new requests should abort previous requests
   interruptRequests : true,
@@ -53,13 +127,13 @@ const settings = {
   on                : 'auto',
 
   // context for applying state classes
-  stateContext      : false,
+  stateContext      : null,
 
   // duration for loading state
   loadingDuration   : 0,
 
   // whether to hide errors after a period of time
-  hideError         : 'auto',
+  hideError         : null,
 
   // duration for error state
   errorDuration     : 2000,
@@ -107,7 +181,7 @@ const settings = {
 // whether onResponse should work with response value without force converting into an object
   rawResponse       : false,
 
-  successTest : false,
+  successTest : null,
 
   // errors
   error : {
@@ -149,32 +223,34 @@ const settings = {
   },
 
   // callbacks before request
-  beforeSend  : function(settings) { return settings; },
-  beforeXHR   : function(xhr) {},
-  onRequest   : function(promise, xhr) {},
+  // beforeSend  : function(settings) { return settings; },
+  // beforeXHR   : function(xhr) {},
+  // onRequest   : function(promise, xhr) {},
 
-  // after request
-  onResponse  : false, // function(response) { },
+  // // after request
+  // onResponse  : false, // function(response) { },
 
-  // response was successful, if JSON passed validation
-  onSuccess   : function(response, $module) {},
+  // // response was successful, if JSON passed validation
+  // onSuccess   : function(response, $module) {},
 
-  // request finished without aborting
-  onComplete  : function(response, $module) {},
+  // // request finished without aborting
+  // onComplete  : function(response, $module) {},
 
-  // failed JSON success test
-  onFailure   : function(response, $module) {},
+  // // failed JSON success test
+  // onFailure   : function(response, $module) {},
 
-  // server error
-  onError     : function(errorMessage, $module) {},
+  // // server error
+  // onError     : function(errorMessage, $module) {},
 
-  // request aborted
-  onAbort     : function(errorMessage, $module) {},
+  // // request aborted
+  // onAbort     : function(errorMessage, $module) {},
 
   events: ['beforeSend', 'beforeXHR', 'onRequest', 'onResponse', 'onSuccess', 'onComplete', 'onFailure', 'onError', 'onAbort']
 }
 
 export class Api extends Module {
+  settings: ApiOptions;
+
   $context: Cash;
   $form: Cash;
 
@@ -196,7 +272,7 @@ export class Api extends Module {
 
   instance: Api;
 
-  constructor(parameters) {
+  constructor(parameters: ApiOptions) {
     super(null, parameters, settings);
 
     // context used for state
@@ -323,7 +399,7 @@ export class Api extends Module {
   event_xhr_done(response, textStatus, xhr) {
     let
       context            = this,
-      elapsedTime        = (new Date().getTime() - requestStartTime),
+      elapsedTime        = (new Date().getTime() - this.requestStartTime),
       timeLeft           = (settings.loadingDuration - elapsedTime),
       translatedResponse = ( $.isFunction(settings.onResponse) )
         ? module.is.expectingJSON() && !settings.rawResponse
@@ -595,7 +671,7 @@ export class Api extends Module {
     else {
       this.xhr = this.create_xhr();
     }
-    this.settings.settings.onRequest.call(this.context, this.request, this.xhr);
+    this.settings.onRequest.call(this.context, this.request, this.xhr);
   }
 
   read_cachedResponse(url) {
@@ -799,7 +875,7 @@ export class Api extends Module {
   }
 
   should_removeError(): boolean {
-    return ( this.settings.hideError === true || (this.settings.hideError === 'auto' && !this.is_form()) );
+    return ( this.settings.hideError === true || (this.settings.hideError === null && !this.is_form()) );
   }
 
   get_defaultData() {

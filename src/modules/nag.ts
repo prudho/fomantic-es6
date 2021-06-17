@@ -1,6 +1,6 @@
 'use strict';
 
-import Module from '../module';
+import { Module, ModuleOptions } from '../module'
 import Utils from '../utils';
 
 import $, { Cash } from 'cash-dom';
@@ -12,7 +12,62 @@ import $, { Cash } from 'cash-dom';
 //   }
 // });
 
-const settings = {
+export interface NagOptions extends ModuleOptions {
+  // allows cookie to be overridden
+  persist     : boolean;
+
+  // set to zero to require manually dismissal, otherwise hides on its own
+  displayTime : number;
+
+  animation   : {
+    show : string;
+    hide : string;
+  },
+
+  context       : string;
+  detachable    : boolean;
+
+  expires       : number;
+
+// cookie storage only options
+  domain        : boolean;
+  path          : string;
+  secure        : boolean;
+  samesite      : boolean;
+
+  // type of storage to use
+  storageMethod : string;
+
+  // value to store in dismissed localstorage/cookie
+  key           : string;
+  value         : string;
+
+// Key suffix to support expiration in localstorage
+  expirationKey : string;
+
+  error: {
+    noStorage       : string;
+    method          : string;
+    setItem         : string;
+    expiresFormat   : string;
+  },
+
+  className     : {
+    bottom : string;
+    fixed  : string;
+  },
+
+  selector      : {
+    close : string;
+  },
+
+  duration      : number;
+  easing        : string;
+
+  events: Array<string>
+}
+
+const settings: NagOptions = {
   name        : 'Nag',
   namespace   : 'Nag',
   
@@ -32,7 +87,7 @@ const settings = {
     hide : 'slide'
   },
 
-  context       : false,
+  context       : null,
   detachable    : false,
 
   expires       : 30,
@@ -81,6 +136,8 @@ const settings = {
 }
 
 export class Nag extends Module {
+  settings: NagOptions;
+
   $context: Cash;
 
   storage;
@@ -272,7 +329,7 @@ export class Nag extends Module {
     return false;
   }
 
-  storage_get(key: string): void {
+  storage_get(key: string): string {
     let storedValue ;
     storedValue = this.storage.getItem(key);
     if (this.storage === window.localStorage) {

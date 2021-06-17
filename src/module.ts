@@ -2,7 +2,17 @@
 
 import $, { Cash } from 'cash-dom';
 
-export default abstract class Module {
+export interface ModuleOptions {
+  name?       : string;
+  namespace?  : string;
+
+  silent?     : boolean;
+  debug?      : boolean,
+  verbose?    : boolean,
+  performance?: boolean,
+} 
+
+export abstract class Module {
   selector: string;
   element: HTMLElement;
   $element: Cash;
@@ -13,7 +23,7 @@ export default abstract class Module {
   eventNamespace: string;
   moduleNamespace: string;
 
-  constructor(selector: any, parameters, settings) {
+  constructor(selector: any, parameters, settings: ModuleOptions) {
     this.selector = selector;
 
     if (typeof selector === 'string') {

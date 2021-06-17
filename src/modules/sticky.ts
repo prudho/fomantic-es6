@@ -1,10 +1,72 @@
 "use strict";
 
-import Module from '../module';
+import { Module, ModuleOptions } from '../module'
 
 import $, { Cash } from 'cash-dom';
 
-const settings = {
+export interface StickyOptions extends ModuleOptions {
+  // whether to stick in the opposite direction on scroll up
+  pushing        : boolean;
+
+  context        : string;
+  container      : string;
+
+  // Context to watch scroll events
+  scrollContext  : Window;
+
+  // Offset to adjust scroll
+  offset         : number;
+
+  // Offset to adjust scroll when attached to bottom of screen
+  bottomOffset   : number;
+
+  // will only set container height if difference between context and container is larger than this number
+  jitter         : number;
+
+  // set width of sticky element when it is fixed to page (used to make sure 100% width is maintained if no fixed size set)
+  setSize        : boolean;
+
+  // Whether to automatically observe changes with Mutation Observers
+  observeChanges : boolean;
+
+  // Called when position is recalculated
+  onReposition   : Function;
+
+  // Called on each scroll
+  onScroll       : Function;
+
+  // Called when element is stuck to viewport
+  onStick        : Function;
+
+  // Called when element is unstuck from viewport
+  onUnstick      : Function;
+
+  // Called when element reaches top of context
+  onTop          : Function;
+
+  // Called when element reaches bottom of context
+  onBottom       : Function;
+
+  error         : {
+    container      : string;
+    visible        : string;
+    method         : string;
+    invalidContext : string;
+    elementSize    : string;
+  },
+
+  className : {
+    bound     : string;
+    fixed     : string;
+    supported : string;
+    top       : string;
+    bottom    : string;
+  },
+
+  events: Array<string>;
+}
+
+const settings: StickyOptions = {
   name           : 'Sticky',
   namespace      : 'sticky',
 
@@ -16,8 +78,8 @@ const settings = {
   // whether to stick in the opposite direction on scroll up
   pushing        : false,
 
-  context        : false,
-  container      : false,
+  context        : null,
+  container      : null,
 
   // Context to watch scroll events
   scrollContext  : window,
@@ -75,6 +137,8 @@ const settings = {
 }
 
 export class Sticky extends Module {
+  settings: StickyOptions;
+
   $window: Cash = $(window);
   $container: Cash;
   $context: Cash;

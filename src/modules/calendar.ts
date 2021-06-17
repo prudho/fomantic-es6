@@ -1,12 +1,149 @@
 "use strict";
 
-import Module from '../module';
+import { Module, ModuleOptions } from '../module';
 
 import { Popup } from './popup';
 
 import $, { Cash } from 'cash-dom';
 
-const settings = {
+export interface CalendarOptions extends ModuleOptions {
+  type: 'datetime' | 'date' | 'time' | 'month' | 'year';
+  firstDayOfWeek: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  constantHeight: boolean;
+  today: boolean;
+  closable: boolean;
+  monthFirst: boolean;
+  touchReadonly: boolean;
+  inline: boolean;
+  on: null;
+  initialDate: null;
+  startMode: false | 'year' | 'month' | 'day' | 'hour' | 'minute';
+  minDate: Date;
+  maxDate: Date;
+  ampm: boolean;
+  disableYear: boolean;
+  disableMonth: boolean;
+  disableMinute: boolean;
+  formatInput: boolean;
+  startCalendar: null;
+  endCalendar: null;
+  multiMonth: number;
+  minTimeGap: number;
+  showWeekNumbers: null;
+  disabledDates: [];
+  disabledDaysOfWeek: [];
+  enabledDates: [];
+  eventDates: [];
+  centuryBreak: number;
+  currentCentury: number;
+  selectAdjacentDays: boolean;
+
+  popupOptions: {
+    position: string;
+    lastResort: string;
+    prefer: string;
+    hideOnScroll: boolean
+  }
+
+  text: {
+    days: Array<string>;
+    months: Array<string>;
+    monthsShort: Array<string>;
+    today: string;
+    now: string;
+    am: string;
+    pm: string;
+    weekNo: string;
+  }
+
+  formatter: {
+    header: Function;
+    yearHeader: Function;
+    monthHeader: Function;
+    dayHeader: Function;
+    hourHeader: Function;
+    minuteHeader: Function;
+    dayColumnHeader: Function;
+    datetime: Function;
+    date: Function;
+    time: Function;
+    today: Function;
+    cell: Function;
+  }
+
+  parser: {
+    date: Function;
+  }
+
+  isDisabled: Function;
+
+  selector: {
+    popup: string;
+    input: string;
+    activator: string;
+    append: string;
+  },
+
+  regExp: {
+    dateWords: RegExp;
+    dateNumbers: RegExp;
+  },
+
+  error: {
+    popup: string,
+    method: string
+  },
+
+  className: {
+    calendar: string,
+    active: string,
+    popup: string,
+    grid: string,
+    column: string,
+    table: string,
+    inverted: string,
+    prev: string,
+    next: string,
+    prevIcon: string,
+    nextIcon: string,
+    link: string,
+    cell: string,
+    disabledCell: string,
+    weekCell: string,
+    adjacentCell: string,
+    activeCell: string,
+    rangeCell: string,
+    focusCell: string,
+    todayCell: string,
+    today: string,
+    disabled: string,
+  },
+
+  metadata: {
+    date: string,
+    focusDate: string,
+    startDate: string,
+    endDate: string,
+    minDate: string,
+    maxDate: string,
+    mode: string,
+    type: string,
+    monthOffset: string,
+    message: string,
+    class: string,
+    inverted: string,
+    variation: string,
+    position: string,
+    month: string,
+    year: string,
+  },
+
+  eventClass: 'blue',
+
+  events: Array<string>
+}
+
+const settings: CalendarOptions = {
   name            : 'Calendar',
   namespace       : 'calendar',
 
@@ -353,6 +490,8 @@ const settings = {
     }
   },
 
+  isDisabled: () => { return false; },
+
   selector: {
     popup: '.ui.popup',
     input: 'input',
@@ -438,7 +577,9 @@ const timeGapTable = {
   '30': {'row': 2, 'column': 1 }
 };
 
-export default class Calendar extends Module {
+export class Calendar extends Module {
+  settings: CalendarOptions;
+
   $input: Cash;
   $activator: Cash;
   $container: Cash;
@@ -455,7 +596,7 @@ export default class Calendar extends Module {
   instance: Calendar;
   popup: Popup;
 
-  constructor(selector: string, parameters) {
+  constructor(selector: string, parameters: CalendarOptions) {
     super(selector, parameters, settings);
 
     this.$input = this.$element.find(this.settings.selector.input);
@@ -542,7 +683,8 @@ export default class Calendar extends Module {
         // return this.settings.onVisible.apply(this.$container, arguments);
         return this.invokeCallback('visible').apply(this.$container, arguments);
       },
-      onHidden = this.settings.onHidden
+      // onHidden = this.settings.onHidden
+      onHidden = this.invokeCallback('hidden').bind(this)
     ;
     if (!this.$input.length) {
       //no input, $container has to handle focus/blur
@@ -563,17 +705,18 @@ export default class Calendar extends Module {
     let
       on = this.setting('on'),
       options = $.extend({}, this.settings.popupOptions, {
-      popup: this.$container,
-      on: on,
-      hoverable: on === 'hover',
-      closable: on === 'click'
-    });
+        popup: this.$container,
+        on: on,
+        hoverable: on === 'hover',
+        closable: on === 'click'
+      })
+    ;
     
     //this.popup(options);
-
     this.popup = new Popup(this.settings.selector.activator, options);
 
     this.popup.on('show', () => {
+      console.log('show')
       //reset the focus date onShow
       this.set_focusDate(this.get_date());
       this.set_mode(this.get_validatedMode(this.settings.startMode));
@@ -1030,7 +1173,7 @@ export default class Calendar extends Module {
       mode = target.data(this.settings.metadata.mode)
     ;
     // if (date && settings.onSelect.call(this.element, date, this.get_mode()) !== false) {
-    if (date && this.invokeCallback('visible').apply(this.element, date, this.get_mode()) !== false) {
+    if (date && this.invokeCallback('visible').call(this.element, date, this.get_mode()) !== false) {
       let forceSet = target.hasClass(this.settings.className.today);
       this.selectDate(date, forceSet);
     }
@@ -1334,7 +1477,7 @@ export default class Calendar extends Module {
     return !equal;
   }
 
-  set_date(date, updateInput: boolean = false, fireChange: boolean = false) {
+  set_date(date, updateInput: boolean = true, fireChange: boolean = true) {
     date = this.helper_sanitiseDate(date);
     date = this.helper_dateInRange(date);
 
@@ -1344,7 +1487,7 @@ export default class Calendar extends Module {
     ;
 
     // if (fireChange && this.settings.onBeforeChange.call(this.element, date, text, mode) === false) {
-    if (fireChange && this.invokeCallback('beforeChange').apply(this.element, date, text, mode) === false) {
+    if (fireChange && this.invokeCallback('beforeChange').call(this.element, date, text, mode) === false) {
       return false;
     }
 
@@ -1380,7 +1523,7 @@ export default class Calendar extends Module {
     this.set_dataKeyValue(this.settings.metadata.endDate, date, refreshCalendar);
   }
 
-  set_focusDate(date, refreshCalendar: boolean = false, updateFocus: boolean = false, updateRange: boolean = false) {
+  set_focusDate(date, refreshCalendar: boolean = true, updateFocus: boolean = true, updateRange: boolean = true) {
     date = this.helper_sanitiseDate(date);
     date = this.helper_dateInRange(date);
     let isDay = this.get_mode() === 'day';
@@ -1421,7 +1564,7 @@ export default class Calendar extends Module {
     }
   }
 
-  set_mode(mode: string, refreshCalendar: boolean = false): void {
+  set_mode(mode: string, refreshCalendar: boolean = true): void {
     this.set_dataKeyValue(this.settings.metadata.mode, mode, refreshCalendar);
   }
 

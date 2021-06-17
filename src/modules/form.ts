@@ -1,25 +1,236 @@
 "use strict";
 
-import Module from '../module';
+import { Module, ModuleOptions } from '../module'
 
 import Utils from '../utils';
 
-import Calendar from './calendar';
-import Checkbox from './checkbox';
-import Dropdown from './dropdown';
-import Transition from './transition';
+import { Calendar } from './calendar';
+import { Checkbox } from './checkbox';
+import { Dropdown } from './dropdown';
+import { Transition } from './transition';
 
 import $, { Cash } from 'cash-dom';
 
-const settings = {
+export interface FormOptions extends ModuleOptions {
+  fields            : {};
+  defaults          : {};
+
+  keyboardShortcuts : boolean;
+  on                : string;
+  inline            : boolean;
+
+  delay             : number;
+  revalidate        : boolean;
+  shouldTrim        : boolean;
+
+  transition        : string;
+  duration          : number;
+
+  autoCheckRequired : boolean;
+  preventLeaving    : boolean;
+  errorFocus        : boolean;
+  dateHandling      : 'date' | 'input' | 'formatter';
+
+  metadata : {
+    defaultValue : string;
+    validate     : string;
+    isDirty      : string;
+  }
+
+  regExp: {
+    htmlID  : RegExp;
+    bracket : RegExp;
+    decimal : RegExp;
+    email   : RegExp;
+    escape  : RegExp;
+    flags   : RegExp;
+    integer : RegExp;
+    number  : RegExp;
+    url     : RegExp;
+  }
+
+  text: {
+    and              : string;
+    unspecifiedRule  : string;
+    unspecifiedField : string;
+    leavingMessage   : string;
+  }
+
+  prompt: {
+    range                : string;
+    maxValue             : string;
+    minValue             : string;
+    empty                : string;
+    checked              : string;
+    email                : string;
+    url                  : string;
+    regExp               : string;
+    integer              : string;
+    decimal              : string;
+    number               : string;
+    is                   : string;
+    isExactly            : string;
+    not                  : string;
+    notExactly           : string;
+    contain              : string;
+    containExactly       : string;
+    doesntContain        : string;
+    doesntContainExactly : string;
+    minLength            : string;
+    length               : string;
+    exactLength          : string;
+    maxLength            : string;
+    match                : string;
+    different            : string;
+    creditCard           : string;
+    minCount             : string;
+    exactCount           : string;
+    maxCount             : string;
+  }
+
+  selector : {
+    checkbox   : string;
+    clear      : string;
+    field      : string;
+    group      : string;
+    input      : string;
+    message    : string;
+    prompt     : string;
+    radio      : string;
+    reset      : string;
+    submit     : string;
+    uiCheckbox : string;
+    uiDropdown : string;
+    uiCalendar : string;
+  }
+
+  className : {
+    error    : string;
+    label    : string;
+    pressed  : string;
+    success  : string;
+    required : string;
+    disabled : string;
+  }
+
+  error: {
+    identifier : string;
+    method     : string;
+    noRule     : string;
+    oldSyntax  : string;
+    noElement  : string;
+  }
+
+  templates: {
+
+    // template that produces error message
+    error: Function;
+
+    // template that produces label
+    prompt: Function;
+  }
+
+  formatter: {
+    date: Function;
+    datetime: Function;
+    time: Function;
+    month: Function;
+    year: Function;
+  }
+
+  rules: {
+
+    // is not empty or blank string
+    empty: Function;
+
+    // checkbox checked
+    checked: Function;
+
+    // is most likely an email
+    email: Function;
+
+    // value is most likely url
+    url: Function;
+
+    // matches specified regExp
+    regExp: Function;
+    minValue: Function;
+    maxValue: Function;
+    // is valid integer or matches range
+    integer: Function;
+    range: Function;
+
+    // is valid number (with decimal)
+    decimal: Function;
+
+    // is valid number
+    number: Function;
+
+    // is value (case insensitive)
+    is: Function;
+
+    // is value
+    isExactly: Function;
+
+    // value is not another value (case insensitive)
+    not: Function;
+
+    // value is not another value (case sensitive)
+    notExactly: Function;
+
+    // value contains text (insensitive)
+    contains: Function;
+
+    // value contains text (case sensitive)
+    containsExactly: Function;
+
+    // value contains text (insensitive)
+    doesntContain: Function;
+
+    // value contains text (case sensitive)
+    doesntContainExactly: Function;
+
+    // is at least string length
+    minLength: Function;
+
+    // see rls notes for 2.0.6 (this is a duplicate of minLength)
+    length: Function;
+
+    // is exactly length
+    exactLength: Function;
+
+    // is less than length
+    maxLength: Function;
+
+    // matches another field
+    match: Function;
+
+    // different than another field
+    different: Function;
+
+    creditCard: Function;
+
+    minCount: Function;
+
+    exactCount: Function;
+
+    maxCount: Function;
+  }
+
+  events: Array<string>;
+}
+
+const settings: FormOptions = {
   name              : 'Form',
   namespace         : 'form',
 
+  silent            : false,
   debug             : false,
   verbose           : false,
   performance       : true,
 
-  fields            : false,
+  defaults          : null,
+  fields            : null,
 
   keyboardShortcuts : true,
   on                : 'submit',
@@ -587,6 +798,8 @@ const settings = {
 }
 
 export class Form extends Module {
+  settings: FormOptions;
+
   $field: Cash;
   $group: Cash;
   $message: Cash;
@@ -723,7 +936,7 @@ export class Form extends Module {
         $fieldGroup  = $field.closest(this.$group),
         $prompt      = $fieldGroup.find(this.settings.selector.prompt),
         $calendar    = $field.closest(this.settings.selector.uiCalendar),
-        defaultValue = $field.data(this.settings.etadata.defaultValue) || '',
+        defaultValue = $field.data(this.settings.metadata.defaultValue) || '',
         isCheckbox   = $element.is(this.settings.selector.uiCheckbox),
         isDropdown   = $element.is(this.settings.selector.uiDropdown)  && this.can_useElement('dropdown'),
         isCalendar   = ($calendar.length > 0  && this.can_useElement('calendar')),
@@ -1634,37 +1847,44 @@ export class Form extends Module {
       if (fieldExists) {
         if (isMultiple && isCheckbox) {
           this.verbose('Selecting multiple', value, $field);
-          $element.checkbox('uncheck');
+          // $element.checkbox('uncheck');
+          new Checkbox($element, {}).uncheck();
           $.each(value, (_index, value) => {
             $multipleField = $field.filter('[value="' + value + '"]');
             $element       = $multipleField.parent();
             if ($multipleField.length > 0) {
-              $element.checkbox('check');
+              // $element.checkbox('check');
+              new Checkbox($element, {}).check();
             }
           });
         }
         else if (isRadio) {
           this.verbose('Selecting radio value', value, $field);
-          $field.filter('[value="' + value + '"]')
-            .parent(this.settings.selector.uiCheckbox)
-              .checkbox('check')
-          ;
+          // $field.filter('[value="' + value + '"]')
+          //   .parent(this.settings.selector.uiCheckbox)
+          //     .checkbox('check')
+          // ;
+          new Checkbox($field.filter('[value="' + value + '"]').parent(this.settings.selector.uiCheckbox), {}).check();
         }
         else if (isCheckbox) {
           this.verbose('Setting checkbox value', value, $element);
           if (value === true || value === 1) {
-            $element.checkbox('check');
+            // $element.checkbox('check');
+            new Checkbox($element, {}).check();
           }
           else {
-            $element.checkbox('uncheck');
+            // $element.checkbox('uncheck');
+            new Checkbox($element, {}).uncheck();
           }
         }
         else if (isDropdown) {
           this.verbose('Setting dropdown value', value, $element);
-          $element.dropdown('set selected', value);
+          // $element.dropdown('set selected', value);
+          new Dropdown($element, {}).set_selected(value);
         }
         else if (isCalendar) {
-          $calendar.calendar('set date',value);
+          // $calendar.calendar('set date',value);
+          new Calendar($element, {}).set_date(value);
         }
         else {
           this.verbose('Setting field value', value, $field);

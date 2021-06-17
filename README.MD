@@ -35,7 +35,7 @@ npm run build
 | Sticky        | none          |   ✔️  |         |
 | Slider        | none          |   ✔️  |         |
 | Sidebar       | none          |   ✔️  |         |
-| Calendar      | Popup         |   ⚠️  | range is broken, halp ! |
+| Calendar      | Transition, Calendar, Checkbox, Dropdown |   ⚠️  | range is broken, halp ! |
 | Checkbox      | none          |   ⚠️  | grouped checkbox must be rethinked |
 | Dropdown      | Transition    |   ⚠️  | not finished and utterly broken |
 | Tab           | none          |   ⚠️  | need to find a replacement for $.address (state library) |

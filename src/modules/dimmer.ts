@@ -1,11 +1,63 @@
 "use strict";
 
-import Module from '../module';
+import { Module, ModuleOptions } from '../module';
 
 import $, { Cash } from 'cash-dom';
-import Transition from './transition';
+import { Transition } from './transition';
 
-const settings = {
+export interface DimmerOptions extends ModuleOptions {
+  useFlex: boolean;
+  dimmerName?: string;
+  variation?: string;
+  closable?: boolean;
+  useCSS: boolean;
+  transition: string | {
+    showMethod: string;
+    hideMethod: string;
+  };
+  on: string | boolean;
+  opacity: string | number;
+
+  duration: {
+    show: number,
+    hide: number
+  }
+
+  displayLoader: boolean;
+  loaderText: string | boolean;
+  loaderVariation: string;
+
+  error: {
+    method: string
+  }
+
+  className : {
+    active     : string,
+    animating  : string,
+    dimmable   : string,
+    dimmed     : string,
+    dimmer     : string,
+    disabled   : string,
+    hide       : string,
+    legacy     : string,
+    pageDimmer : string,
+    show       : string,
+    loader     : string
+  }
+
+  selector: {
+    dimmer   : string,
+    content  : string
+  }
+
+  template: {
+    dimmer: Function
+  }
+
+  events: Array<string>;
+}
+
+const settings: DimmerOptions = {
   name        : 'Dimmer',
   namespace   : 'dimmer',
 
@@ -16,15 +68,6 @@ const settings = {
 
   // whether should use flex layout
   useFlex     : true,
-
-  // name to distinguish between multiple dimmers in context
-  dimmerName  : false,
-
-  // whether to add a variation type
-  variation   : false,
-
-  // whether to bind close events
-  closable    : 'auto',
 
   // whether to use css animations
   useCSS      : true,
@@ -93,6 +136,8 @@ const settings = {
 }
 
 export class Dimmer extends Module {
+  settings: DimmerOptions;
+
   $dimmable: Cash;
   $dimmer  : Cash;
 
@@ -100,7 +145,7 @@ export class Dimmer extends Module {
 
   instance: Dimmer;
 
-  constructor(selector: string, parameters) {
+  constructor(selector: string, parameters: DimmerOptions) {
     super(selector, parameters, settings);
     
     this.preinitialize();
@@ -349,7 +394,7 @@ export class Dimmer extends Module {
   }
 
   is_closable(): boolean {
-    if (this.settings.closable == 'auto') {
+    if (this.settings.closable === null) {
       if (this.settings.on == 'hover') {
         return false;
       }
@@ -476,8 +521,7 @@ export class Dimmer extends Module {
     this.$dimmer.removeClass(this.settings.className.legacy);
   }
 
-  remove_variation(variation): void {
-    variation = variation || settings.variation;
+  remove_variation(variation: string = this.settings.variation): void {
     if (variation) {
       this.$dimmer.removeClass(variation);
     }

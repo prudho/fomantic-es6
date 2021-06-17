@@ -1,15 +1,152 @@
 'use strict';
 
-import Module from '../module';
+import { Module, ModuleOptions } from '../module';
 
 import Utils from '../utils';
 
 import { Api } from './api';
-import Transition from './transition';
+import { Transition } from './transition';
 
 import $, { Cash } from 'cash-dom';
 
-const settings = {
+export interface SearchOptions extends ModuleOptions {
+  // template to use (specified in settings.templates)
+  type              : string;
+
+  // minimum characters required to search
+  minCharacters     : number;
+
+  // whether to select first result after searching automatically
+  selectFirstResult : boolean;
+
+  // API config
+  apiSettings       : boolean;
+
+  // object to search
+  source            : {};
+
+  // Whether search should query current term on focus
+  searchOnFocus     : boolean;
+
+  // fields to search
+  searchFields   : [
+    'id',
+    'title',
+    'description'
+  ],
+
+  // field to display in standard results template
+  displayField   : string;
+
+  // search anywhere in value (set to 'exact' to require exact matches
+  fullTextSearch : `exact` | boolean;
+
+  // match results also if they contain diacritics of the same base character (for example searching for "a" will also match "á" or "â" or "à", etc...)
+  ignoreDiacritics : boolean;
+
+  // whether to add events to prompt automatically
+  automatic      : boolean;
+
+  // delay before hiding menu after blur
+  hideDelay      : number;
+
+  // delay before searching
+  searchDelay    : number;
+
+  // maximum results returned from search
+  maxResults     : number;
+
+  // whether to store lookups in local cache
+  cache          : boolean;
+
+  // whether no results errors should be shown
+  showNoResults  : boolean;
+
+  // preserve possible html of resultset values
+  preserveHTML   : boolean;
+
+  // transition settings
+  transition     : string;
+  duration       : number;
+  easing         : string;
+
+  // callbacks
+  onSelect       : boolean;
+  onResultsAdd   : boolean;
+
+  className: {
+    animating : string;
+    active    : string;
+    empty     : string;
+    focus     : string;
+    hidden    : string;
+    loading   : string;
+    results   : string;
+    pressed   : string;
+  }
+
+  error : {
+    source          : string;
+    noResultsHeader : string;
+    noResults       : string;
+    logging         : string;
+    noEndpoint      : string;
+    noTemplate      : string;
+    oldSearchSyntax : string;
+    serverError     : string;
+    maxResults      : string;
+    method          : string;
+    noNormalize     : string;
+  }
+
+  metadata: {
+    cache   : string;
+    results : string;
+    result  : string;
+  }
+
+  regExp: {
+    escape     : RegExp;
+    beginsWith : string;
+  }
+
+  // maps api response attributes to internal representation
+  fields: {
+    categories      : string;
+    categoryName    : string;
+    categoryResults : string;
+    description     : string;
+    image           : string;
+    price           : string;
+    results         : string;
+    title           : string;
+    url             : string;
+    action          : string;
+    actionText      : string;
+    actionURL       : string;
+  }
+
+  selector : {
+    prompt       : string;
+    searchButton : string;
+    results      : string;
+    message      : string;
+    category     : string;
+    result       : string;
+    title        : string;
+  }
+
+  templates: {
+    escape: Function;
+    message: Function;
+    category: Function;
+    standard: Function;
+  }
+
+  events: Array<string>;
+}
+
+const settings: SearchOptions = {
   name              : 'Search',
   namespace         : 'search',
 
@@ -323,6 +460,8 @@ const settings = {
 }
 
 export class Search extends Module {
+  settings: SearchOptions;
+
   $prompt: Cash;
   $searchButton: Cash;
   $results: Cash;
@@ -727,7 +866,7 @@ export class Search extends Module {
     }
   }
 
-  search_object(searchTerm, source = this.settings.source, searchFields = this.settings.this.settings.searchFields) {
+  search_object(searchTerm, source = this.settings.source, searchFields = this.settings.searchFields) {
     searchTerm = this.remove_diacritics(String(searchTerm));
     let
       results      = [],

@@ -1,10 +1,76 @@
 "use strict";
 
-import Module from '../module';
+import { Module, ModuleOptions } from '../module';
 
 import $, { Cash } from 'cash-dom';
 
-const settings = {
+export interface SidebarOptions extends ModuleOptions {
+  transition        : string;
+  mobileTransition  : string;
+
+  defaultTransition : {
+    computer: {
+      left   : string;
+      right  : string;
+      top    : string;
+      bottom : string;
+    },
+    mobile: {
+      left   : string;
+      right  : string;
+      top    : string;
+      bottom : string;
+    }
+  },
+
+  context           : string;
+  exclusive         : boolean;
+  closable          : boolean;
+  dimPage           : boolean;
+  scrollLock        : boolean;
+  returnScroll      : boolean;
+  delaySetup        : boolean;
+
+  duration          : number;
+
+  className         : {
+    active    : string;
+    animating : string;
+    dimmed    : string;
+    ios       : string;
+    pushable  : string;
+    pushed    : string;
+    right     : string;
+    top       : string;
+    left      : string;
+    bottom    : string;
+    visible   : string;
+  },
+
+  selector: {
+    fixed   : string;
+    omitted : string;
+    pusher  : string;
+    sidebar : string;
+  },
+
+  regExp: {
+    ios          : RegExp;
+    mobileChrome : RegExp;
+    mobile       : RegExp;
+  },
+
+  error   : {
+    method       : string;
+    pusher       : string;
+    movedSidebar : string;
+    notFound     : string;
+  },
+
+  events: Array<string>;
+}
+
+const settings: SidebarOptions = {
   name              : 'Sidebar',
   namespace         : 'sidebar',
 
@@ -72,7 +138,6 @@ const settings = {
     method       : 'The method you called is not defined.',
     pusher       : 'Had to add pusher element. For optimal performance make sure body content is inside a pusher element',
     movedSidebar : 'Had to move sidebar. For optimal performance make sure sidebar and pusher are direct children of your body tag',
-    overlay      : 'The overlay setting is no longer supported, use animation: overlay',
     notFound     : 'There were no elements that matched the specified selector'
   },
 
@@ -80,6 +145,8 @@ const settings = {
 }
 
 export class Sidebar extends Module {
+  settings: SidebarOptions;
+
   $window: Cash         = $(window);
   $document: Cash       = $(document);
   $html: Cash           = $('html');
@@ -302,10 +369,6 @@ export class Sidebar extends Module {
   show(callback = () => {}): void {
     if (this.is_hidden()) {
       this.refreshSidebars();
-      if (this.settings.overlay) {
-        this.error(this.settings.error.overlay);
-        this.settings.transition = 'overlay';
-      }
       this.refresh();
       if (this.othersActive()) {
         this.debug('Other sidebars currently visible');
@@ -648,10 +711,6 @@ export class Sidebar extends Module {
   set_visible() {
     this.$element.addClass(this.settings.className.visible);
   }
-  
-  set_overlay() {
-    this.$element.addClass(this.settings.className.overlay);
-  }
 
   remove_inlineCSS() {
     this.debug('Removing inline css styles', this.$style);
@@ -694,10 +753,6 @@ export class Sidebar extends Module {
 
   remove_visible() {
     this.$element.removeClass(this.settings.className.visible);
-  }
-
-  remove_overlay() {
-    this.$element.removeClass(this.settings.className.overlay);
   }
 
   is_ie(): boolean {

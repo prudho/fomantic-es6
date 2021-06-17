@@ -1,10 +1,49 @@
 'use strict';
 
-import Module from '../module';
+import { Module, ModuleOptions } from '../module'
 
 import { Cash } from 'cash-dom';
 
-const settings = {
+export interface ShapeOptions extends ModuleOptions {
+  // fudge factor in pixels when swapping from 2d to 3d (can be useful to correct rounding errors)
+  jitter     : number;
+
+  // width during animation, can be set to 'auto', initial', 'next' or pixel amount
+  width: 'auto' | 'initial' | 'next' | number;
+
+  // height during animation, can be set to 'auto', 'initial', 'next' or pixel amount
+  height: 'auto' | 'initial' | 'next' | number;
+
+  // allow animation to same side
+  allowRepeats: boolean;
+
+  // animation duration
+  duration   : number;
+
+  // possible errors
+  error: {
+    side   : string;
+    method : string;
+  }
+
+  // classnames used
+  className   : {
+    animating : string;
+    hidden    : string;
+    loading   : string;
+    active    : string;
+  }
+
+  // selectors used
+  selector    : {
+    sides : string;
+    side  : string;
+  }
+
+  events: Array<string>;
+}
+
+const settings: ShapeOptions = {
   // module info
   name : 'Shape',
   
@@ -36,7 +75,7 @@ const settings = {
   allowRepeats: false,
 
   // animation duration
-  duration   : false,
+  duration   : null,
 
   // possible errors
   error: {
@@ -67,6 +106,8 @@ const settings = {
 }
 
 export class Shape extends Module {
+  settings: ShapeOptions;
+
   $side: Cash;
   $sides: Cash;
   $activeSide: Cash;

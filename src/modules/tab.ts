@@ -1,10 +1,69 @@
 'use strict';
 
-import Module from '../module';
+import { Module, ModuleOptions } from '../module'
 
 import $, { Cash } from 'cash-dom';
 
-const settings = {
+export interface TabOptions extends ModuleOptions {
+  auto            : boolean;
+  history         : boolean;
+  historyType     : 'hash' | 'state';
+  path            : string;
+
+  context         : string;
+  childrenOnly    : boolean;
+  maxDepth        : number;
+
+  deactivate      : string;
+
+  alwaysRefresh   : boolean;
+  cache           : boolean;
+  loadOnce        : boolean;
+  cacheType       : string;
+  ignoreFirstLoad : boolean;
+
+  apiSettings     : {};
+  evaluateScripts : string;
+  autoTabActivation: boolean;
+
+  templates : {
+    determineTitle: Function;
+  }
+
+  error: {
+    api        : string;
+    method     : string;
+    missingTab : string;
+    noContent  : string;
+    path       : string;
+    recursion  : string;
+    state      : string;
+  }
+
+  regExp : {
+    escape   : RegExp;
+  }
+
+  metadata : {
+    tab    : string;
+    loaded : string;
+    promise: string;
+  }
+
+  className   : {
+    loading : string;
+    active  : string;
+  }
+
+  selector    : {
+    tabs : string;
+    ui   : string;
+  }
+
+  events: Array<string>;
+}
+
+const settings: TabOptions = {
   name            : 'Tab',
   namespace       : 'tab',
 
@@ -16,9 +75,9 @@ const settings = {
   auto            : false,      // uses pjax style endpoints fetching content from same url with remote-content headers
   history         : false,      // use browser history
   historyType     : 'hash',     // #/ or html5 state
-  path            : false,      // base path of url
+  path            : null,      // base path of url
 
-  context         : false,      // specify a context that tabs must appear inside
+  context         : null,      // specify a context that tabs must appear inside
   childrenOnly    : false,      // use only tabs that are children of context
   maxDepth        : 25,         // max depth a tab can be nested
 
@@ -77,6 +136,8 @@ const settings = {
 }
 
 export class Tab extends Module {
+  settings: TabOptions;
+
   $allModules: Cash;
   $context: Cash;
   $tabs: Cash;
@@ -397,7 +458,7 @@ export class Tab extends Module {
     else {
       if (this.settings.historyType == 'state') {
         this.debug('Using HTML5 to manage state');
-        if (this.settings.path !== false) {
+        if (this.settings.path !== null) {
           $.address
             .history(true)
             .state(this.settings.path)
@@ -628,7 +689,7 @@ export class Tab extends Module {
   }
 
   set_auto(): void {
-    let url = (typeof this.settings.path == 'string')
+    let url = (this.settings.path !== null)
       ? this.settings.path.replace(/\/$/, '') + '/{$tab}'
       : '/{$tab}'
     ;

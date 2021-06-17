@@ -4,12 +4,13 @@
   <meta name="viewport" content="width=device-width">
   <title>Fomantic - Dropdown</title>
   <link rel="stylesheet" href="./styles.css">
-  <script src="../dist/fomantic.umd.js"></script>
+  <script src="./legacy/jquery-3.6.0.min.js"></script>
+  <script src="./legacy/components/transition.js"></script>
+  <script src="./legacy/components/dropdown.js"></script>
   
 </head>
 <body style="padding: 1rem;">
-
-  <div id="dropdown" class="ui selection dropdown">
+  <div id="dropdown" class="ui search selection dropdown">
     <input type="hidden" name="gender">
     <i class="dropdown icon"></i>
     <div class="default text">Gender</div>
@@ -21,7 +22,7 @@
 
   <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', () => {
-      const test = new fomantic.Dropdown('#dropdown', {
+      const dropdown = $('#dropdown').dropdown({
         debug: true,
         verbose: true
       });

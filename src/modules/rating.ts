@@ -1,10 +1,41 @@
 "use strict";
 
-import Module from '../module';
+import { Module, ModuleOptions } from '../module';
 
 import $, { Cash } from 'cash-dom';
 
-const settings = {
+export interface RatingOptions extends ModuleOptions {
+  icon: string;
+  initialRating: number;
+  interactive: boolean;
+  maxRating: number;
+  fireOnInit: boolean;
+  clearable?: boolean;
+  
+  metadata: {
+    rating: string;
+    maxRating: string;
+    icon: string;
+  };
+
+  className: {
+    active: string,
+    disabled: string,
+    selected: string
+  };
+
+  selector: {
+    icon: string;
+  };
+
+  templates: {
+    icon: Function
+  };
+
+  events: Array<string>;
+}
+
+const settings: RatingOptions = {
   name          : 'Rating',
   namespace     : 'rating',
 
@@ -19,7 +50,6 @@ const settings = {
   interactive   : true,
   maxRating     : 4,
   fireOnInit    : false,
-  clearable     : 'auto',
   
   metadata: {
     rating    : 'rating',
@@ -38,12 +68,12 @@ const settings = {
   },
   
   templates: {
-    icon: function(maxRating: number, iconClass: string): string {
+    icon: (maxRating: number, iconClass: string): string => {
       let
         icon:number = 1,
         html:string = ''
       ;
-      while(icon <= maxRating) {
+      while (icon <= maxRating) {
         html +=  `<i class="${iconClass} icon"></i>`;
         icon++;
       }
@@ -55,12 +85,14 @@ const settings = {
 }
 
 export class Rating extends Module {
+  settings: RatingOptions;
+
   $icons: Cash;
   initialLoad: boolean;
 
   instance: Rating;
 
-  constructor(selector: string, parameters) {
+  constructor(selector: string, parameters: RatingOptions) {
     super(selector, parameters, settings);
 
     this.$icons = $(this.settings.selector.icon);
@@ -163,7 +195,7 @@ export class Rating extends Module {
       $activeIcon: Cash = $(element.target),
       currentRating: number = this.get_rating(),
       rating: number        = this.$icons.index($activeIcon) + 1,
-      canClear: boolean     = (this.settings.clearable == 'auto')
+      canClear: boolean     = (this.settings.clearable === undefined)
         ? (this.$icons.length === 1 || currentRating == rating)
         : this.settings.clearable
     ;
