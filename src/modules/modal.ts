@@ -693,7 +693,7 @@ export class Modal extends Module {
 
   showDimmer(): void {
     // if ($dimmable.dimmer('is animating') || !$dimmable.dimmer('is active') ) {
-    if (this.dimmer.is_animating() || this.dimmer.is_active() ) {
+    if (this.dimmer.is_animating() || !this.dimmer.is_active()) {
       this.save_bodyMargin();
       this.debug('Showing dimmer');
       // $dimmable.dimmer('show');
@@ -706,7 +706,7 @@ export class Modal extends Module {
 
   hide(callback: Function = () => {}): boolean {
     this.refreshModals();
-    return this.hideModal(callback, undefined, undefined);
+    return this.hideModal(callback, false, undefined);
   }
 
   hideDimmer(): void {
@@ -808,9 +808,11 @@ export class Modal extends Module {
             queue       : this.settings.queue,
             duration    : this.settings.transition.showDuration || this.settings.duration,
             useFailSafe : true,
+            autostart   : false
           });
     
           this.transition.on('complete', () => {
+            console.log(this, 'complete')
             this.invokeCallback('visible')(this.element);
             if (this.settings.keyboardShortcuts) {
               this.add_keyboardShortcuts();
@@ -822,6 +824,8 @@ export class Modal extends Module {
             }
             callback();
           });
+
+          this.transition.toggle();
         }
         else {
           this.error(this.settings.error.noTransition);
@@ -854,6 +858,7 @@ export class Modal extends Module {
           queue       : this.settings.queue,
           duration    : this.settings.transition.hideDuration || this.settings.duration,
           useFailSafe : true,
+          autostart   : false
         });
 
         this.transition.on('start', () => {
@@ -865,27 +870,29 @@ export class Modal extends Module {
           }
         });
 
-        this.transition.on('start', () => {
+        this.transition.on('complete', () => {
           this.unbind_scrollLock();
-              if (this.settings.allowMultiple) {
-                $previousModal.addClass(this.settings.className.front);
-                this.$element.removeClass(this.settings.className.front);
+          if (this.settings.allowMultiple) {
+            $previousModal.addClass(this.settings.className.front);
+            this.$element.removeClass(this.settings.className.front);
 
-                if (hideOthersToo) {
-                  this.$allModals.find(this.settings.selector.dimmer).removeClass('active');
-                }
-                else {
-                  $previousModal.find(this.settings.selector.dimmer).removeClass('active');
-                }
-              }
-              // if ($.isFunction(settings.onHidden)) {
-              //   settings.onHidden.call(element);
-              // }
-              this.invokeCallback('hidden')(this.element);
-              this.remove_dimmerStyles();
-              this.restore_focus();
-              callback();
+            if (hideOthersToo) {
+              this.$allModals.find(this.settings.selector.dimmer).removeClass('active');
+            }
+            else {
+              $previousModal.find(this.settings.selector.dimmer).removeClass('active');
+            }
+          }
+          // if ($.isFunction(settings.onHidden)) {
+          //   settings.onHidden.call(element);
+          // }
+          this.invokeCallback('hidden')(this.element);
+          this.remove_dimmerStyles();
+          this.restore_focus();
+          callback();
         });
+
+        this.transition.toggle();
       }
       else {
         this.error(this.settings.error.noTransition);
