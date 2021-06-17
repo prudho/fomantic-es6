@@ -47,7 +47,7 @@ export interface AccordionOptions extends ModuleOptions {
   events: Array<string>;
 }
 
-const settings: AccordionOptions = {
+const default_settings: AccordionOptions = {
   name           : 'Accordion',
   namespace      : 'accordion',
 
@@ -106,7 +106,7 @@ export class Accordion extends Module {
   instance: Accordion;
 
   constructor(selector, parameters: AccordionOptions) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
 
     this.$title = this.$element.find(this.settings.selector.title);
     this.$content = this.$element.find(this.settings.selector.content);
@@ -240,9 +240,9 @@ export class Accordion extends Module {
           animation: "fade in",
           queue: false,
           useFailSafe: true,
-          debug: settings.debug,
-          verbose: settings.verbose,
-          duration: settings.duration,
+          debug: this.settings.debug,
+          verbose: this.settings.verbose,
+          duration: this.settings.duration,
           skipInlineHidden: true,
         });
 
@@ -413,7 +413,7 @@ export class Accordion extends Module {
             useFailSafe: true,
             debug: this.settings.debug,
             verbose: this.settings.verbose,
-            duration: settings.duration,
+            duration: default_settings.duration,
             skipInlineHidden: true
           });
         } else {

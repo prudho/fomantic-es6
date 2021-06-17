@@ -4,7 +4,7 @@ import { Module, ModuleOptions } from '../module';
 
 import Utils from '../utils';
 
-import { Api } from './api';
+import { Api, ApiOptions } from './api';
 import { Transition } from './transition';
 
 import $, { Cash } from 'cash-dom';
@@ -20,7 +20,7 @@ export interface SearchOptions extends ModuleOptions {
   selectFirstResult : boolean;
 
   // API config
-  apiSettings       : boolean;
+  apiSettings?      : ApiOptions;
 
   // object to search
   source            : {};
@@ -146,7 +146,7 @@ export interface SearchOptions extends ModuleOptions {
   events: Array<string>;
 }
 
-const settings: SearchOptions = {
+const default_settings: SearchOptions = {
   name              : 'Search',
   namespace         : 'search',
 
@@ -165,7 +165,7 @@ const settings: SearchOptions = {
   selectFirstResult : false,
 
   // API config
-  apiSettings       : false,
+  apiSettings       : null,
 
   // object to search
   source            : false,
@@ -327,7 +327,7 @@ const settings: SearchOptions = {
     category: function(response, fields, preserveHTML) {
       let
         html = '',
-        escape = settings.templates.escape
+        escape = default_settings.templates.escape
       ;
       if (response[fields.categoryResults] !== undefined) {
 
@@ -398,7 +398,7 @@ const settings: SearchOptions = {
     standard: function(response, fields, preserveHTML) {
       var
         html = '',
-        escape = settings.templates.escape
+        escape = default_settings.templates.escape
       ;
       if (response[fields.results] !== undefined) {
 
@@ -480,7 +480,7 @@ export class Search extends Module {
   instance: Search;
 
   constructor(selector: string, parameters) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
 
     this.$prompt          = this.$element.find(this.settings.selector.prompt);
     this.$searchButton    = this.$element.find(this.settings.selector.searchButton);
@@ -540,7 +540,7 @@ export class Search extends Module {
         onError           : this.error
       }
     ;
-    $.extend(true, apiSettings, settings.apiSettings);
+    $.extend(true, apiSettings, this.settings.apiSettings);
     this.verbose('Setting up API request', apiSettings);
 
     // this.$element.api(apiSettings);
@@ -1022,7 +1022,7 @@ export class Search extends Module {
       searchTerm    = this.get_value(),
       numCharacters = searchTerm.length
     ;
-    return (numCharacters >= settings.minCharacters);
+    return (numCharacters >= this.settings.minCharacters);
   }
 
   has_results(): boolean {
@@ -1252,7 +1252,7 @@ export class Search extends Module {
     if (html) {
       this.$results.html(html);
       this.refreshResults();
-      if (settings.selectFirstResult) {
+      if (this.settings.selectFirstResult) {
         this.select_firstResult();
       }
       this.showResults();
@@ -1300,10 +1300,10 @@ export class Search extends Module {
         // ;
 
         let transition = new Transition(this.$results, {
-          animation  : settings.transition + ' in',
-          debug      : settings.debug,
-          verbose    : settings.verbose,
-          duration   : settings.duration,
+          animation  : this.settings.transition + ' in',
+          debug      : this.settings.debug,
+          verbose    : this.settings.verbose,
+          duration   : this.settings.duration,
           queue      : true
         });
         
@@ -1347,10 +1347,10 @@ export class Search extends Module {
         // ;
 
         let transition = new Transition(this.$results, {
-          animation  : settings.transition + ' in',
-          debug      : settings.debug,
-          verbose    : settings.verbose,
-          duration   : settings.duration,
+          animation  : this.settings.transition + ' in',
+          debug      : this.settings.debug,
+          verbose    : this.settings.verbose,
+          duration   : this.settings.duration,
           queue      : true
         });
 
@@ -1408,17 +1408,17 @@ export class Search extends Module {
           }
         }
         else {
-          response[this.settings.fields.results] = response[this.settings.fields.results].slice(0, settings.maxResults);
+          response[this.settings.fields.results] = response[this.settings.fields.results].slice(0, this.settings.maxResults);
         }
       }
       if ($.isFunction(template)) {
-        html = template(response, this.settings.fields, settings.preserveHTML);
+        html = template(response, this.settings.fields, this.settings.preserveHTML);
       }
       else {
         this.error(this.settings.error.noTemplate, false);
       }
     }
-    else if (settings.showNoResults) {
+    else if (this.settings.showNoResults) {
       html = this.displayMessage(this.settings.error.noResults, 'empty', this.settings.error.noResultsHeader);
     }
     this.invokeCallback('results').call(this.element, response);

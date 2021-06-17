@@ -63,7 +63,7 @@ export interface TabOptions extends ModuleOptions {
   events: Array<string>;
 }
 
-const settings: TabOptions = {
+const default_settings: TabOptions = {
   name            : 'Tab',
   namespace       : 'tab',
 
@@ -153,7 +153,7 @@ export class Tab extends Module {
   instance: Tab;
 
   constructor(selector: string, parameters) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
 
     this.$allModules = $(this.$element);
     
@@ -300,7 +300,7 @@ export class Tab extends Module {
     let
       pushStateAvailable = (window.history && window.history.pushState),
       shouldIgnoreLoad   = (pushStateAvailable && this.settings.ignoreFirstLoad && this.firstLoad),
-      remoteContent      = (settings.auto || $.isPlainObject(this.settings.apiSettings)),
+      remoteContent      = (this.settings.auto || $.isPlainObject(this.settings.apiSettings)),
       // only add default path if not remote content
       pathArray = (remoteContent && !shouldIgnoreLoad)
         ? this.utilities_pathToArray(tabPath)

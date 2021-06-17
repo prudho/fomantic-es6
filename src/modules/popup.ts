@@ -147,7 +147,7 @@ export interface PopupOptions extends ModuleOptions {
   events: Array<string>
 }
 
-const settings: PopupOptions = {
+const default_settings: PopupOptions = {
 
   name           : 'Popup',
     
@@ -315,7 +315,7 @@ const settings: PopupOptions = {
     popup: function(text) {
       let
         html   = '',
-        escape = settings.templates.escape
+        escape = default_settings.templates.escape
       ;
       if (typeof text !== undefined) {
         if (typeof text.title !== undefined && text.title) {
@@ -367,7 +367,7 @@ export class Popup extends Module {
   instance: Popup;
 
   constructor(selector: string, parameters) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
 
     this.$target = (this.settings.target)
       ? $(this.settings.target)
@@ -1199,11 +1199,11 @@ export class Popup extends Module {
       this.verbose('Adjusting offset to center arrow on small target element');
       if (position == 'top left' || position == 'bottom left') {
         offset += (target.width / 2);
-        offset -= settings.arrowPixelsFromEdge;
+        offset -= this.settings.arrowPixelsFromEdge;
       }
       if (position == 'top right' || position == 'bottom right') {
         offset -= (target.width / 2);
-        offset += settings.arrowPixelsFromEdge;
+        offset += this.settings.arrowPixelsFromEdge;
       }
     }
 

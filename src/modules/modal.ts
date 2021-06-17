@@ -119,7 +119,7 @@ export interface ModalOptions extends ModuleOptions {
   events: Array<string>;
 }
 
-const settings: ModalOptions = {
+const default_settings: ModalOptions = {
   name           : 'Modal',
   namespace      : 'modal',
 
@@ -363,7 +363,7 @@ export class Modal extends Module {
   instance: Modal;
 
   constructor(selector: string, parameters) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
 
     this.$context        = $(this.settings.context);
     this.$close          = this.$element.find(this.settings.selector.close);
@@ -754,9 +754,9 @@ export class Modal extends Module {
       $.extend(this.cache, {
         pageHeight    : $(document).outerHeight(),
         width         : modalWidth,
-        height        : modalHeight + settings.offset,
-        scrollHeight  : scrollHeight + settings.offset,
-        contextHeight : (settings.context == 'body')
+        height        : modalHeight + this.settings.offset,
+        scrollHeight  : scrollHeight + this.settings.offset,
+        contextHeight : (this.settings.context == 'body')
           ? $(window).height()
           : this.$dimmable.height(),
       });

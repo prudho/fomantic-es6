@@ -47,7 +47,7 @@ export interface TransitionOptions extends ModuleOptions {
   events?: Array<string>
 }
 
-const settings: TransitionOptions = {
+const default_settings: TransitionOptions = {
   name          : 'Transition',
   namespace     : 'transition',
 
@@ -110,7 +110,7 @@ export class Transition extends Module {
   instance: Transition;
 
   constructor(selector, parameters: TransitionOptions) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
     
     this.initialize();
   }
@@ -143,7 +143,7 @@ export class Transition extends Module {
     this.$element.removeAttr(this.moduleNamespace);
   }
 
-  animate(overrideSettings: boolean = false) {
+  animate(overrideSettings: TransitionOptions = null) {
     this.settings = overrideSettings || this.settings;
     if (!this.is_supported()) {
       this.error(this.settings.error.support);
@@ -438,7 +438,7 @@ export class Transition extends Module {
     return style.replace(/display.*?;/, '');
   }
 
-  set_animating(animation:any = settings.animation): void {
+  set_animating(animation:any = this.settings.animation): void {
     // remove previous callbacks
     this.remove_completeCallback();
 

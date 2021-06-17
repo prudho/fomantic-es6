@@ -224,7 +224,7 @@ export interface DropdownOptions extends ModuleOptions {
   events: Array<string>;
 }
 
-const settings: DropdownOptions = {
+const default_settings: DropdownOptions = {
   /* Component */
   name           : 'Dropdown',
   namespace      : 'dropdown',
@@ -475,7 +475,7 @@ const settings: DropdownOptions = {
       let
         placeholder = select.placeholder || false,
         html        = '',
-        escape = settings.templates.escape
+        escape = default_settings.templates.escape
       ;
       html +=  '<i class="dropdown icon"></i>';
       if (placeholder) {
@@ -485,7 +485,7 @@ const settings: DropdownOptions = {
         html += '<div class="text"></div>';
       }
       html += '<div class="'+className.menu+'">';
-      html += settings.templates.menu(select, fields, preserveHTML,className);
+      html += default_settings.templates.menu(select, fields, preserveHTML,className);
       html += '</div>';
       return html;
     },
@@ -495,8 +495,8 @@ const settings: DropdownOptions = {
       let
         values = response[fields.values] || [],
         html   = '',
-        escape = settings.templates.escape,
-        deQuote = settings.templates.deQuote
+        escape = default_settings.templates.escape,
+        deQuote = default_settings.templates.deQuote
       ;
       $.each(values, function(_index, option) {
         let
@@ -540,7 +540,7 @@ const settings: DropdownOptions = {
           if (isMenu) {
             html += '</span>';
             html += '<div class="' + itemType + '">';
-            html += settings.templates.menu(option, fields, preserveHTML, className);
+            html += default_settings.templates.menu(option, fields, preserveHTML, className);
             html += '</div>';
           } else if (hasDescription) {
             html += '</span>';
@@ -569,7 +569,7 @@ const settings: DropdownOptions = {
   
     // generates label for multiselect
     label: function(value, text, preserveHTML, className) {
-      let escape = settings.templates.escape;
+      let escape = default_settings.templates.escape;
       return escape(text,preserveHTML) + '<i class="'+className.delete+' icon"></i>';
     },
   
@@ -629,7 +629,7 @@ export class Dropdown extends Module {
   itemTimer;
 
   constructor(selector: string, parameters) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
 
     this.$document       = $(document)
     this.$context        = $(this.settings.context);
@@ -875,7 +875,7 @@ export class Dropdown extends Module {
           .addClass(this.settings.className.addition)
           .addClass(this.settings.className.item)
         ;
-        if (settings.hideAdditions) {
+        if (this.settings.hideAdditions) {
           $userChoice.addClass(this.settings.className.hidden);
         }
         $userChoices = ($userChoices === undefined)
@@ -985,14 +985,14 @@ export class Dropdown extends Module {
         ;
         this.$icon.on(this.clickEvent + this.eventNamespace, this.event_icon_click.bind(this));
       }
-      else if (settings.on == 'hover') {
+      else if (this.settings.on == 'hover') {
         this.$element
           .on('mouseenter' + this.eventNamespace, this.delay_show.bind(this))
           .on('mouseleave' + this.eventNamespace, this.delay_hide.bind(this))
         ;
       }
       else {
-        this.$element.on(settings.on + this.eventNamespace, this.toggle.bind(this));
+        this.$element.on(this.settings.on + this.eventNamespace, this.toggle.bind(this));
       }
       this.$element
         .on('mousedown' + this.eventNamespace, this.event_mousedown.bind(this))
@@ -1469,7 +1469,7 @@ export class Dropdown extends Module {
       $activeLabels.removeClass(this.settings.className.active);
       $label.addClass(this.settings.className.active);
     }
-    settings.onLabelSelect.apply(this, $labels.filter('.' + this.settings.className.active));
+    this.settings.onLabelSelect.apply(this, $labels.filter('.' + this.settings.className.active));
     event.stopPropagation();
   }
 
@@ -1604,8 +1604,8 @@ export class Dropdown extends Module {
   }
 
   exactSearch(query: string, term: string) {
-    query = (settings.ignoreSearchCase ? query.toLowerCase() : query);
-    term  = (settings.ignoreSearchCase ? term.toLowerCase() : term);
+    query = (this.settings.ignoreSearchCase ? query.toLowerCase() : query);
+    term  = (this.settings.ignoreSearchCase ? term.toLowerCase() : term);
     return term.indexOf(query) > -1;
   }
 
@@ -1614,8 +1614,8 @@ export class Dropdown extends Module {
       termLength  = term.length,
       queryLength = query.length
     ;
-    query = (settings.ignoreSearchCase ? query.toLowerCase() : query);
-    term  = (settings.ignoreSearchCase ? term.toLowerCase() : term);
+    query = (this.settings.ignoreSearchCase ? query.toLowerCase() : query);
+    term  = (this.settings.ignoreSearchCase ? term.toLowerCase() : term);
     if (queryLength > termLength) {
       return false;
     }
@@ -1660,7 +1660,7 @@ export class Dropdown extends Module {
       if (this.is_allFiltered()) {
         return true;
       }
-      if (settings.onShow.call(this.element) !== false) {
+      if (this.settings.onShow.call(this.element) !== false) {
         this.animate_show(() => {
           if (this.can_click()) {
             this.bind_intent();
@@ -1974,7 +1974,7 @@ export class Dropdown extends Module {
           }
           let preSelected = this.$input.val();
           if (!Array.isArray(preSelected)) {
-            preSelected = preSelected && preSelected!=="" ? preSelected.split(settings.delimiter) : [];
+            preSelected = preSelected && preSelected!=="" ? preSelected.split(this.settings.delimiter) : [];
           }
           if (this.is_multiple()) {
             $.each(preSelected, (index, value) => {
@@ -2933,7 +2933,7 @@ export class Dropdown extends Module {
         if (group.length !== oldGroup.length || group[0] !== oldGroup[0]) {
           values.push({
             type: 'header',
-            divider: settings.headerDivider,
+            divider: this.settings.headerDivider,
             name: group.attr('label') || ''
           });
           oldGroup = group;
@@ -3250,7 +3250,7 @@ export class Dropdown extends Module {
             module.set_activeItem($selected);
           }
         }
-        else if (!isFiltered && (settings.useLabels || this.selectActionActive)) {
+        else if (!isFiltered && (this.settings.useLabels || this.selectActionActive)) {
           module.debug('Selected active value, removing label');
           module.remove_selected(selectedValue);
         }
@@ -3386,7 +3386,7 @@ export class Dropdown extends Module {
       newValue
     ;
     if (hasInput) {
-      if (!settings.allowReselection && stringValue == currentValue) {
+      if (!this.settings.allowReselection && stringValue == currentValue) {
         this.verbose('Skipping value update already same value', value, currentValue);
         if (!this.is_initialLoad()) {
           return;
@@ -3418,7 +3418,7 @@ export class Dropdown extends Module {
       this.verbose('No callback on initial load', this.settings.onChange);
     }
     else if (preventChangeTrigger !== true) {
-      settings.onChange.call(this.element, value, text, $selected);
+      this.settings.onChange.call(this.element, value, text, $selected);
     }
   }
 
@@ -3597,12 +3597,12 @@ export class Dropdown extends Module {
       }
     }
     else {
-      newValue = newValue.join(settings.delimiter);
+      newValue = newValue.join(this.settings.delimiter);
       this.debug('Setting hidden input to delimited value', newValue, this.$input);
     }
 
     if (this.settings.fireOnInit === false && this.is_initialLoad()) {
-      this.verbose('Skipping onadd callback on initial load', settings.onAdd);
+      this.verbose('Skipping onadd callback on initial load', this.settings.onAdd);
     }
     else {
       this.settings.onAdd.call(this.element, addedValue, addedText, $selectedItem);
@@ -3690,7 +3690,7 @@ export class Dropdown extends Module {
           value = this.settings.templates.deQuote(item[this.settings.fields.value]),
           name = this.settings.templates.escape(
             item[this.settings.fields.name] || '',
-            settings.preserveHTML
+            this.settings.preserveHTML
           )
         ;
         this.$input.append('<option value="' + value + '">' + name + '</option>');
@@ -3772,13 +3772,13 @@ export class Dropdown extends Module {
     if (this.settings.useLabels && this.has_maxSelections() ) {
       return;
     }
-    if (settings.useLabels && this.is_multiple()) {
+    if (this.settings.useLabels && this.is_multiple()) {
       this.$item.not('.' + this.settings.className.active).removeClass(this.settings.className.filtered);
     }
     else {
       this.$item.removeClass(this.settings.className.filtered);
     }
-    if (settings.hideDividers) {
+    if (this.settings.hideDividers) {
       this.$divider.removeClass(this.settings.className.hidden);
     }
     this.remove_empty();
@@ -3916,7 +3916,7 @@ export class Dropdown extends Module {
         .removeClass(module.settings.className.filtered)
         .removeClass(module.settings.className.active)
       ;
-      if (settings.useLabels) {
+      if (this.settings.useLabels) {
         $selected.removeClass(module.settings.className.selected);
       }
     });

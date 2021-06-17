@@ -60,7 +60,7 @@ export interface EmbedOptions extends ModuleOptions {
   events: Array<string>;
 }
 
-const settings: EmbedOptions = {
+const default_settings: EmbedOptions = {
   name        : 'Embed',
   namespace   : 'embed',
 
@@ -194,7 +194,7 @@ export class Embed extends Module {
   instance: Embed;
 
   constructor(selector: string, parameters) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
 
     this.$placeholder    = this.$element.find(this.settings.selector.placeholder);
     this.$icon           = this.$element.find(this.settings.selector.icon);

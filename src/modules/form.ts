@@ -220,7 +220,7 @@ export interface FormOptions extends ModuleOptions {
   events: Array<string>;
 }
 
-const settings: FormOptions = {
+const default_settings: FormOptions = {
   name              : 'Form',
   namespace         : 'form',
 
@@ -408,13 +408,13 @@ const settings: FormOptions = {
     // is most likely an email
     email: function(value: string) {
       // return $.fn.form.settings.regExp.email.test(value);
-      return settings.regExp.email.test(value);
+      return default_settings.regExp.email.test(value);
     },
 
     // value is most likely url
     url: function(value: string) {
       // return $.fn.form.settings.regExp.url.test(value);
-      return settings.regExp.url.test(value);
+      return default_settings.regExp.url.test(value);
     },
 
     // matches specified regExp
@@ -424,7 +424,7 @@ const settings: FormOptions = {
       }
       let
         // regExpParts = regExp.match($.fn.form.settings.regExp.flags),
-        regExpParts = regExp.match(settings.regExp.flags),
+        regExpParts = regExp.match(default_settings.regExp.flags),
         flags
       ;
       // regular expression specified as /baz/gi (flags)
@@ -442,25 +442,25 @@ const settings: FormOptions = {
     },
     minValue: function(value, range) {
       // return $.fn.form.settings.rules.range(value, range+'..', 'number');
-      return settings.rules.range(value, range+'..', 'number');
+      return default_settings.rules.range(value, range+'..', 'number');
     },
     maxValue: function(value, range) {
       // return $.fn.form.settings.rules.range(value, '..'+range, 'number');
-      return settings.rules.range(value, '..'+range, 'number');
+      return default_settings.rules.range(value, '..'+range, 'number');
     },
     // is valid integer or matches range
     integer: function(value, range) {
       // return $.fn.form.settings.rules.range(value, range, 'integer');
-      return settings.rules.range(value, range, 'integer');
+      return default_settings.rules.range(value, range, 'integer');
     },
     range: function(value, range, regExp) {
       if (typeof regExp == "string") {
         // regExp = $.fn.form.settings.regExp[regExp];
-        regExp = settings.regExp[regExp];
+        regExp = default_settings.regExp[regExp];
       }
       if (!(regExp instanceof RegExp)) {
         // regExp = $.fn.form.settings.regExp.integer;
-        regExp = settings.regExp.integer;
+        regExp = default_settings.regExp.integer;
       }
       let
         min,
@@ -494,13 +494,13 @@ const settings: FormOptions = {
     // is valid number (with decimal)
     decimal: function(value, range) {
       // return $.fn.form.settings.rules.range(value, range, 'decimal');
-      return settings.rules.range(value, range, 'decimal');
+      return default_settings.rules.range(value, range, 'decimal');
     },
 
     // is valid number
     number: function(value, range) {
       // return $.fn.form.settings.rules.range(value, range, 'number');
-      return settings.rules.range(value, range, 'number');
+      return default_settings.rules.range(value, range, 'number');
     },
 
     // is value (case insensitive)
@@ -543,7 +543,7 @@ const settings: FormOptions = {
     contains: function(value, text) {
       // escape regex characters
       // text = text.replace($.fn.form.settings.regExp.escape, "\\$&");
-      text = text.replace(settings.regExp.escape, "\\$&");
+      text = text.replace(default_settings.regExp.escape, "\\$&");
       return (value.search( new RegExp(text, 'i') ) !== -1);
     },
 
@@ -551,7 +551,7 @@ const settings: FormOptions = {
     containsExactly: function(value, text) {
       // escape regex characters
       // text = text.replace($.fn.form.settings.regExp.escape, "\\$&");
-      text = text.replace(settings.regExp.escape, "\\$&");
+      text = text.replace(default_settings.regExp.escape, "\\$&");
       return (value.search( new RegExp(text) ) !== -1);
     },
 
@@ -559,7 +559,7 @@ const settings: FormOptions = {
     doesntContain: function(value, text) {
       // escape regex characters
       // text = text.replace($.fn.form.settings.regExp.escape, "\\$&");
-      text = text.replace(settings.regExp.escape, "\\$&");
+      text = text.replace(default_settings.regExp.escape, "\\$&");
       return (value.search( new RegExp(text, 'i') ) === -1);
     },
 
@@ -567,7 +567,7 @@ const settings: FormOptions = {
     doesntContainExactly: function(value, text) {
       // escape regex characters
       // text = text.replace($.fn.form.settings.regExp.escape, "\\$&");
-      text = text.replace(settings.regExp.escape, "\\$&");
+      text = text.replace(default_settings.regExp.escape, "\\$&");
       return (value.search( new RegExp(text) ) === -1);
     },
 
@@ -821,7 +821,7 @@ export class Form extends Module {
   instance: Form;
 
   constructor(selector: string, parameters) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
     
     this.initialize();
   }

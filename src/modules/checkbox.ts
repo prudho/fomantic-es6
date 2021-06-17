@@ -51,7 +51,7 @@ export interface CheckboxOptions extends ModuleOptions {
   events: Array<string>;
 }
 
-const settings: CheckboxOptions = {
+const default_settings: CheckboxOptions = {
   name                : 'Checkbox',
   namespace           : 'checkbox',
 
@@ -121,7 +121,7 @@ export class Checkbox extends Module {
   instance: Checkbox;
 
   constructor(selector, parameters) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
 
     this.$input = this.$element.children(this.settings.selector.input);
     this.$label = this.$element.children(this.settings.selector.label);

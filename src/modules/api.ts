@@ -105,7 +105,7 @@ export interface ApiOptions extends ModuleOptions {
   events?: Array<string>
 }
 
-const settings: ApiOptions = {
+const default_settings: ApiOptions = {
   name              : 'API',
   namespace         : 'api',
 
@@ -273,7 +273,7 @@ export class Api extends Module {
   instance: Api;
 
   constructor(parameters: ApiOptions) {
-    super(null, parameters, settings);
+    super(null, parameters, default_settings);
 
     // context used for state
     this.$context        = (this.settings.stateContext)
@@ -342,7 +342,7 @@ export class Api extends Module {
       this.write_cachedResponse(this.url, response);
       this.debug('Saving server response locally', this.cache);
     }
-    settings.onSuccess.call(this.context, response, this.$element, xhr);
+    this.settings.onSuccess.call(this.context, response, this.$element, xhr);
   }
 
   event_request_fail(xhr, status, httpMessage) {
@@ -400,11 +400,11 @@ export class Api extends Module {
     let
       context            = this,
       elapsedTime        = (new Date().getTime() - this.requestStartTime),
-      timeLeft           = (settings.loadingDuration - elapsedTime),
-      translatedResponse = ( $.isFunction(settings.onResponse) )
-        ? module.is.expectingJSON() && !settings.rawResponse
-          ? settings.onResponse.call(context, $.extend(true, {}, response))
-          : settings.onResponse.call(context, response)
+      timeLeft           = (default_settings.loadingDuration - elapsedTime),
+      translatedResponse = ( $.isFunction(default_settings.onResponse) )
+        ? module.is.expectingJSON() && !default_settings.rawResponse
+          ? default_settings.onResponse.call(context, $.extend(true, {}, response))
+          : default_settings.onResponse.call(context, response)
         : false
     ;
     timeLeft = (timeLeft > 0)
@@ -412,7 +412,7 @@ export class Api extends Module {
       : 0
     ;
     if (translatedResponse) {
-      module.debug('Modified API response in onResponse callback', settings.onResponse, translatedResponse, response);
+      module.debug('Modified API response in onResponse callback', default_settings.onResponse, translatedResponse, response);
       response = translatedResponse;
     }
     if (timeLeft > 0) {
@@ -432,7 +432,7 @@ export class Api extends Module {
     let
       context     = this,
       elapsedTime = (new Date().getTime() - requestStartTime),
-      timeLeft    = (settings.loadingDuration - elapsedTime)
+      timeLeft    = (default_settings.loadingDuration - elapsedTime)
     ;
     timeLeft = (timeLeft > 0)
       ? timeLeft
@@ -565,13 +565,13 @@ export class Api extends Module {
       this.send_request();
     }
     else {
-      if (!settings.throttleFirstRequest && !this.timer) {
+      if (!default_settings.throttleFirstRequest && !this.timer) {
         this.debug('Sending request', this.data, this.ajaxSettings.method);
         this.send_request();
-        this.timer = setTimeout(function() {}, settings.throttle);
+        this.timer = setTimeout(function() {}, default_settings.throttle);
       }
       else {
-        this.debug('Throttling request', settings.throttle);
+        this.debug('Throttling request', default_settings.throttle);
         clearTimeout(this.timer);
         this.timer = setTimeout(() => {
           if (this.timer) {
@@ -747,7 +747,7 @@ export class Api extends Module {
           }
           else {
             this.verbose('Found required variable', variable, value);
-            value = (settings.encodeParameters)
+            value = (default_settings.encodeParameters)
               ? this.get_urlEncodedValue(value)
               : value
             ;

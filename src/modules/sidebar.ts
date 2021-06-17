@@ -70,7 +70,7 @@ export interface SidebarOptions extends ModuleOptions {
   events: Array<string>;
 }
 
-const settings: SidebarOptions = {
+const default_settings: SidebarOptions = {
   name              : 'Sidebar',
   namespace         : 'sidebar',
 
@@ -166,7 +166,7 @@ export class Sidebar extends Module {
   instance: Sidebar;
 
   constructor(selector: string, parameters) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
 
     this.$context        = $(this.settings.context);
     this.$pusher         = this.$context.children(this.settings.selector.pusher);

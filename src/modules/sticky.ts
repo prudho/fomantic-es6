@@ -66,7 +66,7 @@ export interface StickyOptions extends ModuleOptions {
   events: Array<string>;
 }
 
-const settings: StickyOptions = {
+const default_settings: StickyOptions = {
   name           : 'Sticky',
   namespace      : 'sticky',
 
@@ -155,7 +155,7 @@ export class Sticky extends Module {
   instance: Sticky;
 
   constructor(selector: string, parameters) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
 
     this.$scroll = $(this.settings.scrollContext);
 
@@ -252,8 +252,8 @@ export class Sticky extends Module {
     if (!this.is_standardScroll()) {
       this.debug('Non-standard scroll. Removing scroll offset from element offset');
 
-      scrollContext.top  = this.$scroll.scrollY;
-      scrollContext.left = this.$scroll.scrollX;
+      scrollContext.top  = this.settings.scrollContext.scrollY;
+      scrollContext.left = this.settings.scrollContext.scrollX;
 
       element.offset.top  += scrollContext.top;
       context.offset.top  += scrollContext.top;
@@ -323,7 +323,7 @@ export class Sticky extends Module {
   event_scroll(): void {
     requestAnimationFrame(() => {
       //this.$scroll.triggerHandler('scrollchange' + this.eventNamespace, this.$scroll.scrollY ); INVESTIGATE
-      this.$scroll.trigger('scrollchange' + this.eventNamespace, this.$scroll.scrollY);
+      this.$scroll.trigger('scrollchange' + this.eventNamespace, this.settings.scrollContext.scrollY);
     });
   }
 
@@ -397,7 +397,7 @@ export class Sticky extends Module {
 
   stick(scroll = undefined): void {
     let
-      cachedPosition = scroll || (this.settings.scrollContext == window ? 0 : this.$scroll.scrollY),
+      cachedPosition = scroll || (this.settings.scrollContext == window ? 0 : this.settings.scrollContext.scrollY),
       cache          = this.cache,
       fits           = cache.fits,
       sameHeight     = cache.sameHeight,
@@ -644,7 +644,7 @@ export class Sticky extends Module {
 
   get_direction(scroll): string {
     let direction: string = 'down';
-    scroll = scroll || this.$scroll.scrollY;
+    scroll = scroll || this.settings.scrollContext.scrollY;
     if (this.lastScroll !== undefined) {
       if (this.lastScroll < scroll) {
         direction = 'down';
@@ -657,7 +657,7 @@ export class Sticky extends Module {
   }
 
   get_scrollChange(scroll) {
-    scroll = scroll || this.$scroll.scrollY;
+    scroll = scroll || this.settings.scrollContext.scrollY;
     return (this.lastScroll)
       ? (scroll - this.lastScroll)
       : 0
@@ -675,7 +675,7 @@ export class Sticky extends Module {
   }
 
   get_elementScroll(scroll) {
-    scroll = scroll || this.$scroll.scrollY;
+    scroll = scroll || this.settings.scrollContext.scrollY;
     let
       element        = this.cache.element,
       scrollContext  = this.cache.scrollContext,

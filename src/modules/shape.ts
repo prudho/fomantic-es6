@@ -43,7 +43,7 @@ export interface ShapeOptions extends ModuleOptions {
   events: Array<string>;
 }
 
-const settings: ShapeOptions = {
+const default_settings: ShapeOptions = {
   // module info
   name : 'Shape',
   
@@ -118,7 +118,7 @@ export class Shape extends Module {
   instance: Shape;
 
   constructor(selector: string, parameters) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
 
     this.$sides = this.$element.find(':scope> ' + this.settings.selector.sides);
     this.$side  = this.$sides.find(':scope> ' + this.settings.selector.side);

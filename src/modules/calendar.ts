@@ -143,7 +143,7 @@ export interface CalendarOptions extends ModuleOptions {
   events: Array<string>
 }
 
-const settings: CalendarOptions = {
+const default_settings: CalendarOptions = {
   name            : 'Calendar',
   namespace       : 'calendar',
 
@@ -597,7 +597,7 @@ export class Calendar extends Module {
   popup: Popup;
 
   constructor(selector: string, parameters: CalendarOptions) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
 
     this.$input = this.$element.find(this.settings.selector.input);
     this.$activator = this.$element.find(this.settings.selector.activator);
@@ -799,7 +799,7 @@ export class Calendar extends Module {
     ;
 
     let
-      columns = isDay ? settings.showWeekNumbers ? 8 : 7 : isHour ? 4 : this.timeGap['column'],
+      columns = isDay ? this.settings.showWeekNumbers ? 8 : 7 : isHour ? 4 : this.timeGap['column'],
       rows = isDay || isHour ? 6 : this.timeGap['row'],
       pages = isDay ? multiMonth : 1
     ;
@@ -1556,7 +1556,7 @@ export class Calendar extends Module {
 
   set_minDate(date): void {
     date = this.helper_sanitiseDate(date);
-    if (settings.maxDate !== null && this.settings.maxDate <= date) {
+    if (this.settings.maxDate !== null && this.settings.maxDate <= date) {
       this.verbose('Unable to set minDate variable bigger that maxDate variable', date, this.settings.maxDate);
     } else {
       this.setting('minDate', date);
@@ -1569,7 +1569,7 @@ export class Calendar extends Module {
   }
 
   set_monthOffset(monthOffset, refreshCalendar): void {
-    let multiMonth = Math.max(settings.multiMonth, 1);
+    let multiMonth = Math.max(this.settings.multiMonth, 1);
     monthOffset = Math.max(1 - multiMonth, Math.min(0, monthOffset));
     this.set_dataKeyValue(this.settings.metadata.monthOffset, monthOffset, refreshCalendar);
   }

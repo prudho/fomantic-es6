@@ -85,7 +85,7 @@ export interface VisibilityOptions extends ModuleOptions {
   events: Array<string>;
 }
 
-const settings: VisibilityOptions = {
+const default_settings: VisibilityOptions = {
   name                   : 'Visibility',
   namespace              : 'visibility',
 
@@ -199,7 +199,7 @@ settings: VisibilityOptions;
   instance: Visibility;
 
   constructor(selector: string, parameters: any) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
 
     this.$context = $(this.settings.context);
     
@@ -291,9 +291,9 @@ settings: VisibilityOptions;
           module.set.image(src, function() {
             loadedCount++;
             if(loadedCount == moduleCount) {
-              settings.onAllLoaded.call(this);
+              this.settings.onAllLoaded.call(this);
             }
-            settings.onLoad.call(this);
+            this.settings.onLoad.call(this);
           });
         });
       };
@@ -317,7 +317,7 @@ settings: VisibilityOptions;
       this.set_fixed();
       if (this.settings.transition) {
         if($.fn.transition !== undefined) {
-          $module.transition(settings.transition, settings.duration);
+          $module.transition(this.settings.transition, this.settings.duration);
         }
       }
     };
@@ -596,7 +596,7 @@ settings: VisibilityOptions;
         if(calculations.bottomVisible || calculations.pixelsPassed > this.get_pixelsPassed(amount)) {
           this.execute(callback, amount);
         }
-        else if(!settings.once) {
+        else if(!this.settings.once) {
           this.remove_occurred(callback);
         }
       });
@@ -627,7 +627,7 @@ settings: VisibilityOptions;
   offScreen(newCallback) {
     let
       calculations = this.get_elementCalculations(),
-      callback     = newCallback || settings.onOffScreen,
+      callback     = newCallback || this.settings.onOffScreen,
       callbackName = 'offScreen'
     ;
     if (newCallback) {
@@ -753,7 +753,7 @@ settings: VisibilityOptions;
   passingReverse(newCallback) {
     let
       calculations = this.get_elementCalculations(),
-      callback     = newCallback || settings.onPassingReverse,
+      callback     = newCallback || this.settings.onPassingReverse,
       callbackName = 'passingReverse'
     ;
     if (newCallback) {

@@ -72,7 +72,7 @@ export interface ProgressOptions extends ModuleOptions {
   events: Array<string>
 }
 
-const settings: ProgressOptions = {
+const default_settings: ProgressOptions = {
   name         : 'Progress',
   namespace    : 'progress',
 
@@ -172,7 +172,7 @@ export class Progress extends Module {
   instance: Progress;
 
   constructor(selector: string, parameters: ProgressOptions) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
 
     this.$bars = $(this.element).find(this.settings.selector.bar);
     // this.$progresses     = $(this).find(this.settings.selector.progress),
@@ -634,7 +634,7 @@ export class Progress extends Module {
     } else if (totalPercent < 0) {
       this.error(this.settings.error.tooLow, totalPercent);
     } else {
-      let autoPrecision = settings.precision > 0
+      let autoPrecision = this.settings.precision > 0
         ? this.settings.precision
         : isMultipleValues
           ? this.helper_derivePrecision(Math.min.apply(null, this.value), this.total)

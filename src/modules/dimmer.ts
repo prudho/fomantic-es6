@@ -57,7 +57,7 @@ export interface DimmerOptions extends ModuleOptions {
   events: Array<string>;
 }
 
-const settings: DimmerOptions = {
+const default_settings: DimmerOptions = {
   name        : 'Dimmer',
   namespace   : 'dimmer',
 
@@ -146,7 +146,7 @@ export class Dimmer extends Module {
   instance: Dimmer;
 
   constructor(selector: string, parameters: DimmerOptions) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
     
     this.preinitialize();
 

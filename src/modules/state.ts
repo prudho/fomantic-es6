@@ -87,7 +87,7 @@ export interface StateOptions extends ModuleOptions {
   events: Array<string>
 }
 
-const settings: StateOptions = {
+const default_settings: StateOptions = {
   // module info
   name           : 'State',
 
@@ -203,7 +203,7 @@ export class State extends Module {
   instance: State;
 
   constructor(selector: string, parameters: any) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
     
     this.initialize();
   }
@@ -261,7 +261,7 @@ export class State extends Module {
     $.each(this.settings.defaults, (type, typeStates) => {
       if (module.is[type] !== undefined && module.is[type]() ) {
         module.verbose('Adding default states', type, element);
-        $.extend(settings.states, typeStates, userStates);
+        $.extend(this.settings.states, typeStates, userStates);
       }
     });
   }
@@ -300,13 +300,13 @@ export class State extends Module {
         .then(function() {
           if(apiRequest.state() == 'resolved') {
             module.debug('API request succeeded');
-            settings.activateTest   = function(){ return true; };
-            settings.deactivateTest = function(){ return true; };
+            this.settings.activateTest   = function(){ return true; };
+            this.settings.deactivateTest = function(){ return true; };
           }
           else {
             module.debug('API request failed');
-            settings.activateTest   = function(){ return false; };
-            settings.deactivateTest = function(){ return false; };
+            this.settings.activateTest   = function(){ return false; };
+            this.settings.deactivateTest = function(){ return false; };
           }
           module.change.state();
         })

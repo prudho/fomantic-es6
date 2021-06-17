@@ -111,7 +111,7 @@ export interface ToastOptions extends ModuleOptions {
   events: Array<string>;
 }
 
-const settings: ToastOptions = {
+const default_settings: ToastOptions = {
   name           : 'Toast',
   namespace      : 'toast',
 
@@ -240,7 +240,7 @@ export class Toast extends Module {
   instance: Toast;
 
   constructor(selector: string, parameters: any) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
 
     this.$toastBox    = $(`<div class="${this.settings.className.box}"/>`);
     this.$toast       = $('<div/>');

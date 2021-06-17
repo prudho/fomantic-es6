@@ -67,7 +67,7 @@ export interface NagOptions extends ModuleOptions {
   events: Array<string>
 }
 
-const settings: NagOptions = {
+const default_settings: NagOptions = {
   name        : 'Nag',
   namespace   : 'Nag',
   
@@ -143,7 +143,7 @@ export class Nag extends Module {
   storage;
 
   constructor(selector: string, parameters: any) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
 
     this.$context = (this.settings.context)
       ? $(this.settings.context)

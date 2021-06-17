@@ -35,7 +35,7 @@ export interface RatingOptions extends ModuleOptions {
   events: Array<string>;
 }
 
-const settings: RatingOptions = {
+const default_settings: RatingOptions = {
   name          : 'Rating',
   namespace     : 'rating',
 
@@ -93,7 +93,7 @@ export class Rating extends Module {
   instance: Rating;
 
   constructor(selector: string, parameters: RatingOptions) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
 
     this.$icons = $(this.settings.selector.icon);
     
@@ -176,11 +176,11 @@ export class Rating extends Module {
       $activeIcon: Cash = $(element.target),
       idx: number       = this.$icons.index($activeIcon)
     ;
-    for(let i: number = idx + 1; i < this.get_maxRating(); i++) {
+    for (let i: number = idx + 1; i < this.get_maxRating(); i++) {
       this.$icons.eq(i).removeClass(this.settings.className.selected);
     }
     this.$element.addClass(this.settings.className.selected);
-    for(let i: number = idx; i >= 0; i--) {
+    for (let i: number = idx; i >= 0; i--) {
       this.$icons.eq(i).addClass(this.settings.className.selected);
     }
   }
@@ -211,7 +211,7 @@ export class Rating extends Module {
     if (icon) {
       this.$element.removeAttr(this.settings.metadata.icon);
     }
-    return icon || settings.icon;
+    return icon || this.settings.icon;
   }
 
   get_initialRating(): number {

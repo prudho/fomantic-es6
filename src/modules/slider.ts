@@ -76,7 +76,7 @@ export interface SliderOptions extends ModuleOptions {
   events: Array<string>;
 }
 
-const settings: SliderOptions = {
+const default_settings: SliderOptions = {
   silent       : false,
   debug        : false,
   verbose      : false,
@@ -181,7 +181,7 @@ export class Slider extends Module {
   instance: Slider;
 
   constructor(selector: string, parameters) {
-    super(selector, parameters, settings);
+    super(selector, parameters, default_settings);
     
     this.initialize();
   }
