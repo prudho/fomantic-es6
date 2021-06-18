@@ -67,7 +67,12 @@ export interface SidebarOptions extends ModuleOptions {
     notFound     : string;
   },
 
-  events: Array<string>;
+  onChange          : Function;
+  onShow            : Function;
+  onHide            : Function;
+
+  onHidden          : Function;
+  onVisible         : Function;
 }
 
 const default_settings: SidebarOptions = {
@@ -141,7 +146,12 @@ const default_settings: SidebarOptions = {
     notFound     : 'There were no elements that matched the specified selector'
   },
 
-  events: ['change', 'show', 'hide', 'hidden', 'visible']
+  onChange          : function(){},
+  onShow            : function(){},
+  onHide            : function(){},
+
+  onHidden          : function(){},
+  onVisible         : function(){}
 }
 
 export class Sidebar extends Module {
@@ -388,10 +398,10 @@ export class Sidebar extends Module {
       }
       this.pushPage(() => {
         callback.call(this.element);
-        this.invokeCallback('show').call(this.element);
+        this.settings.onShow.call(this.element);
       });
-      this.invokeCallback('change').call(this.element);
-      this.invokeCallback('visible').call(this.element);
+      this.settings.onChange.call(this.element);
+      this.settings.onVisible.call(this.element);
     }
     else {
       this.debug('Sidebar is already visible');
@@ -404,10 +414,10 @@ export class Sidebar extends Module {
       this.refreshSidebars();
       this.pullPage(() => {
         callback.call(this.element);
-        this.invokeCallback('hidden').call(this.element);
+        this.settings.onHidden.call(this.element);
       });
-      this.invokeCallback('change').call(this.element);
-      this.invokeCallback('hide').call(this.element);
+      this.settings.onChange.call(this.element);
+      this.settings.onHide.call(this.element);
     }
   }
 

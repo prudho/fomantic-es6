@@ -9,22 +9,20 @@
 </head>
 <body>
   
-    <div id="rating" class="ui yellow rating" data-rating="5" data-max-rating="10"></div>
+  <div id="rating" class="ui yellow rating" data-rating="5" data-max-rating="10"></div>
 
   <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', () => {
-      const test = new fomantic.Rating('#rating', {
+      const rating = new fomantic.Rating('#rating', {
         debug: true,
-        verbose: true
-      });
-
-      test.on('rate', (one) => {
-        console.log(one);
-      });
-
-      test.on('beforeRate', (one, two) => {
-        console.log(one, two);
-        return false;
+        verbose: true,
+        onBeforeRate: function(one, two) {
+          console.log(this, one, two);
+          return true;
+        },
+        onRate: function(one) {
+          console.log(this, one);
+        }
       });
     });
   </script>

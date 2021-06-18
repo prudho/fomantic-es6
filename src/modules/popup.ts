@@ -144,7 +144,26 @@ export interface PopupOptions extends ModuleOptions {
     popup: Function;
   }
 
-  events: Array<string>
+  // callback only when element added to dom
+  onCreate       : Function;
+
+  // callback before element removed from dom
+  onRemove       : Function;
+
+  // callback before show animation
+  onShow         : Function;
+
+  // callback after show animation
+  onVisible      : Function;
+
+  // callback before hide animation
+  onHide         : Function;
+
+  // callback when popup cannot be positioned in visible screen
+  onUnplaceable  : Function;
+
+  // callback after hide animation
+  onHidden       : Function;
 }
 
 const default_settings: PopupOptions = {
@@ -331,7 +350,26 @@ const default_settings: PopupOptions = {
     }
   },
 
-  events: ['visible', 'hidden', 'create', 'show', 'hide', 'remove', 'unplaceable']
+  // callback only when element added to dom
+  onCreate       : function(){},
+
+  // callback before element removed from dom
+  onRemove       : function(){},
+
+  // callback before show animation
+  onShow         : function(){},
+
+  // callback after show animation
+  onVisible      : function(){},
+
+  // callback before hide animation
+  onHide         : function(){},
+
+  // callback when popup cannot be positioned in visible screen
+  onUnplaceable  : function(){},
+
+  // callback after hide animation
+  onHidden       : function(){},
 }
 
 export class Popup extends Module {
@@ -457,7 +495,7 @@ export class Popup extends Module {
       if (this.settings.hoverable) {
         this.bind_popup();
       }
-      this.invokeCallback('create')(this.$popup, this.element);
+      this.settings.onCreate.call(this.$popup, this.element);
     }
     else if (this.settings.popup) {
       $(this.settings.popup).data(this.settings.metadata.activator, this.$element);
@@ -665,7 +703,7 @@ export class Popup extends Module {
       this.debug('Removing popup', this.$popup);
       this.$popup.remove();
       this.$popup = undefined;
-      this.invokeCallback('remove').call(this.$popup, this.element);
+      this.settings.onRemove.call(this.$popup, this.element);
     }
   }
 
@@ -728,7 +766,7 @@ export class Popup extends Module {
       if (!this.exists()) {
         this.create();
       }
-      if (this.invokeCallback('show').call(this.$popup, this.element) === false) {
+      if (this.settings.onShow.call(this.$popup, this.element) === false) {
         this.debug('onShow callback returned false, cancelling popup animation');
         return;
       }
@@ -760,7 +798,7 @@ export class Popup extends Module {
       transition.on('complete', () => {
         this.bind_close();
         callback.call(this.$popup, this.element);
-        this.invokeCallback('visible').call(this.$popup, this.element)
+        this.settings.onVisible.call(this.$popup, this.element);
       });
     }
     else {
@@ -771,7 +809,7 @@ export class Popup extends Module {
   hide(callback: Function = () => {}): void {
     if (this.is_visible() || this.is_animating()) {
       
-      if (this.invokeCallback('hide').call(this.$popup, this.element) === false) {
+      if(this.settings.onHide.call(this.$popup, this.element) === false) {
         this.debug('onHide callback returned false, cancelling popup animation');
         return;
       }
@@ -798,7 +836,7 @@ export class Popup extends Module {
         this.reset();
         callback.call(this.$popup, this.element);
         // INVESTIGATE: broken when using in calendar
-        //this.invokeCallback('hidden').call(this.$popup, this.element)
+        // this.settings.onHidden.call(this.$popup, this.element);
       });
     }
     else {
@@ -1351,7 +1389,7 @@ export class Popup extends Module {
           this.remove_attempts();
           this.remove_loading();
           this.reset();
-          this.invokeCallback('unplaceable')(this.$popup, this.element);
+          this.settings.onUnplaceable.call(this.$popup, this.element);
           return false;
         }
       }

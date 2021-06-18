@@ -102,7 +102,28 @@ export interface ApiOptions extends ModuleOptions {
     url     : string;
   }
 
-  events?: Array<string>
+  // callbacks before request
+  beforeSend  : Function;
+  beforeXHR   : Function;
+  onRequest   : Function;
+
+  // after request
+  onResponse  : Function;
+
+  // response was successful, if JSON passed validation
+  onSuccess   : Function;
+
+  // request finished without aborting
+  onComplete  : Function;
+
+  // failed JSON success test
+  onFailure   : Function;
+
+  // server error
+  onError     : Function;
+
+  // request aborted
+  onAbort     : Function;
 }
 
 const default_settings: ApiOptions = {
@@ -223,29 +244,27 @@ const default_settings: ApiOptions = {
   },
 
   // callbacks before request
-  // beforeSend  : function(settings) { return settings; },
-  // beforeXHR   : function(xhr) {},
-  // onRequest   : function(promise, xhr) {},
+  beforeSend  : function(settings) { return settings; },
+  beforeXHR   : function(xhr) {},
+  onRequest   : function(promise, xhr) {},
 
-  // // after request
-  // onResponse  : false, // function(response) { },
+  // after request
+  onResponse  : null, // function(response) { },
 
-  // // response was successful, if JSON passed validation
-  // onSuccess   : function(response, $module) {},
+  // response was successful, if JSON passed validation
+  onSuccess   : function(response, $module) {},
 
-  // // request finished without aborting
-  // onComplete  : function(response, $module) {},
+  // request finished without aborting
+  onComplete  : function(response, $module) {},
 
-  // // failed JSON success test
-  // onFailure   : function(response, $module) {},
+  // failed JSON success test
+  onFailure   : function(response, $module) {},
 
-  // // server error
-  // onError     : function(errorMessage, $module) {},
+  // server error
+  onError     : function(errorMessage, $module) {},
 
-  // // request aborted
-  // onAbort     : function(errorMessage, $module) {},
-
-  events: ['beforeSend', 'beforeXHR', 'onRequest', 'onResponse', 'onSuccess', 'onComplete', 'onFailure', 'onError', 'onAbort']
+  // request aborted
+  onAbort     : function(errorMessage, $module) {}
 }
 
 export class Api extends Module {

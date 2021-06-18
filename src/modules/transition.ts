@@ -44,7 +44,12 @@ export interface TransitionOptions extends ModuleOptions {
     support     : string
   }
 
-  events?: Array<string>
+  // animation callback event
+  onStart       : Function;
+  onComplete    : Function;
+  onShow        : Function;
+  onHide        : Function;
+  onBeforeHide  : Function;
 }
 
 const default_settings: TransitionOptions = {
@@ -96,7 +101,12 @@ const default_settings: TransitionOptions = {
     support     : 'This browser does not support CSS animations'
   },
 
-  events: ['start', 'complete', 'show', 'hide', 'before_hide']
+  // animation callback event
+  onStart       : function() {},
+  onComplete    : function() {},
+  onShow        : function() {},
+  onHide        : function() {},
+  onBeforeHide  : function() { return true }
 }
 
 export class Transition extends Module {
@@ -190,7 +200,7 @@ export class Transition extends Module {
       } else {
         this.verbose('Static animation completed');
         this.restore_conditions();
-        this.invokeCallback('complete')(this.$element);
+        this.settings.onComplete.call(this.$element);
       }
     }
   }
@@ -200,8 +210,8 @@ export class Transition extends Module {
     if (this.force_visible()) {
       this.remove_hidden();
       this.set_visible();
-      this.invokeCallback('show')(this.element);
-      this.invokeCallback('complete')(this.element);
+      this.settings.onShow.call(this.element);
+      this.settings.onComplete.call(this.element);
       // module.repaint();
     }
   }
@@ -216,11 +226,11 @@ export class Transition extends Module {
     this.remove_display();
     this.remove_visible();
 
-    if (this.invokeCallback('before_hide').call(this.element) !== false) {
+    if (this.settings.onBeforeHide.call(this.element) !== false) {
       this.set_hidden();
       this.force_hidden();
-      this.invokeCallback('hide')(this.$element);
-      this.invokeCallback('complete')(this.$element);
+      this.settings.onHide.call(this.$element);
+      this.settings.onComplete.call(this.$element);
       // module.repaint(); already commented
     }
   }
@@ -723,8 +733,7 @@ export class Transition extends Module {
     }
     this.set_duration(this.settings.duration);
 
-    //this.invokeCallback('start', element); INVESTIGATE
-    this.invokeCallback('start')(this.element);
+    this.settings.onStart.call(this.element);
   }
 
   add_failSafe(): void {

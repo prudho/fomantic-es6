@@ -46,9 +46,7 @@ export interface CheckboxOptions extends ModuleOptions {
     label    : string;
     input    : string;
     link     : string;
-  };
-
-  events: Array<string>;
+  }
 }
 
 const default_settings: CheckboxOptions = {
@@ -103,9 +101,7 @@ const default_settings: CheckboxOptions = {
     label    : 'label, .box',
     input    : 'input[type="checkbox"], input[type="radio"]',
     link     : 'a[href]'
-  },
-
-  events: ['change', 'beforeChecked', 'beforeUnchecked', 'beforeDeterminate', 'beforeIndeterminate', 'checked', 'unchecked', 'determinate', 'indeterminate', 'enable', 'disable']
+  }
 }
 
 export class Checkbox extends Module {

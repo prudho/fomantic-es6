@@ -51,10 +51,14 @@ export interface DimmerOptions extends ModuleOptions {
   }
 
   template: {
-    dimmer: Function
+    dimmer: Function;
   }
 
-  events: Array<string>;
+  onChange    : Function;
+  onVisible   : Function;
+  onHidden    : Function;
+  onShow      : Function;
+  onHide      : Function;
 }
 
 const default_settings: DimmerOptions = {
@@ -132,7 +136,11 @@ const default_settings: DimmerOptions = {
     }
   },
 
-  events: ['change', 'show', 'hide', 'visible', 'hidden']
+  onChange    : function(){},
+  onVisible   : function(){},
+  onHidden    : function(){},
+  onShow      : function(){},
+  onHide      : function(){}
 }
 
 export class Dimmer extends Module {
@@ -237,8 +245,8 @@ export class Dimmer extends Module {
     this.set_variation(undefined);
     if ((!this.is_dimmed() || this.is_animating()) && this.is_enabled()) {
       this.animate_show(callback);
-      this.invokeCallback('show')(this.element);
-      this.invokeCallback('change')(this.element);
+      this.settings.onShow.call(this.element);
+      this.settings.onChange.call(this.element);
     }
     else {
       this.debug('Dimmer is already shown or disabled');
@@ -249,8 +257,8 @@ export class Dimmer extends Module {
     if (this.is_dimmed() || this.is_animating()) {
       this.debug('Hiding dimmer', this.$dimmer);
       this.animate_hide(callback);
-      this.invokeCallback('hide')(this.element);
-      this.invokeCallback('change')(this.element);
+      this.settings.onHide.call(this.element);
+      this.settings.onChange.call(this.element);
     }
     else {
       this.debug('Dimmer is not visible');
@@ -301,7 +309,7 @@ export class Dimmer extends Module {
 
       transition.on('complete', () => {
         this.set_active();
-        this.invokeCallback('visible')(this.element);
+        this.settings.onVisible.call(this.element);
         callback();
       });
 
@@ -353,7 +361,7 @@ export class Dimmer extends Module {
         this.remove_dimmed();
         this.remove_variation(undefined);
         this.remove_active();
-        this.invokeCallback('hidden')(this.element);
+        this.settings.onHidden.call(this.element);
         callback();
       });
 

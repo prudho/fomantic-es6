@@ -20,11 +20,10 @@
     document.addEventListener('DOMContentLoaded', () => {
       const progress = new fomantic.Progress('#progress', {
         debug: true,
-        verbose: true
-      });
-
-      progress.on('change', function(one, two, three, four) {
-        console.log(one, two, three, four);
+        verbose: true,
+        onChange: function(one, two, three, four) {
+          console.log(one, two, three, four);
+        }
       });
 
       setTimeout(function() {

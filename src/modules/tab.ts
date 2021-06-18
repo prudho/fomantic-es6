@@ -60,7 +60,10 @@ export interface TabOptions extends ModuleOptions {
     ui   : string;
   }
 
-  events: Array<string>;
+  onFirstLoad : Function;
+  onLoad      : Function;
+  onVisible   : Function;
+  onRequest   : Function;
 }
 
 const default_settings: TabOptions = {
@@ -127,12 +130,10 @@ const default_settings: TabOptions = {
     ui   : '.ui'
   },
 
-  events: [
-    'firstLoad', // called first time loaded
-    'load',      // called on every load
-    'visible',   // called every time tab visible
-    'request'    // called ever time a tab beings loading remote content
-  ]
+  onFirstLoad : function(tabPath, parameterArray, historyEvent) {}, // called first time loaded
+  onLoad      : function(tabPath, parameterArray, historyEvent) {}, // called on every load
+  onVisible   : function(tabPath, parameterArray, historyEvent) {}, // called every time tab visible
+  onRequest   : function(tabPath, parameterArray, historyEvent) {}, // called ever time a tab beings loading remote content
 }
 
 export class Tab extends Module {
@@ -350,8 +351,8 @@ export class Tab extends Module {
             this.firstLoad = false;
             this.cache_add(tabPath, $tab.html());
             this.activate_all(currentPath);
-            this.invokeCallback('firstLoad').call($tab[0], currentPath, this.parameterArray, this.historyEvent);
-            this.invokeCallback('load').call($tab[0], currentPath, this.parameterArray, this.historyEvent);
+            this.settings.onFirstLoad.call($tab[0], currentPath, this.parameterArray, this.historyEvent);
+            this.settings.onLoad.call($tab[0], currentPath, this.parameterArray, this.historyEvent);
           }
           return false;
         }
@@ -361,9 +362,9 @@ export class Tab extends Module {
           if (!this.cache_read(currentPath)) {
             this.cache_add(currentPath, true);
             this.debug('First time tab loaded calling tab init');
-            this.invokeCallback('firstLoad').call($tab[0], currentPath, this.parameterArray, this.historyEvent);
+            this.settings.onFirstLoad.call($tab[0], currentPath, this.parameterArray, this.historyEvent);
           }
-          this.invokeCallback('load').call($tab[0], currentPath, this.parameterArray, this.historyEvent);
+          this.settings.onLoad.call($tab[0], currentPath, this.parameterArray, this.historyEvent);
         }
 
       }
@@ -385,9 +386,9 @@ export class Tab extends Module {
           if (!this.cache_read(currentPath)) {
             this.cache_add(currentPath, true);
             this.debug('First time tab loaded calling tab init');
-            this.invokeCallback('firstLoad').call($tab[0], currentPath, this.parameterArray, this.historyEvent);
+            this.settings.onFirstLoad.call($tab[0], currentPath, this.parameterArray, this.historyEvent);
           }
-          this.invokeCallback('load').call($tab[0], currentPath, this.parameterArray, this.historyEvent);
+          this.settings.onLoad.call($tab[0], currentPath, this.parameterArray, this.historyEvent);
           return false;
         }
       }
@@ -416,7 +417,7 @@ export class Tab extends Module {
       $tab.addClass(this.settings.className.active);
       $deactiveTabs.removeClass(this.settings.className.active + ' ' + this.settings.className.loading);
       if ($tab.length > 0) {
-        this.invokeCallback('visible').call($tab[0], tabPath);
+        this.settings.onVisible.call($tab[0], tabPath);
       }
     }
   }
@@ -539,8 +540,8 @@ export class Tab extends Module {
           else {
             this.debug('Content loaded in background', tabPath);
           }
-          this.invokeCallback('firstLoad').call($tab[0], tabPath, this.parameterArray, this.historyEvent);
-          this.invokeCallback('load').call($tab[0], tabPath, this.parameterArray, this.historyEvent);
+          this.settings.onFirstLoad.call($tab[0], tabPath, this.parameterArray, this.historyEvent);
+          this.settings.onLoad.call($tab[0], tabPath, this.parameterArray, this.historyEvent);
 
           if (this.settings.loadOnce) {
             this.cache_add(fullTabPath, true);
@@ -581,7 +582,7 @@ export class Tab extends Module {
           this.update_content(tabPath, cachedContent);
         }
       }
-      this.invokeCallback('load').call($tab[0], tabPath, this.parameterArray, this.historyEvent);
+      this.settings.onLoad.call($tab[0], tabPath, this.parameterArray, this.historyEvent);
     }
     else if (existingRequest) {
       this.set_loading(tabPath);
@@ -717,7 +718,7 @@ export class Tab extends Module {
         .removeClass(this.settings.className.active + ' ' + this.settings.className.loading)
       ;
       if ($tab.length > 0) {
-        this.invokeCallback('request').call($tab[0], tabPath);
+        this.settings.onRequest.call($tab[0], tabPath);
       }
     }
   }

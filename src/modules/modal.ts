@@ -114,9 +114,23 @@ export interface ModalOptions extends ModuleOptions {
     prompt: Function;
   }
 
-  onHidden: Function;
+  // called before show animation
+  onShow     : Function;
 
-  events: Array<string>;
+  // called after show animation
+  onVisible  : Function;
+
+  // called before hide animation
+  onHide     : Function;
+
+  // called after hide animation
+  onHidden   : Function;
+
+  // called after approve selector match
+  onApprove  : Function;
+
+  // called after deny selector match
+  onDeny     : Function;
 }
 
 const default_settings: ModalOptions = {
@@ -311,9 +325,23 @@ const default_settings: ModalOptions = {
     }
   },
 
-  onHidden: null,
+  // called before show animation
+  onShow     : function(){},
 
-  events: ['show', 'visible', 'hide', 'hidden', 'approve', 'deny']
+  // called after show animation
+  onVisible  : function(){},
+
+  // called before hide animation
+  onHide     : function(){ return true; },
+
+  // called after hide animation
+  onHidden   : null,
+
+  // called after approve selector match
+  onApprove  : function(){ return true; },
+
+  // called after deny selector match
+  onDeny     : function(){ return true; }
 }
 
 class Cache {
@@ -562,7 +590,7 @@ export class Modal extends Module {
   }
 
   event_approve(): void {
-    if (this.ignoreRepeatedEvents || this.invokeCallback('approve')(this.element, this.$element) === false) {
+    if (this.ignoreRepeatedEvents || this.settings.onApprove.call(this.element, this.$element) === false) {
       this.verbose('Approve callback returned false cancelling hide');
       return;
     }
@@ -579,7 +607,7 @@ export class Modal extends Module {
   // }
 
   event_deny(): void {
-    if (this.ignoreRepeatedEvents || this.invokeCallback('deny')(this.element, this.$element) === false) {
+    if (this.ignoreRepeatedEvents || this.settings.onDeny.call(this.element, this.$element) === false) {
       this.verbose('Deny callback returned false cancelling hide');
       return;
     }
@@ -797,7 +825,7 @@ export class Modal extends Module {
             this.$element.detach().appendTo(this.$dimmer);
           }
         }
-        this.invokeCallback('show')(this.element);
+        this.settings.onShow.call(this.element);
         // if (this.settings.transition && $.fn.transition !== undefined && $module.transition('is supported')) {
         if (this.settings.transition) {
           this.debug('Showing modal with css animations');
@@ -813,7 +841,7 @@ export class Modal extends Module {
     
           this.transition.on('complete', () => {
             console.log(this, 'complete')
-            this.invokeCallback('visible')(this.element);
+            this.settings.onVisible.apply(this.element);
             if (this.settings.keyboardShortcuts) {
               this.add_keyboardShortcuts();
             }
@@ -841,7 +869,7 @@ export class Modal extends Module {
     let $previousModal = this.$otherModals.filter('.' + this.settings.className.active).last();
     this.debug('Hiding modal');
     // if (settings.onHide.call(element, $(this)) === false) {
-    if (this.invokeCallback('hide')(this.element, this.$element) === false) {
+    if (this.settings.onHide.call(this.element, this.$element) === false) {
       this.verbose('Hide callback returned false cancelling hide');
       this.ignoreRepeatedEvents = false;
       return false;
@@ -886,7 +914,7 @@ export class Modal extends Module {
           // if ($.isFunction(settings.onHidden)) {
           //   settings.onHidden.call(element);
           // }
-          this.invokeCallback('hidden')(this.element);
+          this.settings.onHidden.call(this.element);
           this.remove_dimmerStyles();
           this.restore_focus();
           callback();

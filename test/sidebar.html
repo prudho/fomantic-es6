@@ -30,27 +30,22 @@
     document.addEventListener('DOMContentLoaded', () => {
       const sidebar = new fomantic.Sidebar('#sidebar', {
         debug: true,
-        verbose: true
-      });
-
-      sidebar.on('change', () => {
-        console.log('change');
-      });
-
-      sidebar.on('show', () => {
-        console.log('show');
-      });
-
-      sidebar.on('hide', () => {
-        console.log('hide');
-      });
-
-      sidebar.on('visible', () => {
-        console.log('visible');
-      });
-
-      sidebar.on('hidden', () => {
-        console.log('hidden');
+        verbose: true,
+        onChange: () => {
+          console.log('change');
+        },
+        onShow :() => {
+          console.log('show');
+        },
+        onHide: () => {
+          console.log('hide');
+        },
+        onVisible: () => {
+          console.log('visible');
+        },
+        onHidden: () => {
+          console.log('hidden');
+        }
       });
 
       document.querySelector('#btn_sidebar').addEventListener('click', () => {

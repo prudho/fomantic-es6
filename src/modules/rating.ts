@@ -32,7 +32,8 @@ export interface RatingOptions extends ModuleOptions {
     icon: Function
   };
 
-  events: Array<string>;
+  onBeforeRate: Function;
+  onRate: Function
 }
 
 const default_settings: RatingOptions = {
@@ -81,7 +82,8 @@ const default_settings: RatingOptions = {
     }
   },
 
-  events: ['rate', 'beforeRate']
+  onBeforeRate    : function(old_rating, new_rating) { return true; },
+  onRate        : function(rating) {},
 }
 
 export class Rating extends Module {
@@ -247,6 +249,14 @@ export class Rating extends Module {
         : 0,
       idx: number = ratingIndex;
     ;
+
+    if (!this.initialLoad || this.settings.fireOnInit) {
+      if (this.settings.onBeforeRate.call(this.element, this.get_rating(), rating) === false) {
+        this.verbose(`'onBeforeRate' callback returned 'false'. Keeping old rating: `, this.get_rating());
+        return;
+      }
+    }
+
     this.$element.removeClass(this.settings.className.selected);
     this.$icons
       .removeClass(this.settings.className.selected)
@@ -261,7 +271,7 @@ export class Rating extends Module {
       }
     }
     if (!this.initialLoad || this.settings.fireOnInit) {
-      this.invokeCallback('rate')(rating);
+      this.settings.onRate.call(this.element, rating);
     }
   }
   

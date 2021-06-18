@@ -84,7 +84,14 @@ export interface StateOptions extends ModuleOptions {
     deactivate : boolean;
   }
 
-  events: Array<string>
+  // callback occurs on state change
+  onActivate     : Function;
+  onDeactivate   : Function;
+  onChange       : Function;
+
+  // state test functions
+  activateTest   : Function;
+  deactivateTest : Function;
 }
 
 const default_settings: StateOptions = {
@@ -188,13 +195,14 @@ const default_settings: StateOptions = {
     deactivate : false
   },
 
-  events: [
-    'activate',
-    'deactivate',
-    'change',
-    'activateTest',
-    'deactivateTest'
-  ]
+  // callback occurs on state change
+  onActivate     : function() {},
+  onDeactivate   : function() {},
+  onChange       : function() {},
+
+  // state test functions
+  activateTest   : function() { return true; },
+  deactivateTest : function() { return true; },
 }
 
 export class State extends Module {

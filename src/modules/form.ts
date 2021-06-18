@@ -217,7 +217,12 @@ export interface FormOptions extends ModuleOptions {
     maxCount: Function;
   }
 
-  events: Array<string>;
+  onValid           : Function;
+  onInvalid         : Function;
+  onSuccess         : Function;
+  onFailure         : Function;
+  onDirty           : Function;
+  onClean           : Function;
 }
 
 const default_settings: FormOptions = {
@@ -794,7 +799,12 @@ const default_settings: FormOptions = {
     }
   },
 
-  events: ['valid', 'invalid', 'clean', 'dirty', 'success', 'failure']
+  onValid           : function() {},
+  onInvalid         : function() {},
+  onSuccess         : function() { return true; },
+  onFailure         : function() { return false; },
+  onDirty           : function() {},
+  onClean           : function() {},
 }
 
 export class Form extends Module {
@@ -1006,11 +1016,11 @@ export class Form extends Module {
     });
 
     this.$element.on('dirty' + this.eventNamespace, (e) => {
-      this.invokeCallback('dirty')();
+      this.settings.onDirty.call(this.element);
     });
 
     this.$element.on('clean' + this.eventNamespace, (e) => {
-      this.invokeCallback('clean')();
+      this.settings.onClean.call(this.element);
     })
   }
 
@@ -1270,14 +1280,14 @@ export class Form extends Module {
       if (showErrors) {
         // this.remove_prompt(identifier, fieldErrors);
         this.remove_prompt(identifier);
-        this.invokeCallback('valid')($field);
+        this.settings.onValid.call($field);
       }
     }
     else {
       if (showErrors) {
         this.formErrors = this.formErrors.concat(fieldErrors);
         this.add_prompt(identifier, fieldErrors, true);
-        this.invokeCallback('invalid')($field);
+        this.settings.onInvalid.call($field);
       }
       return false;
     }
@@ -1301,7 +1311,7 @@ export class Form extends Module {
         this.remove_errors();
       }
       if (ignoreCallbacks !== true) {
-        return this.invokeCallback('success')(this.element, event, values);
+        return this.settings.onSuccess.call(this.element, event, values);
       }
     }
     else {
@@ -1334,7 +1344,7 @@ export class Form extends Module {
         }
       }
       if (ignoreCallbacks !== true) {
-        this.invokeCallback('failure')(this.element, this.formErrors, values);
+        return this.settings.onFailure.call(this.element, this.formErrors, values);
       }
     }
   }

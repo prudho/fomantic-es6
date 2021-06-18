@@ -51,13 +51,17 @@ export interface EmbedOptions extends ModuleOptions {
     placeholder : Function;
   }
 
+  onDisplay            : Function;
+  onPlaceholderDisplay : Function;
+  onReset              : Function;
+  onCreate             : Function;
+  onEmbed              : Function;
+
   // NOT YET IMPLEMENTED
   api     : false,
   onPause : Function;
   onPlay  : Function;
   onStop  : Function;
-
-  events: Array<string>;
 }
 
 const default_settings: EmbedOptions = {
@@ -169,19 +173,19 @@ const default_settings: EmbedOptions = {
     }
   },
 
+  onDisplay            : function() {},
+  onPlaceholderDisplay : function() {},
+  onReset              : function() {},
+  onCreate             : function(url) {},
+  onEmbed              : function(parameters) {
+    return parameters;
+  },
+
   // NOT YET IMPLEMENTED
   api     : false,
   onPause : function() {},
   onPlay  : function() {},
-  onStop  : function() {},
-
-  events: [
-    'display',
-    'placeholderDisplay',
-    'reset',
-    'create',
-    'embed'
-  ]
+  onStop  : function() {}
 }
 
 export class Embed extends Module {
@@ -243,7 +247,7 @@ export class Embed extends Module {
       .html(this.generate_embed(url))
       .appendTo(this.$element)
     ;
-    this.invokeCallback('create').call(this.element, url);
+    this.settings.onCreate.call(this.element, url);
     this.debug('Creating embed object', this.$embed);
   }
 
@@ -288,7 +292,7 @@ export class Embed extends Module {
     if (extraParameters) {
       parameters = $.extend({}, parameters, extraParameters);
     }
-    parameters = this.invokeCallback('embed', parameters);
+    parameters = this.settings.onEmbed(parameters);
     return this.encode_parameters(parameters);
   }
 
@@ -344,13 +348,13 @@ export class Embed extends Module {
   showPlaceholder() {
     this.debug('Showing placeholder image');
     this.remove_active();
-    this.invokeCallback('placeholderDisplay').call(this.element);
+    this.settings.onPlaceholderDisplay.call(this.element);
   }
 
   show(): void {
     this.debug('Showing embed');
     this.set_active();
-    this.invokeCallback('display').call(this.element);
+    this.settings.onDisplay.call(this.element);
   }
 
   hide(): void {
@@ -371,7 +375,7 @@ export class Embed extends Module {
     this.remove_active();
     this.remove_embed();
     this.showPlaceholder();
-    this.invokeCallback('reset').call(this.element);
+    this.settings.onReset.call(this.element);
   }
 
   should_autoplay(): boolean {

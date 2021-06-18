@@ -108,7 +108,15 @@ export interface ToastOptions extends ModuleOptions {
     click        : string;
   }
 
-  events: Array<string>;
+  // callbacks
+  onShow         : Function;
+  onVisible      : Function;
+  onClick        : Function;
+  onHide         : Function;
+  onHidden       : Function;
+  onRemove       : Function;
+  onApprove      : Function;
+  onDeny         : Function;
 }
 
 const default_settings: ToastOptions = {
@@ -219,7 +227,15 @@ const default_settings: ToastOptions = {
     click        : 'click'
   },
 
-  events: ['show', 'visible', 'click', 'hide', 'hidden', 'remove', 'approve', 'deny']
+  // callbacks
+  onShow         : function(){},
+  onVisible      : function(){},
+  onClick        : function(){},
+  onHide         : function(){},
+  onHidden       : function(){},
+  onRemove       : function(){},
+  onApprove      : function(){},
+  onDeny         : function(){}
 }
 
 export class Toast extends Module {
@@ -294,7 +310,7 @@ export class Toast extends Module {
       this.$toastBox = undefined;
       this.$toast = undefined;
       this.$animationObject = undefined;
-      this.invokeCallback('remove')(this.$toastBox, this.element)
+      this.settings.onRemove.call(this.$toastBox, this.element)
       this.$progress = undefined;
       this.$progressBar = undefined;
       this.$close = undefined;
@@ -474,8 +490,7 @@ export class Toast extends Module {
 
   show(callback: Function = () => {}) {
     this.debug('Showing toast');
-    //if (this.settings.onShow.call(this.$toastBox, this.element) === false) {
-    if (this.invokeCallback('show')(this.$toastBox, this.element) === false) {
+    if (this.settings.onShow.call(this.$toastBox, this.element) === false) {
       this.debug('onShow callback returned false, cancelling toast animation');
       return;
     }
@@ -503,7 +518,7 @@ export class Toast extends Module {
 
       this.transition.on('complete', () => {
         callback.call(this.$toastBox, this.element);
-        this.invokeCallback('visible')(this.$toastBox, this.element);
+        this.settings.onVisible.call(this.$toastBox, this.element);
       });
     }
   }
@@ -511,7 +526,7 @@ export class Toast extends Module {
   animate_close(callback: Function = () => {}): void {
     callback = $.isFunction(callback) ? callback : () => {};
     this.debug('Closing toast');
-    if (this.invokeCallback('hide')(this.$toastBox, this.element) === false) {
+    if (this.settings.onHide.call(this.$toastBox, this.element) === false) {
       this.debug('onHide callback returned false, cancelling toast animation');
       return;
     }
@@ -546,7 +561,7 @@ export class Toast extends Module {
 
       this.transition.on('complete', () => {
         callback.call(this.$toastBox, this.element);
-        this.invokeCallback('hidden')(this.$toastBox, this.element);
+        this.settings.onHidden.call(this.$toastBox, this.element);
         this.destroy();
       });
     }
@@ -596,14 +611,13 @@ export class Toast extends Module {
 
   event_click(event) {
     if ($(event.target).closest('a').length === 0) {
-      this.invokeCallback('click')(this.$toastBox, this.element)
+      this.settings.onClick.call(this.$toastBox, this.element)
       this.close();
     }
   }
 
   event_approve() {
-    // if (this.settings.onApprove.call(this.element, this.$element) === false) {
-    if (this.invokeCallback('approve').call(this.element, this.$element) === false) {
+    if (this.settings.onApprove.call(this.element, this.$element) === false) {
       this.verbose('Approve callback returned false cancelling close');
       return;
     }
@@ -611,8 +625,7 @@ export class Toast extends Module {
   }
 
   event_deny() {
-    // if (this.settings.onDeny.call(this.element, this.$element) === false) {
-    if (this.invokeCallback('deny').call(this.element, this.$element) === false) {
+    if (this.settings.onDeny.call(this.element, this.$element) === false) {
       this.verbose('Deny callback returned false cancelling close');
       return;
     }

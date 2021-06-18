@@ -44,7 +44,13 @@ export interface AccordionOptions extends ModuleOptions {
     content  : string;
   }
 
-  events: Array<string>;
+  onOpening       : Function;
+  onClosing       : Function;
+  onChanging      : Function;
+
+  onOpen          : Function;
+  onClose         : Function;
+  onChange        : Function;
 }
 
 const default_settings: AccordionOptions = {
@@ -85,14 +91,13 @@ const default_settings: AccordionOptions = {
     content  : '.content',
   },
 
-  events: [
-    'opening',  // callback before open animation
-    'closing',  // callback before closing animation
-    'changing', // callback before closing or opening animation
-    'open',     // callback after open animation
-    'close',    // callback after closing animation
-    'change'    // callback after closing or opening animation
-  ],
+  onOpening       : function(){}, // callback before open animation
+  onClosing       : function(){}, // callback before closing animation
+  onChanging      : function(){}, // callback before closing or opening animation
+
+  onOpen          : function(){}, // callback after open animation
+  onClose         : function(){}, // callback after closing animation
+  onChange        : function(){}, // callback after closing or opening animation
 };
 
 export class Accordion extends Module {
@@ -206,10 +211,8 @@ export class Accordion extends Module {
       return;
     }
     this.debug("Opening accordion content", $activeTitle);
-    // this.settings.onOpening.call($activeContent);
-    // this.settings.onChanging.call($activeContent);
-    this.invokeCallback('opening').call($activeContent);
-    this.invokeCallback('changind').call($activeContent);
+    this.settings.onOpening.call($activeContent);
+    this.settings.onChanging.call($activeContent);
     if (this.settings.exclusive) {
       this.closeOthers.call(this, $activeTitle);
     }
@@ -279,10 +282,8 @@ export class Accordion extends Module {
         .addClass(this.settings.className.active)
       ;
       this.reset_display.call(this);
-      // this.settings.onOpen.call(this);
-      // this.settings.onChange.call(this);
-      this.invokeCallback('open').call(this);
-      this.invokeCallback('change').call(this);
+      this.settings.onOpen.call(this);
+      this.settings.onChange.call(this);
     });
   }
 
@@ -300,10 +301,8 @@ export class Accordion extends Module {
       isClosing = isActive && isAnimating;
     if ((isActive || isOpening) && !isClosing) {
       this.debug("Closing accordion content", $activeContent);
-      // settings.onClosing.call($activeContent);
-      // settings.onChanging.call($activeContent);
-      this.invokeCallback('closing').call($activeContent);
-      this.invokeCallback('changing').call($activeContent);
+      this.settings.onClosing.call($activeContent);
+      this.settings.onChanging.call($activeContent);
       $activeTitle.removeClass(this.settings.className.active);
       $activeContent
         // .stop(true, true)
@@ -356,10 +355,8 @@ export class Accordion extends Module {
           .removeClass(this.settings.className.animating)
           .removeClass(this.settings.className.active);
         this.reset_display.call(this);
-        // this.settings.onClose.call(this);
-        // this.settings.onChange.call(this);
-        this.invokeCallback('close').call(this);
-        this.invokeCallback('change').call(this);
+        this.settings.onClose.call(this);
+        this.settings.onChange.call(this);
       });
     }
   }

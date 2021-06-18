@@ -72,8 +72,6 @@ export interface SliderOptions extends ModuleOptions {
 
   onChange : Function;
   onMove   : Function;
-
-  events: Array<string>;
 }
 
 const default_settings: SliderOptions = {
@@ -143,10 +141,8 @@ const default_settings: SliderOptions = {
     letter  : 'letter'
   },
 
-  onChange : function(value, thumbVal, secondThumbVal) {},
-  onMove   : function(value, thumbVal, secondThumbVal) {},
-
-  events: ['change', 'move']
+  onChange : function(value, thumbVal, secondThumbVal){},
+  onMove   : function(value, thumbVal, secondThumbVal){}
 }
 
 export class Slider extends Module {
@@ -480,10 +476,10 @@ export class Slider extends Module {
       }
       value = Math.abs(thumbVal - (secondThumbVal || 0));
       this.update_position(thumbSmoothVal);
-      this.invokeCallback('move')(this.element, this.value, this.thumbVal, this.secondThumbVal);
+      this.settings.onMove.call(this.element, this.value, this.thumbVal, this.secondThumbVal);
     } else {
       this.update_value(value, () => {
-        this.invokeCallback('move')(this.element, this.value, this.thumbVal, this.secondThumbVal);
+        this.settings.onMove.call(this.element, this.value, this.thumbVal, this.secondThumbVal);
       });
     }
   }
@@ -1022,9 +1018,9 @@ export class Slider extends Module {
       this.update_position(this.secondThumbVal, this.$secondThumb);
       if ((!this.initialLoad || this.settings.fireOnInit) && fireChange) {
         if (this.value !== this.previousValue) {
-          this.invokeCallback('change')(this.element, this.value, this.thumbVal, this.secondThumbVal);
+          this.settings.onChange.call(this.element, this.value, this.thumbVal, this.secondThumbVal);
         }
-        this.invokeCallback('move')(this.element, this.value, this.thumbVal, this.secondThumbVal);
+        this.settings.onMove.call(this.element, this.value, this.thumbVal, this.secondThumbVal);
       }
       if (toReset) {
         this.previousValue = undefined;
@@ -1040,9 +1036,9 @@ export class Slider extends Module {
     this.update_value(newValue, (value, thumbVal, secondThumbVal) => {
       if ((!this.initialLoad || this.settings.fireOnInit) && fireChange) {
         if (newValue !== this.previousValue) {
-          this.invokeCallback('change')(this.element, this.value, this.thumbVal, this.secondThumbVal);
+          this.settings.onChange.call(this.element, this.value, this.thumbVal, this.secondThumbVal);
         }
-        this.invokeCallback('move')(this.element, this.value, this.thumbVal, this.secondThumbVal);
+        this.settings.onMove.call(this.element, this.value, this.thumbVal, this.secondThumbVal);
       }
       if (toReset) {
         this.previousValue = undefined;

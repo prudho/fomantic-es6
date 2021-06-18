@@ -69,7 +69,12 @@ export interface ProgressOptions extends ModuleOptions {
     warning : string
   }
 
-  events: Array<string>
+  onLabelUpdate : Function;
+  onChange      : Function;
+  onSuccess     : Function;
+  onActive      : Function;
+  onError       : Function;
+  onWarning     : Function;
 }
 
 const default_settings: ProgressOptions = {
@@ -146,7 +151,14 @@ const default_settings: ProgressOptions = {
     warning : 'warning'
   },
 
-  events: ['error', 'change', 'success', 'labelUpdate', 'active', 'warning']
+  onLabelUpdate : function(state, text, value, total){
+    return text;
+  },
+  onChange      : function(percent, value, total){},
+  onSuccess     : function(total){},
+  onActive      : function(value, total){},
+  onError       : function(value, total){},
+  onWarning     : function(value, total){}
 }
 
 export class Progress extends Module {
@@ -470,12 +482,12 @@ export class Progress extends Module {
     this.remove_warning();
     this.remove_error();
     this.remove_success();
-    text = this.invokeCallback('labelUpdate').call('active', text, this.value, this.total);
+    text = this.settings.onLabelUpdate.call('active', text, this.value, this.total);
     if (text) {
       this.set_label(text);
     }
     this.bind_transitionEnd(() => {
-      this.invokeCallback('active').call(this.element, this.value, this.total);
+      this.settings.onActive.call('active').call(this.element, this.value, this.total);
     });
   }
 
@@ -552,13 +564,12 @@ export class Progress extends Module {
     this.remove_success();
     this.remove_warning();
     this.complete(keepState);
-    // text = this.settings.onLabelUpdate('error', text, this.value, this.total);
-    text = this.invokeCallback('labelUpdate')('error', text, this.value, this.total);
+    text = this.settings.onLabelUpdate('error', text, this.value, this.total);
     if (text) {
       this.set_label(text);
     }
     this.bind_transitionEnd(() => {
-      this.invokeCallback('error')(this.element, this.value, this.total);
+      this.settings.onError.call(this.element, this.value, this.total);
     });
   }
 
@@ -660,7 +671,7 @@ export class Progress extends Module {
       this.set_barWidth(percents);
       this.set_labelInterval();
     }
-    this.invokeCallback('change')(this.element, percents, this.value, this.total);
+    this.settings.onChange.call(this.element, percents, this.value, this.total);
   }
 
   set_progress(value): void {
@@ -706,17 +717,15 @@ export class Progress extends Module {
     this.remove_error();
     this.complete(keepState);
     if (this.settings.text.success) {
-      // text = this.settings.onLabelUpdate('success', text, this.value, this.total);
-      text = this.invokeCallback('labelUpdate')('success', text, this.value, this.total);
+      text = this.settings.onLabelUpdate('success', text, this.value, this.total);
       this.set_label(text);
     }
     else {
-      // text = this.settings.onLabelUpdate('active', text, this.value, this.total);
-      text = this.invokeCallback('labelUpdate')('active', text, this.value, this.total);
+      text = this.settings.onLabelUpdate('active', text, this.value, this.total);
       this.set_label(text);
     }
     this.bind_transitionEnd(() => {
-      this.invokeCallback('success').call(this.element, this.total);
+      this.settings.onSuccess.call(this.element, this.total);
     });
   }
 
@@ -739,13 +748,12 @@ export class Progress extends Module {
     this.remove_success();
     this.remove_error();
     this.complete(keepState);
-    // text = this.settings.onLabelUpdate('warning', text, this.value, this.total);
-    text = this.invokeCallback('active')('warning', text, this.value, this.total);
+    text = this.settings.onLabelUpdate('warning', text, this.value, this.total);
     if (text) {
       this.set_label(text);
     }
     this.bind_transitionEnd(() => {
-      this.invokeCallback('warning').call(this.element, this.value, this.total);
+      this.settings.onWarning.call(this.element, this.value, this.total);
     });
   }
 

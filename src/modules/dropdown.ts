@@ -220,8 +220,6 @@ export interface DropdownOptions extends ModuleOptions {
     message: Function;
     addition: Function;
   }
-
-  events: Array<string>;
 }
 
 const default_settings: DropdownOptions = {
@@ -583,9 +581,7 @@ const default_settings: DropdownOptions = {
     addition: function(choice) {
       return choice;
     }
-  },
-
-  events: []
+  }
 }
 
 export class Dropdown extends Module {

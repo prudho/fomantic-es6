@@ -64,7 +64,17 @@ export interface NagOptions extends ModuleOptions {
   duration      : number;
   easing        : string;
 
-  events: Array<string>
+  // callback before show animation, return false to prevent show
+  onShow        : Function;
+
+  // called after show animation
+  onVisible     : Function;
+
+  // callback before hide animation, return false to prevent hide
+  onHide        : Function;
+
+  // callback after hide animation
+  onHidden      : Function;
 }
 
 const default_settings: NagOptions = {
@@ -127,12 +137,17 @@ const default_settings: NagOptions = {
   duration      : 500,
   easing        : 'easeOutQuad',
 
-  events: [
-    'show',    // callback before show animation, return false to prevent show
-    'visible', // called after show animation
-    'hide',    // callback before hide animation, return false to prevent hide
-    'hidden'   // callback after hide animation
-  ]
+  // callback before show animation, return false to prevent show
+  onShow        : function() {},
+
+  // called after show animation
+  onVisible     : function() {},
+
+  // callback before hide animation, return false to prevent hide
+  onHide        : function() {},
+
+  // callback after hide animation
+  onHidden      : function() {}
 }
 
 export class Nag extends Module {
@@ -197,37 +212,35 @@ export class Nag extends Module {
 
   show() {
     if (this.should_show() && !this.$element.is('visible') ) {
-      // if (this.settings.onShow.call(this.element) === false) {
-      if (this.invokeCallback('show')(this.element) === false) {
+      if (this.settings.onShow.call(this.element) === false) {
         this.debug('onShow callback returned false, cancelling nag animation');
         return false;
       }
       this.debug('Showing nag', this.settings.animation.show);
       if (this.settings.animation.show === 'fade') {
         // this.$element.fadeIn(this.settings.duration, this.settings.easing, this.settings.onVisible);
-        Utils.fadeIn(this.$element, this.settings.duration, this.settings.easing, this.invokeCallback('visible'))
+        Utils.fadeIn(this.$element, this.settings.duration, this.settings.easing, this.settings.onVisible)
       }
       else {
         // this.$element.slideDown(this.settings.duration, this.settings.easing, this.settings.onVisible);
-        Utils.slideDown(this.$element, this.settings.duration, this.invokeCallback('visible'));
+        Utils.slideDown(this.$element, this.settings.duration,.this.settings.onVisible);
       }
     }
   }
 
   hide() {
-    // if (this.settings.onHide.call(this.element) === false) {
-      if (this.invokeCallback('hide')(this.element) === false) {
+    if (this.settings.onHide.call(this.element) === false) {
       this.debug('onHide callback returned false, cancelling nag animation');
       return false;
     }
     this.debug('Hiding nag', this.settings.animation.hide);
     if (this.settings.animation.hide === 'fade') {
       // this.$element.fadeOut(this.settings.duration, this.settings.easing, this.settings.onHidden);
-      Utils.fadeOut(this.$element, this.settings.duration, this.settings.easing, this.invokeCallback('hidden'))
+      Utils.fadeOut(this.$element, this.settings.duration, this.settings.easing, this.settings.onHidden)
     }
     else {
       // this.$element.slideUp(this.settings.duration, this.settings.easing, this.settings.onHidden);
-      Utils.slideUp(this.$element, this.settings.duration, this.invokeCallback('hidden'));
+      Utils.slideUp(this.$element, this.settings.duration, this.settings.onHidden);
     }
   }
 

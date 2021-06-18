@@ -40,7 +40,9 @@ export interface ShapeOptions extends ModuleOptions {
     side  : string;
   }
 
-  events: Array<string>;
+  // callback occurs on side change
+   beforeChange : Function;
+   onChange     : Function;
 }
 
 const default_settings: ShapeOptions = {
@@ -97,12 +99,9 @@ const default_settings: ShapeOptions = {
     side  : '.side'
   },
 
-  events: [
-    'change',
-    'results',
-    'resultsOpen',
-    'resultsClose'
-  ]
+  // callback occurs on side change
+  beforeChange : function() {},
+  onChange     : function() {}
 }
 
 export class Shape extends Module {
@@ -173,8 +172,7 @@ export class Shape extends Module {
       this.set_active();
     });
 
-    // settings.beforeChange.call($nextSide[0]);
-    this.invokeCallback('beforeChange').call(this.$nextSide[0]);
+    this.settings.beforeChange.call(this.$nextSide[0]);
     
     if (this.get_transitionEvent()) {
       this.verbose('Starting CSS animation');
@@ -586,8 +584,7 @@ export class Shape extends Module {
     this.verbose('Setting new side to active', this.$nextSide);
     this.$side.removeClass(this.settings.className.active);
     this.$nextSide.addClass(this.settings.className.active);
-    // this.settings.onChange.call(this.$nextSide[0]);
-    this.invokeCallback('change').call(this.$nextSide[0])
+    this.settings.onChange.call(this.$nextSide[0])
     this.set_defaultSide();
   }
 }

@@ -48,25 +48,6 @@ export interface VisibilityOptions extends ModuleOptions {
   transition             : string;
   duration               : number;
 
-  // array of callbacks for percentage
-  onPassed               : {},
-
-  // standard callbacks
-  onOnScreen             : boolean;
-  onOffScreen            : boolean;
-  onPassing              : boolean;
-  onTopVisible           : boolean;
-  onBottomVisible        : boolean;
-  onTopPassed            : boolean;
-  onBottomPassed         : boolean;
-
-  // reverse callbacks
-  onPassingReverse       : boolean;
-  onTopVisibleReverse    : boolean;
-  onBottomVisibleReverse : boolean;
-  onTopPassedReverse     : boolean;
-  onBottomPassedReverse  : boolean;
-
   metadata : {
     src: string;
   },
@@ -82,7 +63,36 @@ export interface VisibilityOptions extends ModuleOptions {
     visible : string;
   },
 
-  events: Array<string>;
+  // array of callbacks for percentage
+  onPassed               : {},
+
+  // standard callbacks
+  onOnScreen             : false,
+  onOffScreen            : false,
+  onPassing              : false,
+  onTopVisible           : false,
+  onBottomVisible        : false,
+  onTopPassed            : false,
+  onBottomPassed         : false,
+
+  // reverse callbacks
+  onPassingReverse       : false,
+  onTopVisibleReverse    : false,
+  onBottomVisibleReverse : false,
+  onTopPassedReverse     : false,
+  onBottomPassedReverse  : false,
+
+  // special callbacks for image
+  onLoad                 : Function;
+  onAllLoaded            : Function;
+
+  // special callbacks for fixed position
+  onFixed                : Function;
+  onUnfixed              : Function;
+
+  // utility callbacks
+  onUpdate               : Function;
+  onRefresh              : Function;
 }
 
 const default_settings: VisibilityOptions = {
@@ -137,25 +147,6 @@ const default_settings: VisibilityOptions = {
   transition             : 'fade in',
   duration               : 1000,
 
-  // array of callbacks for percentage
-  onPassed               : {},
-
-  // standard callbacks
-  onOnScreen             : false,
-  onOffScreen            : false,
-  onPassing              : false,
-  onTopVisible           : false,
-  onBottomVisible        : false,
-  onTopPassed            : false,
-  onBottomPassed         : false,
-
-  // reverse callbacks
-  onPassingReverse       : false,
-  onTopVisibleReverse    : false,
-  onBottomVisibleReverse : false,
-  onTopPassedReverse     : false,
-  onBottomPassedReverse  : false,
-
   metadata : {
     src: 'src'
   },
@@ -171,14 +162,36 @@ const default_settings: VisibilityOptions = {
     visible : 'Element is hidden, you must call refresh after element becomes visible'
   },
 
-  events: [
-    'load',
-    'allLoaded',
-    'fixed',
-    'unfixed',
-    'update',
-    'refresh'
-  ]
+  // array of callbacks for percentage
+  onPassed               : {},
+
+  // standard callbacks
+  onOnScreen             : null,
+  onOffScreen            : null,
+  onPassing              : null,
+  onTopVisible           : null,
+  onBottomVisible        : null,
+  onTopPassed            : null,
+  onBottomPassed         : null,
+
+  // reverse callbacks
+  onPassingReverse       : null,
+  onTopVisibleReverse    : null,
+  onBottomVisibleReverse : null,
+  onTopPassedReverse     : null,
+  onBottomPassedReverse  : null,
+
+  // special callbacks for image
+  onLoad                 : function() {},
+  onAllLoaded            : function() {},
+
+  // special callbacks for fixed position
+  onFixed                : function() {},
+  onUnfixed              : function() {},
+
+  // utility callbacks
+  onUpdate               : null, // disabled by default for performance
+  onRefresh              : function(){}
 }
 
 export class Visibility extends Module {

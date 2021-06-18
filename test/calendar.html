@@ -49,7 +49,10 @@
       // const rangeend = new fomantic.Calendar('#rangeend', {
       //   type: 'date',
       //   debug: true,
-      //   verbose: true
+      //   verbose: true,
+      //   onChange: () => {
+      //    console.log(element, date, text, mode)
+      //   }
       // });
 
       // const rangestart = new fomantic.Calendar('#rangestart', {
@@ -57,15 +60,10 @@
       //   debug: true,
       //   verbose: true,
       //   endCalendar: rangeend
+      //   onChange: () => {
+      //    console.log(element, date, text, mode)
+      //   }
       // });
-
-      /*rangestart.on('change', function(element, date, text, mode) {
-        console.log(element, date, text, mode)
-      })
-
-      rangeend.on('change', function(element, date, text, mode) {
-        //console.log(element, date, text, mode)
-      })*/
     });
   </script>
 </body>

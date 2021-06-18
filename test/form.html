@@ -70,24 +70,14 @@
           password : ['minLength[6]', 'empty'],
           skills   : ['minCount[2]', 'empty'],
           terms    : 'checked'
+        },
+        onDirty: () => {
+          console.log('dirty');
+        },
+        onClean: () => {
+          console.log('clean');
         }
       });
-
-      form.on('dirty', () => {
-        console.log('dirty');
-      });
-
-      form.on('clean', () => {
-        console.log('clean');
-      });
-
-      // document.querySelector('.ui.show.button').addEventListener('click', () => {
-      //   dimmer.show();
-      // });
-
-      // document.querySelector('.ui.hide.button').addEventListener('click', () => {
-      //   dimmer.hide();
-      // });
     });
   </script>
 </body>

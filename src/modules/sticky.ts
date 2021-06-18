@@ -29,6 +29,22 @@ export interface StickyOptions extends ModuleOptions {
   // Whether to automatically observe changes with Mutation Observers
   observeChanges : boolean;
 
+  error         : {
+    container      : string;
+    visible        : string;
+    method         : string;
+    invalidContext : string;
+    elementSize    : string;
+  },
+
+  className : {
+    bound     : string;
+    fixed     : string;
+    supported : string;
+    top       : string;
+    bottom    : string;
+  },
+
   // Called when position is recalculated
   onReposition   : Function;
 
@@ -46,24 +62,6 @@ export interface StickyOptions extends ModuleOptions {
 
   // Called when element reaches bottom of context
   onBottom       : Function;
-
-  error         : {
-    container      : string;
-    visible        : string;
-    method         : string;
-    invalidContext : string;
-    elementSize    : string;
-  },
-
-  className : {
-    bound     : string;
-    fixed     : string;
-    supported : string;
-    top       : string;
-    bottom    : string;
-  },
-
-  events: Array<string>;
 }
 
 const default_settings: StickyOptions = {
@@ -99,24 +97,6 @@ const default_settings: StickyOptions = {
   // Whether to automatically observe changes with Mutation Observers
   observeChanges : false,
 
-  // Called when position is recalculated
-  onReposition   : function() {},
-
-  // Called on each scroll
-  onScroll       : function() {},
-
-  // Called when element is stuck to viewport
-  onStick        : function() {},
-
-  // Called when element is unstuck from viewport
-  onUnstick      : function() {},
-
-  // Called when element reaches top of context
-  onTop          : function() {},
-
-  // Called when element reaches bottom of context
-  onBottom       : function() {},
-
   error         : {
     container      : 'Sticky element must be inside a relative container',
     visible        : 'Element is hidden, you must call refresh after element becomes visible. Use silent setting to surpress this warning in production.',
@@ -133,7 +113,23 @@ const default_settings: StickyOptions = {
     bottom    : 'bottom'
   },
 
-  events: ['reposition', 'scroll', 'stick', 'unstick', 'top', 'bottom']
+  // Called when position is recalculated
+  onReposition   : function(){},
+
+  // Called on each scroll
+  onScroll       : function(){},
+
+  // Called when element is stuck to viewport
+  onStick        : function(){},
+
+  // Called when element is unstuck from viewport
+  onUnstick      : function(){},
+
+  // Called when element reaches top of context
+  onTop          : function(){},
+
+  // Called when element reaches bottom of context
+  onBottom       : function(){}
 }
 
 export class Sticky extends Module {

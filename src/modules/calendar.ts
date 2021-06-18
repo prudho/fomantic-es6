@@ -75,8 +75,6 @@ export interface CalendarOptions extends ModuleOptions {
     date: Function;
   }
 
-  isDisabled: Function;
-
   selector: {
     popup: string;
     input: string;
@@ -140,7 +138,29 @@ export interface CalendarOptions extends ModuleOptions {
 
   eventClass: 'blue',
 
-  events: Array<string>
+  // callback before date is changed, return false to cancel the change
+  onBeforeChange: Function;
+
+  // callback when date changes
+  onChange: Function;
+
+  // callback before show animation, return false to prevent show
+  onShow: Function;
+
+  // callback after show animation
+  onVisible: Function;
+
+  // callback before hide animation, return false to prevent hide
+  onHide: Function;
+
+  // callback after hide animation
+  onHidden: Function;
+
+  // callback before item is selected, return false to prevent selection
+  onSelect: Function;
+
+  // is the given date disabled?
+  isDisabled: Function;
 }
 
 const default_settings: CalendarOptions = {
@@ -490,8 +510,6 @@ const default_settings: CalendarOptions = {
     }
   },
 
-  isDisabled: () => { return false; },
-
   selector: {
     popup: '.ui.popup',
     input: 'input',
@@ -555,16 +573,39 @@ const default_settings: CalendarOptions = {
 
   eventClass: 'blue',
 
-  events: [
-    'beforeChange', // callback before date is changed, return false to cancel the change
-    'change',       // callback when date changes
-    'show',         // callback before show animation, return false to prevent show
-    'visible',      // callback after show animation
-    'hide',         // callback before hide animation, return false to prevent hide
-    'hidden',       // callback after hide animation
-    'select',       // callback before item is selected, return false to prevent selection
-    'disabled'      // is the given date disabled?
-  ]
+  // callback before date is changed, return false to cancel the change
+  onBeforeChange: function (date, text, mode) {
+    return true;
+  },
+
+  // callback when date changes
+  onChange: function (date, text, mode) {
+  },
+
+  // callback before show animation, return false to prevent show
+  onShow: function () {
+  },
+
+  // callback after show animation
+  onVisible: function () {
+  },
+
+  // callback before hide animation, return false to prevent hide
+  onHide: function () {
+  },
+
+  // callback after hide animation
+  onHidden: function () {
+  },
+
+  // callback before item is selected, return false to prevent selection
+  onSelect: function (date, mode) {
+  },
+
+  // is the given date disabled?
+  isDisabled: function (date, mode) {
+    return false;
+  }
 }
 
 const numberText = ['','one','two','three','four','five','six','seven','eight'];
@@ -680,11 +721,9 @@ export class Calendar extends Module {
     let
       onVisible = () => {
         this.refreshTooltips();
-        // return this.settings.onVisible.apply(this.$container, arguments);
-        return this.invokeCallback('visible').apply(this.$container, arguments);
+        return this.settings.onVisible.apply(this.$container, arguments);
       },
-      // onHidden = this.settings.onHidden
-      onHidden = this.invokeCallback('hidden').bind(this)
+      onHidden = this.settings.onHidden
     ;
     if (!this.$input.length) {
       //no input, $container has to handle focus/blur
@@ -692,13 +731,11 @@ export class Calendar extends Module {
       onVisible = () => {
         this.refreshTooltips();
         this.focus();
-        // return this.settings.onVisible.apply(this.$container, arguments);
-        return this.invokeCallback('visible').apply(this.$container, arguments)
+        return this.settings.onVisible.apply(this.$container, arguments);
       };
       onHidden = () => {
         this.blur();
-        // return this.settings.onHidden.apply(this.$container, arguments);
-        return this.invokeCallback('hidden').apply(this.$container, arguments)
+        return this.settings.onHidden.apply(this.$container, arguments);
       };
     }
 
@@ -708,25 +745,21 @@ export class Calendar extends Module {
         popup: this.$container,
         on: on,
         hoverable: on === 'hover',
-        closable: on === 'click'
+        closable: on === 'click',
+        onShow: () => {
+          //reset the focus date onShow
+          this.set_focusDate(this.get_date());
+          this.set_mode(this.get_validatedMode(this.settings.startMode));
+          return this.settings.onShow.apply(this.$container, arguments);
+        },
+        onVisible: onVisible,
+        onHide: this.settings.onHide,
+        onHidden: onHidden
       })
     ;
     
     //this.popup(options);
     this.popup = new Popup(this.settings.selector.activator, options);
-
-    this.popup.on('show', () => {
-      console.log('show')
-      //reset the focus date onShow
-      this.set_focusDate(this.get_date());
-      this.set_mode(this.get_validatedMode(this.settings.startMode));
-      // return this.settings.onShow.apply(this.$container, arguments);
-      return this.invokeCallback('show').apply(this.$container, arguments)
-    });
-
-    this.popup.on('visible', onVisible);
-    this.popup.on('hide', this.invokeCallback('hide'));
-    this.popup.on('hidden', onHidden);
   }
 
   setup_inline(): void {
@@ -1172,8 +1205,7 @@ export class Calendar extends Module {
       focusDate = target.data(this.settings.metadata.focusDate),
       mode = target.data(this.settings.metadata.mode)
     ;
-    // if (date && settings.onSelect.call(this.element, date, this.get_mode()) !== false) {
-    if (date && this.invokeCallback('visible').call(this.element, date, this.get_mode()) !== false) {
+    if (date && this.settings.onSelect.call(this.element, date, this.get_mode()) !== false) {
       let forceSet = target.hasClass(this.settings.className.today);
       this.selectDate(date, forceSet);
     }
@@ -1486,8 +1518,7 @@ export class Calendar extends Module {
       text = this.settings.formatter.datetime(date, this.settings)
     ;
 
-    // if (fireChange && this.settings.onBeforeChange.call(this.element, date, text, mode) === false) {
-    if (fireChange && this.invokeCallback('beforeChange').call(this.element, date, text, mode) === false) {
+    if (fireChange && this.settings.onBeforeChange.call(this.element, date, text, mode) === false) {
       return false;
     }
 
@@ -1509,8 +1540,7 @@ export class Calendar extends Module {
     }
 
     if (fireChange) {
-      // this.settings.onChange.call(this.element, date, text, mode);
-      this.invokeCallback('change').call(this.element, date, text, mode);
+      this.settings.onChange.call(this.element, date, text, mode);
     }
   }
 

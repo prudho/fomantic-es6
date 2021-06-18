@@ -84,12 +84,11 @@
     document.addEventListener('DOMContentLoaded', () => {
       const tab = new fomantic.Tab('#tabs', {
         debug: true,
-        verbose: true
+        verbose: true,
+        onFirstLoad: (one, two, three, four) => {
+          console.log(one, two, three, four);
+        }
       });
-
-      tab.on('firstLoad', (one, two, three, four) => {
-        console.log(one, two, three, four);
-      })
 
       // const test2 = new fomantic.Tab('#tabs2', {
       //   debug: true,

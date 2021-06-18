@@ -20,17 +20,15 @@
     document.addEventListener('DOMContentLoaded', () => {
       const nag = new fomantic.Nag('#nag', {
         debug: true,
-        verbose: true
+        verbose: true,
+        onRate: (one) => {
+          console.log(one);
+        },
+        onBeforeRate: (one, two) => {
+          console.log(one, two);
+          return false;
+        }
       });
-
-      // test.on('rate', (one) => {
-      //   console.log(one);
-      // });
-
-      // test.on('beforeRate', (one, two) => {
-      //   console.log(one, two);
-      //   return false;
-      // });
     });
   </script>
 </body>

@@ -70,10 +70,6 @@ export interface SearchOptions extends ModuleOptions {
   duration       : number;
   easing         : string;
 
-  // callbacks
-  onSelect       : boolean;
-  onResultsAdd   : boolean;
-
   className: {
     animating : string;
     active    : string;
@@ -143,7 +139,15 @@ export interface SearchOptions extends ModuleOptions {
     standard: Function;
   }
 
-  events: Array<string>;
+  // callbacks
+  onSelect       : Function;
+  onResultsAdd   : Function;
+
+  onSearchQuery  : Function;
+  onResults      : Function;
+
+  onResultsOpen  : Function;
+  onResultsClose : Function;
 }
 
 const default_settings: SearchOptions = {
@@ -214,10 +218,6 @@ const default_settings: SearchOptions = {
   transition     : 'scale',
   duration       : 200,
   easing         : 'easeOutExpo',
-
-  // callbacks
-  onSelect       : false,
-  onResultsAdd   : false,
 
   className: {
     animating : 'animating',
@@ -451,12 +451,15 @@ const default_settings: SearchOptions = {
     }
   },
 
-  events: [
-    'searchQuery',
-    'results',
-    'resultsOpen',
-    'resultsClose'
-  ]
+  // callbacks
+  onSelect       : null,
+  onResultsAdd   : null,
+
+  onSearchQuery  : function(query){},
+  onResults      : function(response){},
+
+  onResultsOpen  : function(){},
+  onResultsClose : function(){},
 }
 
 export class Search extends Module {
@@ -852,7 +855,7 @@ export class Search extends Module {
           callback();
         }
       }
-      this.invokeCallback('searchQuery').call(this.element, searchTerm);
+      this.settings.onSearchQuery.call(this.element, searchTerm);
     }
     else {
       this.hideResults();
@@ -1324,7 +1327,7 @@ export class Search extends Module {
         // ;
         Utils.fadeIn(this.$results, this.settings.duration, this.settings.easing);
       }
-      this.invokeCallback('resultsOpen').call(this.$results);
+      this.settings.onResultsOpen.call(this.$results);
     }
   }
 
@@ -1366,7 +1369,7 @@ export class Search extends Module {
         // ;
         Utils.fadeOut(this.$results, this.settings.duration, this.settings.easing);
       }
-      this.invokeCallback('resultsClose').call(this.$results);
+      this.settings.onResultsClose.call(this.$results);
     }
   }
 
@@ -1421,7 +1424,7 @@ export class Search extends Module {
     else if (this.settings.showNoResults) {
       html = this.displayMessage(this.settings.error.noResults, 'empty', this.settings.error.noResultsHeader);
     }
-    this.invokeCallback('results').call(this.element, response);
+    this.settings.onResultsClose.call(this.element, response);
     return html;
   }
 
