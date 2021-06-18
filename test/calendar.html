@@ -43,7 +43,10 @@
     document.addEventListener('DOMContentLoaded', () => {
       const calendar = new fomantic.Calendar('#calendar', {
         debug: true,
-        verbose: true
+        verbose: true,
+        // type: 'date',
+        ampm: false,
+        today: true
       });
 
       // const rangeend = new fomantic.Calendar('#rangeend', {

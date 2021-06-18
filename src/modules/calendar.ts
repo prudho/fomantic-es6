@@ -211,14 +211,14 @@ const default_settings: CalendarOptions = {
   },
 
   text: {
-    days: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
-    months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-    monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    today: 'Today',
-    now: 'Now',
-    am: 'AM',
-    pm: 'PM',
-    weekNo: 'Week'
+    days        : ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+    months      : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+    monthsShort : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    today       : 'Today',
+    now         : 'Now',
+    am          : 'AM',
+    pm          : 'PM',
+    weekNo      : 'Week'
   },
 
   formatter: {
@@ -511,64 +511,64 @@ const default_settings: CalendarOptions = {
   },
 
   selector: {
-    popup: '.ui.popup',
-    input: 'input',
+    popup:     '.ui.popup',
+    input:     'input',
     activator: 'input',
-    append: '.inline.field,.inline.fields'
+    append:    '.inline.field,.inline.fields'
   },
 
   regExp: {
-    dateWords: /[^A-Za-z\u00C0-\u024F]+/g,
+    dateWords:   /[^A-Za-z\u00C0-\u024F]+/g,
     dateNumbers: /[^\d:]+/g
   },
 
   error: {
-    popup: 'UI Popup, a required component is not included in this page',
+    popup:  'UI Popup, a required component is not included in this page',
     method: 'The method you called is not defined.'
   },
 
   className: {
-    calendar: 'calendar',
-    active: 'active',
-    popup: 'ui popup',
-    grid: 'ui equal width grid',
-    column: 'column',
-    table: 'ui celled center aligned unstackable table',
-    inverted: 'inverted',
-    prev: 'prev link',
-    next: 'next link',
-    prevIcon: 'chevron left icon',
-    nextIcon: 'chevron right icon',
-    link: 'link',
-    cell: 'link',
+    calendar:     'calendar',
+    active:       'active',
+    popup:        'ui popup',
+    grid:         'ui equal width grid',
+    column:       'column',
+    table:        'ui celled center aligned unstackable table',
+    inverted:     'inverted',
+    prev:         'prev link',
+    next:         'next link',
+    prevIcon:     'chevron left icon',
+    nextIcon:     'chevron right icon',
+    link:         'link',
+    cell:         'link',
     disabledCell: 'disabled',
-    weekCell: 'disabled',
+    weekCell:     'disabled',
     adjacentCell: 'adjacent',
-    activeCell: 'active',
-    rangeCell: 'range',
-    focusCell: 'focus',
-    todayCell: 'today',
-    today: 'today link',
-    disabled: 'disabled'
+    activeCell:   'active',
+    rangeCell:    'range',
+    focusCell:    'focus',
+    todayCell:    'today',
+    today:        'today link',
+    disabled:     'disabled'
   },
 
   metadata: {
-    date: 'date',
-    focusDate: 'focusDate',
-    startDate: 'startDate',
-    endDate: 'endDate',
-    minDate: 'minDate',
-    maxDate: 'maxDate',
-    mode: 'mode',
-    type: 'type',
+    date:        'date',
+    focusDate:   'focusDate',
+    startDate:   'startDate',
+    endDate:     'endDate',
+    minDate:     'minDate',
+    maxDate:     'maxDate',
+    mode:        'mode',
+    type:        'type',
     monthOffset: 'monthOffset',
-    message: 'message',
-    class: 'class',
-    inverted: 'inverted',
-    variation: 'variation',
-    position: 'position',
-    month: 'month',
-    year: 'year'
+    message:     'message',
+    class:       'class',
+    inverted:    'inverted',
+    variation:   'variation',
+    position:    'position',
+    month:       'month',
+    year:        'year'
   },
 
   eventClass: 'blue',
@@ -603,7 +603,7 @@ const default_settings: CalendarOptions = {
   },
 
   // is the given date disabled?
-  isDisabled: function (date, mode) {
+  isDisabled: function (date: Date, mode) {
     return false;
   }
 }
@@ -645,7 +645,7 @@ export class Calendar extends Module {
     this.$container = this.$element.find(this.settings.selector.popup);
 
     this.isInverted = this.$element.hasClass(this.settings.className.inverted);
-    this.timeGap = timeGapTable[this.settings.minTimeGap],
+    this.timeGap = timeGapTable[this.settings.minTimeGap];
     
     this.initialize();
   }

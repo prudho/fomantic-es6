@@ -522,9 +522,9 @@ export class Search extends Module {
 
   setup_api(searchTerm, callback) {
     let
-      apiSettings = {
+      apiSettings: ApiOptions = {
         debug             : this.settings.debug,
-        on                : false,
+        on                : null,
         cache             : this.settings.cache,
         action            : 'search',
         urlData           : {
@@ -1307,16 +1307,14 @@ export class Search extends Module {
           debug      : this.settings.debug,
           verbose    : this.settings.verbose,
           duration   : this.settings.duration,
-          queue      : true
-        });
-        
-        transition.on('show', () => {
-          let $firstResult = this.$element.find(this.settings.selector.result).eq(0);
-          this.ensureVisible($firstResult);
-        });
-
-        transition.on('complete', () => {
-          callback();
+          queue      : true,
+          onShow     : () => {
+            let $firstResult = this.$element.find(this.settings.selector.result).eq(0);
+            this.ensureVisible($firstResult);
+          },
+          onComplete : () => {
+            callback();
+          }
         });
       }
       else {
@@ -1349,16 +1347,15 @@ export class Search extends Module {
         //   })
         // ;
 
-        let transition = new Transition(this.$results, {
+        new Transition(this.$results, {
           animation  : this.settings.transition + ' in',
           debug      : this.settings.debug,
           verbose    : this.settings.verbose,
           duration   : this.settings.duration,
-          queue      : true
-        });
-
-        transition.on('complete', () => {
-          callback();
+          queue      : true,
+          onComplete : () => {
+            callback();
+          }
         });
       }
       else {

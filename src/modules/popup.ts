@@ -792,13 +792,12 @@ export class Popup extends Module {
         queue      : false,
         debug      : this.settings.debug,
         verbose    : this.settings.verbose,
-        duration   : this.settings.transition.showDuration || this.settings.duration
-      });
-
-      transition.on('complete', () => {
-        this.bind_close();
-        callback.call(this.$popup, this.element);
-        this.settings.onVisible.call(this.$popup, this.element);
+        duration   : this.settings.transition.showDuration || this.settings.duration,
+        onComplete : () => {
+          this.bind_close();
+          callback.call(this.$popup, this.element);
+          this.settings.onVisible.call(this.$popup, this.element);
+        }
       });
     }
     else {
@@ -829,14 +828,13 @@ export class Popup extends Module {
           queue      : false,
           duration   : this.settings.transition.hideDuration || this.settings.duration,
           debug      : this.settings.debug,
-          verbose    : this.settings.verbose
-      });
-
-      transition.on('complete', () => {
-        this.reset();
-        callback.call(this.$popup, this.element);
-        // INVESTIGATE: broken when using in calendar
-        // this.settings.onHidden.call(this.$popup, this.element);
+          verbose    : this.settings.verbose,
+          onComplete : () => {
+            this.reset();
+            callback.call(this.$popup, this.element);
+            // INVESTIGATE: broken when using in calendar
+            // this.settings.onHidden.call(this.$popup, this.element);
+          }
       });
     }
     else {

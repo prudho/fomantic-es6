@@ -41,7 +41,7 @@ export interface ApiOptions extends ModuleOptions {
   hideError?: boolean;
   errorDuration?: number;
   encodeParameters?: boolean;
-  action?: boolean;
+  action?: string;
   url?: boolean;
   base?: string;
   urlData?: {};
@@ -103,27 +103,27 @@ export interface ApiOptions extends ModuleOptions {
   }
 
   // callbacks before request
-  beforeSend  : Function;
-  beforeXHR   : Function;
-  onRequest   : Function;
+  beforeSend?  : Function;
+  beforeXHR?   : Function;
+  onRequest?   : Function;
 
   // after request
-  onResponse  : Function;
+  onResponse?  : Function;
 
   // response was successful, if JSON passed validation
-  onSuccess   : Function;
+  onSuccess?   : Function;
 
   // request finished without aborting
-  onComplete  : Function;
+  onComplete?  : Function;
 
   // failed JSON success test
-  onFailure   : Function;
+  onFailure?   : Function;
 
   // server error
-  onError     : Function;
+  onError?     : Function;
 
   // request aborted
-  onAbort     : Function;
+  onAbort?     : Function;
 }
 
 const default_settings: ApiOptions = {
@@ -163,7 +163,7 @@ const default_settings: ApiOptions = {
   encodeParameters  : true,
 
   // API action to use
-  action            : false,
+  action            : null,
 
   // templated URL to use
   url               : false,

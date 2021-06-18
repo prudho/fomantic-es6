@@ -247,14 +247,13 @@ export class Accordion extends Module {
           verbose: this.settings.verbose,
           duration: this.settings.duration,
           skipInlineHidden: true,
+          onComplete: () => {
+            $activeContent
+              .children()
+              .removeClass(this.settings.className.transition)
+            ;
+          }
         });
-
-        transition.on('complete', () => {
-          $activeContent
-            .children()
-            .removeClass(this.settings.className.transition)
-          ;
-        })
       } else {
         // $activeContent
         //   .children()

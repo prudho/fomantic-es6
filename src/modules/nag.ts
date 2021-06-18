@@ -223,7 +223,7 @@ export class Nag extends Module {
       }
       else {
         // this.$element.slideDown(this.settings.duration, this.settings.easing, this.settings.onVisible);
-        Utils.slideDown(this.$element, this.settings.duration,.this.settings.onVisible);
+        Utils.slideDown(this.$element, this.settings.duration, this.settings.onVisible);
       }
     }
   }

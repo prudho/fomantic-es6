@@ -513,12 +513,11 @@ export class Toast extends Module {
         queue      : false,
         debug      : this.settings.debug,
         verbose    : this.settings.verbose,
-        duration   : this.settings.transition.showDuration
-      });
-
-      this.transition.on('complete', () => {
-        callback.call(this.$toastBox, this.element);
-        this.settings.onVisible.call(this.$toastBox, this.element);
+        duration   : this.settings.transition.showDuration,
+        onComplete : () => {
+          callback.call(this.$toastBox, this.element);
+          this.settings.onVisible.call(this.$toastBox, this.element);
+        }
       });
     }
   }
@@ -538,32 +537,29 @@ export class Toast extends Module {
         duration   : this.settings.transition.hideDuration,
         debug      : this.settings.debug,
         verbose    : this.settings.verbose,
-        interval   : 50
-      });
-
-      // TODO
-
-      this.transition.on('before_hide', (callback: Function = () => {}) => {
-        if (this.settings.transition.closeEasing !== '') {
-            if (this.$toastBox) {
-              this.$toastBox.css('opacity', 0);
-              // this.$toastBox.wrap('<div/>').parent().hide(this.settings.transition.closeDuration, this.settings.transition.closeEasing, function () {
-              //   if (this.$toastBox) {
-              //     this.$toastBox.parent().remove();
-              //     callback.call(this.$toastBox);
-              //   }
-              // });
-            }
-        } else {
-          callback.call(this.$toastBox);
+        interval   : 50,
+        onBeforeHide : (callback: Function = () => {}) => {
+          // TODO
+          if (this.settings.transition.closeEasing !== '') {
+              if (this.$toastBox) {
+                this.$toastBox.css('opacity', 0);
+                // this.$toastBox.wrap('<div/>').parent().hide(this.settings.transition.closeDuration, this.settings.transition.closeEasing, function () {
+                //   if (this.$toastBox) {
+                //     this.$toastBox.parent().remove();
+                //     callback.call(this.$toastBox);
+                //   }
+                // });
+              }
+          } else {
+            callback.call(this.$toastBox);
+          }
+        },
+        onComplete :() => {
+          callback.call(this.$toastBox, this.element);
+          this.settings.onHidden.call(this.$toastBox, this.element);
+          this.destroy();
         }
-      });
-
-      this.transition.on('complete', () => {
-        callback.call(this.$toastBox, this.element);
-        this.settings.onHidden.call(this.$toastBox, this.element);
-        this.destroy();
-      });
+      });      
     }
     else {
       this.error(this.settings.error.noTransition);

@@ -300,17 +300,15 @@ export class Dimmer extends Module {
         queue       : false,
         duration    : this.get_duration(),
         useFailSafe : true,
-        autostart   : false
-      });
-
-      transition.on('start', () => {
-        this.set_dimmed();
-      });
-
-      transition.on('complete', () => {
-        this.set_active();
-        this.settings.onVisible.call(this.element);
-        callback();
+        autostart   : false,
+        onStart     : () => {
+          this.set_dimmed();
+        },
+        onComplete  : () => {
+          this.set_active();
+          this.settings.onVisible.call(this.element);
+          callback();
+        }
       });
 
       transition.toggle();
@@ -350,19 +348,17 @@ export class Dimmer extends Module {
         queue       : false,
         duration    : this.get_duration(),
         useFailSafe : true,
-        autostart   : false
-      });
-
-      transition.on('start', () => {
-        this.set_dimmed();
-      });
-
-      transition.on('complete', () => {
-        this.remove_dimmed();
-        this.remove_variation(undefined);
-        this.remove_active();
-        this.settings.onHidden.call(this.element);
-        callback();
+        autostart   : false,
+        onStart     : () => {
+          this.set_dimmed();
+        },
+        onComplete  : () => {
+          this.remove_dimmed();
+          this.remove_variation(undefined);
+          this.remove_active();
+          this.settings.onHidden.call(this.element);
+          callback();
+        }
       });
 
       transition.toggle();

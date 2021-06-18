@@ -45,11 +45,11 @@ export interface TransitionOptions extends ModuleOptions {
   }
 
   // animation callback event
-  onStart       : Function;
-  onComplete    : Function;
-  onShow        : Function;
-  onHide        : Function;
-  onBeforeHide  : Function;
+  onStart?      : Function;
+  onComplete?   : Function;
+  onShow?       : Function;
+  onHide?       : Function;
+  onBeforeHide? : Function;
 }
 
 const default_settings: TransitionOptions = {

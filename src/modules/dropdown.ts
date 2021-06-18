@@ -4,6 +4,8 @@ import { Module, ModuleOptions } from '../module'
 
 import { Transition } from './transition';
 
+import { Api, ApiOptions } from './api';
+
 import $, { Cash } from 'cash-dom';
 
 export interface DropdownOptions extends ModuleOptions {
@@ -14,7 +16,7 @@ export interface DropdownOptions extends ModuleOptions {
 
   clearable: boolean;
 
-  apiSettings: boolean;
+  apiSettings: ApiOptions;
   selectOnKeydown: boolean;
   minCharacters: number;
 
@@ -43,7 +45,7 @@ export interface DropdownOptions extends ModuleOptions {
   ignoreSearchCase: boolean;
   hideAdditions: boolean;
 
-  maxSelections: boolean;
+  maxSelections: number;
   useLabels: boolean;
   delimiter: string;
 
@@ -56,7 +58,7 @@ export interface DropdownOptions extends ModuleOptions {
 
   transition: string;
   duration: number;
-  displayType: boolean;
+  displayType: string;
 
   glyphWidth: number;
 
@@ -239,7 +241,7 @@ const default_settings: DropdownOptions = {
 
   clearable              : false,      // whether the value of the dropdown can be cleared
 
-  apiSettings            : false,
+  apiSettings            : null,
   selectOnKeydown        : true,       // Whether selection should occur automatically when keyboard shortcuts used
   minCharacters          : 0,          // Minimum characters required to trigger API call
 
@@ -268,7 +270,7 @@ const default_settings: DropdownOptions = {
   ignoreSearchCase       : true,       // whether to consider case sensitivity when filtering items
   hideAdditions          : true,       // whether or not to hide special message prompting a user they can enter a value
 
-  maxSelections          : false,      // When set to a number limits the number of selections to this count
+  maxSelections          : null,       // When set to a number limits the number of selections to this count
   useLabels              : true,       // whether multiple select should filter currently active selections from choices
   delimiter              : ',',        // when multiselect uses normal <input> the values will be delimited with this character
 
@@ -281,7 +283,7 @@ const default_settings: DropdownOptions = {
 
   transition             : 'auto',     // auto transition will slide down or up based on direction
   duration               : 200,        // duration of transition
-  displayType            : false,      // displayType of transition
+  displayType            : null,      // displayType of transition
 
   glyphWidth             : 1.037,      // widest glyph width in em (W is 1.037 em) used to calculate multiselect input width
 
@@ -621,6 +623,8 @@ export class Dropdown extends Module {
   menuObserver: MutationObserver;
   classObserver: MutationObserver;
 
+  api: Api;
+
   timer;
   itemTimer;
 
@@ -715,17 +719,18 @@ export class Dropdown extends Module {
 
   setup_api() {
     let
-      apiSettings = {
+      apiSettings: ApiOptions = {
         debug   : this.settings.debug,
         urlData : {
           value : this.get_value(),
           query : this.get_query()
         },
-        on    : false
+        on    : null
       }
     ;
     this.verbose('First request, initializing API');
-    // this.$element.api(apiSettings);
+
+    this.api = new Api(apiSettings);
   }
 
   setup_layout() {
@@ -1232,21 +1237,21 @@ export class Dropdown extends Module {
 
   event_item_mouseenter(event) {
     let
-      $target        = $(event.target),
       $item          = $(event.currentTarget),
       $subMenu       = $item.children(this.settings.selector.menu),
       $otherMenus    = $item.siblings(this.settings.selector.item).children(this.settings.selector.menu),
       hasSubMenu     = ($subMenu.length > 0),
-      isBubbledEvent = ($subMenu.find($target).length > 0)
+      isBubbledEvent = ($subMenu.find(event.target).length > 0),
+      module         = this
     ;
     if (!isBubbledEvent && hasSubMenu) {
       clearTimeout(this.itemTimer);
       this.itemTimer = setTimeout(function() {
         this.verbose('Showing sub-menu', $subMenu);
         $.each($otherMenus, function() {
-          module.animate.hide(false, $(this));
+          module.animate_hide(null, $(this));
         });
-        module.animate.show(false, $subMenu);
+        module.animate_show(null, $subMenu);
       }, this.settings.delay.show);
       event.preventDefault();
     }
@@ -1706,13 +1711,11 @@ export class Dropdown extends Module {
           duration   : this.settings.transition.showDuration || this.settings.duration,
           queue      : true,
           displayType: this.get_displayType(),
-          autostart: false
-        });
-
-        this.menuTransition.on('start', start);
-
-        this.menuTransition.on('complete', () => {
-          callback.call(this.element);
+          autostart  : false,
+          onStart    : start,
+          onComplete : () => {
+            callback.call(this.element);
+          }
         });
 
         this.menuTransition.animate();
@@ -1790,19 +1793,17 @@ export class Dropdown extends Module {
           verbose    : this.settings.verbose,
           queue      : false,
           displayType: this.get_displayType(),
-          autostart: false
-        });
-
-        this.menuTransition.on('start', start);
-
-        this.menuTransition.on('complete', () => {
-          callback.call(this.element);
+          autostart  : false,
+          onStart    : start,
+          onComplete : () => {
+            callback.call(this.element);
+          }
         });
 
         this.menuTransition.animate();
       }
       else {
-        this.error(this.settings.error.transition);
+        this.error(this.settings.error.noTransition);
       }
     }
   }
@@ -1962,7 +1963,7 @@ export class Dropdown extends Module {
     if (this.settings.useLabels && this.has_maxSelections()) {
       return;
     }
-    if (this.settings.apiSettings) {
+    if (this.settings.apiSettings !== null) {
       if (this.can_useAPI() ) {
         this.queryRemote(searchTerm, () => {
           if (this.settings.filterRemoteData) {
@@ -2098,8 +2099,8 @@ export class Dropdown extends Module {
       callbackParameters = [callbackParameters];
     }
     let
-      apiSettings = {
-        errorDuration : false,
+      apiSettings: ApiOptions = {
+        // errorDuration : false,
         cache         : 'local',
         throttle      : this.settings.throttle,
         urlData       : {
@@ -2137,21 +2138,19 @@ export class Dropdown extends Module {
               this.set_selected(value, null, null, true);
             }
           }
-          this.settings.iconClicked = false;
-          this.settings.focused = false;
+          this.iconClicked = false;
+          this.focused = false;
           callback.apply(null, callbackParameters);
         }
       }
     ;
-    // INVESTIGATE
-    // if (!this.$element.api('get request')) {
-    //   this.setup_api();
-    // }
-    // apiSettings = $.extend(true, {}, apiSettings, this.settings.apiSettings);
-    // this.$element
-    //   .api('setting', apiSettings)
-    //   .api('query')
-    // ;
+    if (this.api === undefined) {
+      this.setup_api();
+    }
+    apiSettings = $.extend(true, {}, apiSettings, this.settings.apiSettings);
+
+    this.api.setting(apiSettings);
+    this.api.query();
   }
 
   clearItems() {
@@ -2283,7 +2282,7 @@ export class Dropdown extends Module {
   }
 
   can_extendSelect(): boolean {
-    return this.settings.allowAdditions || this.settings.apiSettings;
+    return this.settings.allowAdditions || this.settings.apiSettings !== null;
   }
 
   can_openDownward($subMenu): boolean {
@@ -2929,7 +2928,7 @@ export class Dropdown extends Module {
         if (group.length !== oldGroup.length || group[0] !== oldGroup[0]) {
           values.push({
             type: 'header',
-            divider: this.settings.headerDivider,
+            divider: module.settings.headerDivider,
             name: group.attr('label') || ''
           });
           oldGroup = group;
@@ -3622,7 +3621,7 @@ export class Dropdown extends Module {
     }
     if (hasMaxCount) {
       count  = this.get_selectionCount();
-      message = message.replace('{maxCount}', this.settings.maxSelections);
+      message = message.replace('{maxCount}', this.settings.maxSelections.toString());
     }
     if (hasTerm) {
       query   = term || this.get_query();

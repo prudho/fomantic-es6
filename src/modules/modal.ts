@@ -836,21 +836,20 @@ export class Modal extends Module {
             queue       : this.settings.queue,
             duration    : this.settings.transition.showDuration || this.settings.duration,
             useFailSafe : true,
-            autostart   : false
-          });
-    
-          this.transition.on('complete', () => {
-            console.log(this, 'complete')
-            this.settings.onVisible.apply(this.element);
-            if (this.settings.keyboardShortcuts) {
-              this.add_keyboardShortcuts();
+            autostart   : false,
+            onComplete  : () => {
+              console.log(this, 'complete')
+              this.settings.onVisible.apply(this.element);
+              if (this.settings.keyboardShortcuts) {
+                this.add_keyboardShortcuts();
+              }
+              this.save_focus();
+              this.set_active();
+              if (this.settings.autofocus) {
+                this.set_autofocus();
+              }
+              callback();
             }
-            this.save_focus();
-            this.set_active();
-            if (this.settings.autofocus) {
-              this.set_autofocus();
-            }
-            callback();
           });
 
           this.transition.toggle();
@@ -886,38 +885,36 @@ export class Modal extends Module {
           queue       : this.settings.queue,
           duration    : this.settings.transition.hideDuration || this.settings.duration,
           useFailSafe : true,
-          autostart   : false
-        });
-
-        this.transition.on('start', () => {
-          if (!this.others_active() && !this.others_animating() && !keepDimmed) {
-            this.hideDimmer();
-          }
-          if (this.settings.keyboardShortcuts && !this.others_active()) {
-            this.remove_keyboardShortcuts();
-          }
-        });
-
-        this.transition.on('complete', () => {
-          this.unbind_scrollLock();
-          if (this.settings.allowMultiple) {
-            $previousModal.addClass(this.settings.className.front);
-            this.$element.removeClass(this.settings.className.front);
-
-            if (hideOthersToo) {
-              this.$allModals.find(this.settings.selector.dimmer).removeClass('active');
+          autostart   : false,
+          onStart     : () => {
+            if (!this.others_active() && !this.others_animating() && !keepDimmed) {
+              this.hideDimmer();
             }
-            else {
-              $previousModal.find(this.settings.selector.dimmer).removeClass('active');
+            if (this.settings.keyboardShortcuts && !this.others_active()) {
+              this.remove_keyboardShortcuts();
             }
+          },
+          onComplete  : () => {
+            this.unbind_scrollLock();
+            if (this.settings.allowMultiple) {
+              $previousModal.addClass(this.settings.className.front);
+              this.$element.removeClass(this.settings.className.front);
+  
+              if (hideOthersToo) {
+                this.$allModals.find(this.settings.selector.dimmer).removeClass('active');
+              }
+              else {
+                $previousModal.find(this.settings.selector.dimmer).removeClass('active');
+              }
+            }
+            // if ($.isFunction(settings.onHidden)) {
+            //   settings.onHidden.call(element);
+            // }
+            this.settings.onHidden.call(this.element);
+            this.remove_dimmerStyles();
+            this.restore_focus();
+            callback();
           }
-          // if ($.isFunction(settings.onHidden)) {
-          //   settings.onHidden.call(element);
-          // }
-          this.settings.onHidden.call(this.element);
-          this.remove_dimmerStyles();
-          this.restore_focus();
-          callback();
         });
 
         this.transition.toggle();
