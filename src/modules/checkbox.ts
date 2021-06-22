@@ -25,9 +25,6 @@ export interface CheckboxOptions extends ModuleOptions {
   onEnable: Function;
   onDisable: Function;
 
-  onEnabled: Function;
-  onDisabled: Function;
-
   className       : {
     checked       : string;
     indeterminate : string;
@@ -78,10 +75,6 @@ const default_settings: CheckboxOptions = {
 
   onEnable            : function() {},
   onDisable           : function() {},
-
-  // preserve misspelled callbacks (will be removed in 3.0)
-  onEnabled           : function() {},
-  onDisabled          : function() {},
 
   className       : {
     checked       : 'checked',
@@ -368,8 +361,6 @@ export class Checkbox extends Module {
     this.set_enabled();
     if (!this.should_ignoreCallbacks()) {
       this.settings.onEnable.call(this.input);
-      // preserve legacy callbacks
-      this.settings.onEnabled.call(this.input);
       this.trigger_change();
     }
   }
@@ -383,8 +374,6 @@ export class Checkbox extends Module {
     this.set_disabled();
     if (!this.should_ignoreCallbacks()) {
       this.settings.onDisable.call(this.input);
-      // preserve legacy callbacks
-      this.settings.onDisabled.call(this.input);
       this.trigger_change();
     }
   }
