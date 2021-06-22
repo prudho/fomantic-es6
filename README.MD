@@ -35,32 +35,32 @@ npm run build
 | Sticky        | none          |   ✔️  |         |
 | Slider        | none          |   ✔️  |         |
 | Sidebar       | none          |   ✔️  |         |
-| Calendar      | Transition, Calendar, Checkbox, Dropdown |   ⚠️  | range is broken, halp ! |
+| Calendar      |  |   ⚠️  | range is broken, halp ! |
 | Checkbox      | none          |   ⚠️  | grouped checkbox must be rethinked |
 | Dropdown      | Transition    |   ⚠️  | not finished and utterly broken |
 | Tab           | none          |   ⚠️  | need to find a replacement for $.address (state library) |
 | Accordion     | Transition    |   ⚠️  |         |
-| Embed         | ...           |   ⚠️  |         |
-| Modal         | ...           |   ⚠️  |         |
-| Nag           | ...           |   ⚠️  |         |
-| API           | ...           |   ⚠️  | needs intesive tests |
-| Form          | ...           |   ⚠️  |         |
+| Embed         | none          |   ⚠️  |         |
+| Modal         | Transition, Dimmer |   ⚠️  |         |
+| Nag           | none          |   ⚠️  |         |
+| API           | none          |   ⚠️  | needs intesive tests |
+| Form          | Transition, Calendar, Checkbox, Dropdown |   ⚠️  |         |
 | Search        | API, Transition |   ⚠️  | needs API debugging |
-| Shape         | ...           |   ⚠️  |         |
-| State         | ...           |   ❌  |         |
-| Visibility    | ...           |   ❌  |         |
+| Shape         | none          |   ⚠️  |         |
+| State         | none          |   ⚠️  |         |
+| Visibility    | none          |   ⚠️  |         |
 | Site          | ...           |   ❌  |         |
 
 ## jQuery
 
 [jQuery's related discussion](https://github.com/fomantic/Fomantic-UI/issues/374)
 
-jQuery is heavily used in FUI actually, and remove all its references from code is a real PITA (trust me, i've tried and others too...). But we can reduce its footprint on the code by using a lighter compatible library. [Cash](https://github.com/fabiospampinato/cash) seems to be a great solution. The only caveat I saw for now is the lack on jQuery's animation methods, but we'll find a lightweight alternative too !
+jQuery is heavily used in FUI actually, and remove all its references from code is a real PITA (trust me, i've tried and others too...). But we can reduce its footprint on the code by using a lighter compatible library. [Cash](https://github.com/fabiospampinato/cash) seems to be a great solution. ~~The only caveat I saw for now is the lack on jQuery's animation methods, but we'll find a lightweight alternative too !~~ FOUND ! Implemented by ourselves :)
 
 ## Todo
 - find a replacement for the `.addBack` jQuery's function (used once in dropdown).
 - find a replacement for the `$.adress` functions used in tabs.
-- implement a vanilla Ajax library to handle requests.
+- ~~implement a vanilla Ajax library to handle requests.~~ (#5bccb8b529246a1b29006aed7e65109a9cbaa011)
 - fix polymorhp variables that exists in the code.
 - fix some method which requires multiple parameters.
 - fix some `Cash` behaviors that don't work like jQuery.
