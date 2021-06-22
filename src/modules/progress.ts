@@ -487,7 +487,7 @@ export class Progress extends Module {
       this.set_label(text);
     }
     this.bind_transitionEnd(() => {
-      this.settings.onActive.call('active').call(this.element, this.value, this.total);
+      this.settings.onActive.call(this.element, this.value, this.total);
     });
   }
 
@@ -505,6 +505,8 @@ export class Progress extends Module {
         this.verbose('Adding percentage to bar label');
         $progress.text( this.get_text(this.settings.text.percent, index) );
       }
+      // INVESTIGATE: ts error if removed
+      return element;
     });
   }
 
