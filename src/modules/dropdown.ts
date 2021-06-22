@@ -25,14 +25,14 @@ export interface DropdownOptions extends ModuleOptions {
 
   throttle: number;
 
-  context: Window;
+  context: Window | string;
   direction: string;
   keepOnScreen: boolean;
 
-  match: 'both' | 'text' | 'label';
-  fullTextSearch: boolean;
+  match: 'both' | 'text' | 'label' | 'value';
+  fullTextSearch: boolean | 'exact';
   ignoreDiacritics: boolean;
-  hideDividers: boolean;
+  hideDividers: boolean | 'empty';
 
   placeholder: string;
   preserveHTML: boolean;
@@ -628,11 +628,18 @@ export class Dropdown extends Module {
   timer;
   itemTimer;
 
+  private _context;
+
   constructor(selector: string, parameters) {
     super(selector, parameters, default_settings);
 
     this.$document       = $(document)
     this.$context        = $(this.settings.context);
+
+    this._context = this.settings.context === window
+      ? window
+      : document.querySelector(this.settings.context.toString())
+    ;
   
     this.$combo          = (this.$element.prev().find(this.settings.selector.text).length > 0)
       ? this.$element.prev().find(this.settings.selector.text)
@@ -1200,7 +1207,7 @@ export class Dropdown extends Module {
     this.timer = setTimeout(this.search.bind(this), this.settings.delay.search);
   }
 
-  event_item_click(event, skipRefocus) {
+  event_item_click(event, skipRefocus: boolean) {
     let
       $choice        = $(event.currentTarget),
       $target        = (event)
@@ -1247,12 +1254,12 @@ export class Dropdown extends Module {
     if (!isBubbledEvent && hasSubMenu) {
       clearTimeout(this.itemTimer);
       this.itemTimer = setTimeout(function() {
-        this.verbose('Showing sub-menu', $subMenu);
+        module.verbose('Showing sub-menu', $subMenu);
         $.each($otherMenus, function() {
-          module.animate_hide(null, $(this));
+          module.animate_hide(undefined, $(this));
         });
-        module.animate_show(null, $subMenu);
-      }, this.settings.delay.show);
+        module.animate_show(undefined, $subMenu);
+      }, module.settings.delay.show);
       event.preventDefault();
     }
   }
@@ -1588,7 +1595,8 @@ export class Dropdown extends Module {
   focusSearch(skipHandler: boolean = false) {
     if (this.has_search() && !this.is_focusedOnSearch() ) {
       if (skipHandler) {
-        this.$element.off('focus' + this.eventNamespace, this.settings.selector.search);
+        // this.$element.off('focus' + this.eventNamespace, this.settings.selector.search);
+        this.$element.off('focus' + this.eventNamespace, this.settings.selector.search, null);
         this.$search.trigger('focus');
         this.$element.on('focus'  + this.eventNamespace, this.settings.selector.search, this.event_search_focus.bind(this));
       }
@@ -1676,7 +1684,7 @@ export class Dropdown extends Module {
     }
   }
 
-  animate_show(callback = () => {}, $subMenu = undefined) {
+  animate_show(callback: Function = () => {}, $subMenu = undefined) {
     let
       $currentMenu = $subMenu || this.$menu,
       start = ($subMenu)
@@ -1761,7 +1769,7 @@ export class Dropdown extends Module {
     }
   }
 
-  animate_hide(callback = () => {}, $subMenu = undefined) {
+  animate_hide(callback: Function = () => {}, $subMenu = undefined) {
     let
       $currentMenu = $subMenu || this.$menu,
       start = ($subMenu)
@@ -2295,10 +2303,10 @@ export class Dropdown extends Module {
     $currentMenu.addClass(this.settings.className.loading);
     calculations = {
       context: {
-        offset    : (this.$context.get(0) === window)
+        offset    : (this._context === window)
           ? { top: 0, left: 0}
           : this.$context.offset(),
-        scrollTop : (this.$context.get(0) === window) ? window.scrollY : this.$context.scrollTop(),
+        scrollTop : (this._context === window) ? window.scrollY : this._context.scrollY,
         height    : this.$context.outerHeight()
       },
       menu : {
@@ -2342,10 +2350,10 @@ export class Dropdown extends Module {
     $currentMenu.addClass(this.settings.className.loading);
     calculations = {
       context: {
-        offset     : (this.$context.get(0) === window)
+        offset     : (this._context === window)
           ? { top: 0, left: 0}
           : this.$context.offset(),
-        scrollLeft : (this.$context.get(0) === window) ? window.scrollX : this.$context.scrollLeft(),
+        scrollLeft : (this._context === window) ? window.scrollX : this._context.scrollX,
         width      : this.$context.outerWidth()
       },
       menu: {
@@ -2438,7 +2446,7 @@ export class Dropdown extends Module {
   }
 
   is_horizontallyScrollableContext(): boolean {
-    let overflowX = (this.$context.get(0) !== window)
+    let overflowX = (this._context !== window)
       ? this.$context.css('overflow-X')
       : false
     ;
@@ -2515,7 +2523,7 @@ export class Dropdown extends Module {
   }
 
   is_verticallyScrollableContext(): boolean {
-    let overflowY = (this.$context.get(0) !== window)
+    let overflowY = (this._context !== window)
       ? this.$context.css('overflow-y')
       : false
     ;

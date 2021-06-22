@@ -1091,20 +1091,20 @@ export class Slider extends Module {
     ;
     if (this.is_vertical()) {
       if (this.is_reversed()) {
-        thumbPosValue = {bottom: 'calc(' + thumbPosPercent + '% - ' + this.offset + 'px)', top: 'auto'};
+        thumbPosValue = {bottom: `calc(${thumbPosPercent}% - ${this.offset}px)`, top: 'auto'};
         trackPosValue = {bottom: trackStartPosPercent + '%', top: trackEndPosPercent + '%'};
       }
       else {
-        thumbPosValue = {top: 'calc(' + thumbPosPercent + '% - ' + this.offset + 'px)', bottom: 'auto'};
+        thumbPosValue = {top: `calc(${thumbPosPercent}% - ${this.offset}px)`, bottom: 'auto'};
         trackPosValue = {top: trackStartPosPercent + '%', bottom: trackEndPosPercent + '%'};
       }
     } else {
       if (this.is_reversed()) {
-        thumbPosValue = {right: 'calc(' + thumbPosPercent + '% - ' + this.offset + 'px)', left: 'auto'};
+        thumbPosValue = {right: `calc(${thumbPosPercent}% - ${this.offset}px)`, left: 'auto'};
         trackPosValue = {right: trackStartPosPercent + '%', left: trackEndPosPercent + '%'};
       }
       else {
-        thumbPosValue = {left: 'calc(' + thumbPosPercent + '% - ' + this.offset + 'px)', right: 'auto'};
+        thumbPosValue = {left: `calc(${thumbPosPercent}% - ${this.offset}px)`, right: 'auto'};
         trackPosValue = {left: trackStartPosPercent + '%', right: trackEndPosPercent + '%'};
       }
     }

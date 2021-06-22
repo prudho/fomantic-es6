@@ -268,11 +268,11 @@ export class Dimmer extends Module {
   toggle(): void {
     this.verbose('Toggling dimmer visibility', this.$dimmer);
     if (!this.is_dimmed() ) {
-      this.show(undefined);
+      this.show();
     }
     else {
       if (this.is_closable()) {
-        this.hide(undefined);
+        this.hide();
       }
     }
   }
@@ -292,7 +292,7 @@ export class Dimmer extends Module {
         this.set_opacity(undefined);
       }
 
-      let transition = new Transition(this.$dimmer, {
+      new Transition(this.$dimmer, {
         debug       : this.settings.debug,
         verbose     : this.settings.verbose,
         displayType : this.settings.useFlex ? 'flex' : 'block',
@@ -300,18 +300,16 @@ export class Dimmer extends Module {
         queue       : false,
         duration    : this.get_duration(),
         useFailSafe : true,
-        autostart   : false,
         onStart     : () => {
           this.set_dimmed();
         },
         onComplete  : () => {
+          console.log('animate_show complete')
           this.set_active();
           this.settings.onVisible.call(this.element);
           callback();
         }
       });
-
-      transition.toggle();
     }
     else {
       this.verbose('Showing dimmer animation with javascript');
@@ -340,7 +338,7 @@ export class Dimmer extends Module {
     if (this.settings.useCSS) {
       this.verbose('Hiding dimmer with css');
 
-      let transition = new Transition(this.$dimmer, {
+      new Transition(this.$dimmer, {
         debug       : this.settings.debug,
         verbose     : this.settings.verbose,
         displayType : this.settings.useFlex ? 'flex' : 'block',
@@ -348,20 +346,14 @@ export class Dimmer extends Module {
         queue       : false,
         duration    : this.get_duration(),
         useFailSafe : true,
-        autostart   : false,
-        onStart     : () => {
-          this.set_dimmed();
-        },
         onComplete  : () => {
           this.remove_dimmed();
-          this.remove_variation(undefined);
+          this.remove_variation();
           this.remove_active();
           this.settings.onHidden.call(this.element);
           callback();
         }
       });
-
-      transition.toggle();
     }
     else {
       this.verbose('Hiding dimmer with javascript');
@@ -380,7 +372,7 @@ export class Dimmer extends Module {
   event_click(event): void {
     this.verbose('Determining if event occurred on dimmer', event);
     if (this.$dimmer.find(event.target).length === 0 || $(event.target).is(this.settings.selector.content)) {
-      this.hide(undefined);
+      this.hide();
       event.stopImmediatePropagation();
     }
   }

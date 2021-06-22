@@ -2,9 +2,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>Fomantic - Modal</title>
+  <title>Fomantic - Dropdown</title>
   <link rel="stylesheet" href="./styles.css">
-  <script src="../dist/fomantic.umd.js"></script>
+  <script src="./legacy/jquery-3.6.0.min.js"></script>
+  <script src="./legacy/components/transition.js"></script>
+  <script src="./legacy/components/dimmer.js"></script>
+  <script src="./legacy/components/modal.js"></script>
   
 </head>
 <body style="padding: 1rem;">
@@ -57,12 +60,10 @@
   <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelector('#btn_modal').addEventListener('click', () => {
-        const modal = new fomantic.Modal('#modal', {
+        const modal = $('#modal').modal({
           debug: true,
           verbose: true
-        });
-
-        modal.show();
+        }).modal('show');
       });
     });
   </script>

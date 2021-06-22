@@ -1709,7 +1709,7 @@ export class Calendar extends Module {
     return null;
   }
 
-  helper_isDateInRange(date, mode, minDate = null, maxDate = null) {
+  helper_isDateInRange(date: Date, mode, minDate = null, maxDate = null) {
     if (!minDate && !maxDate) {
       let startDate = this.get_startDate();
       minDate = startDate && this.settings.minDate ? new Date(Math.max(startDate, this.settings.minDate)) : startDate || this.settings.minDate;
@@ -1721,8 +1721,8 @@ export class Calendar extends Module {
     (maxDate && this.helper_dateDiff(maxDate, date, mode) > 0));
   }
 
-  helper_isDisabled(date, mode: string): boolean {
-    return (mode === 'day' || mode === 'month' || mode === 'year') && ((mode === 'day' && this.settings.disabledDaysOfWeek.indexOf(date.getDay()) !== -1) || this.settings.disabledDates.some((d) => {
+  helper_isDisabled(date: Date, mode: string): boolean {
+    return (mode === 'day' || mode === 'month' || mode === 'year') && ((mode === 'day' && this.settings.disabledDaysOfWeek.indexOf(date.getDay()) !== -1) || this.settings.disabledDates.some((d: any) => {
       if (typeof d === 'string') {
         d = this.helper_sanitiseDate(d);
       }
@@ -1760,7 +1760,7 @@ export class Calendar extends Module {
 
   helper_isEnabled(date, mode: string): boolean {
     if (mode === 'day') {
-      return this.settings.enabledDates.length === 0 || this.settings.enabledDates.some((d) => {
+      return this.settings.enabledDates.length === 0 || this.settings.enabledDates.some((d: any) => {
         if (typeof d === 'string') {
           d = this.helper_sanitiseDate(d);
         }
@@ -1776,7 +1776,7 @@ export class Calendar extends Module {
     }
   }
 
-  helper_isTodayButton(element) {
+  helper_isTodayButton(element): boolean {
     return element.text() === this.settings.text.today;
   }
 
@@ -1785,7 +1785,7 @@ export class Calendar extends Module {
       new Date(date.getFullYear(), date.getMonth(), date.getDate(), time.getHours(), time.getMinutes());
   }
 
-  helper_sanitiseDate(date) {
+  helper_sanitiseDate(date): Date {
     if (!(date instanceof Date)) {
       date = this.settings.parser.date('' + date, this.settings);
     }

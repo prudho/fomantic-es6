@@ -456,7 +456,7 @@ export class Modal extends Module {
     }
     this.instantiate();
     if (this.settings.autoShow) {
-      this.show(null);
+      this.show();
     }
   }
 
@@ -494,10 +494,10 @@ export class Modal extends Module {
 
   toggle(): void {
     if (this.is_active() || this.is_animating()) {
-      this.hide(null);
+      this.hide();
     }
     else {
-      this.show(null);
+      this.show();
     }
   }
 
@@ -586,7 +586,7 @@ export class Modal extends Module {
   }
 
   event_close(): void {
-    this.hide(null);
+    this.hide();
   }
 
   event_approve(): void {
@@ -626,7 +626,7 @@ export class Modal extends Module {
       if (this.settings.closable) {
         this.debug('Escape key pressed hiding modal');
         if (this.$element.hasClass(this.settings.className.front)) {
-          this.hide(null);
+          this.hide();
         }
       }
       else {
@@ -677,7 +677,7 @@ export class Modal extends Module {
           return;
         }
       }
-      else if (!this.hide(null)) {
+      else if (!this.hide()) {
         return;
       }
       this.remove_clickaway();
@@ -836,9 +836,8 @@ export class Modal extends Module {
             queue       : this.settings.queue,
             duration    : this.settings.transition.showDuration || this.settings.duration,
             useFailSafe : true,
-            autostart   : false,
             onComplete  : () => {
-              console.log(this, 'complete')
+              console.log('complete')
               this.settings.onVisible.apply(this.element);
               if (this.settings.keyboardShortcuts) {
                 this.add_keyboardShortcuts();
@@ -851,8 +850,6 @@ export class Modal extends Module {
               callback();
             }
           });
-
-          this.transition.toggle();
         }
         else {
           this.error(this.settings.error.noTransition);
@@ -885,7 +882,6 @@ export class Modal extends Module {
           queue       : this.settings.queue,
           duration    : this.settings.transition.hideDuration || this.settings.duration,
           useFailSafe : true,
-          autostart   : false,
           onStart     : () => {
             if (!this.others_active() && !this.others_animating() && !keepDimmed) {
               this.hideDimmer();
@@ -907,17 +903,14 @@ export class Modal extends Module {
                 $previousModal.find(this.settings.selector.dimmer).removeClass('active');
               }
             }
-            // if ($.isFunction(settings.onHidden)) {
-            //   settings.onHidden.call(element);
-            // }
-            this.settings.onHidden.call(this.element);
+            if ($.isFunction(this.settings.onHidden)) {
+              this.settings.onHidden.call(this.element);
+            }
             this.remove_dimmerStyles();
             this.restore_focus();
             callback();
           }
         });
-
-        this.transition.toggle();
       }
       else {
         this.error(this.settings.error.noTransition);
