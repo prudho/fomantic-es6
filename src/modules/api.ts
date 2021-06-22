@@ -31,6 +31,69 @@ const serializeObject = function (form) {
 	return obj;
 };
 
+function deferred() {
+  let thens = []
+  let catches = []
+
+  var status = 'pending';
+  let resolvedValue
+  let rejectedError
+
+  return {
+    status: status,
+    resolveWith: (context, value) => {
+      status = 'resolved'
+      resolvedValue = value
+      thens.forEach(t => t.apply(context, value))
+      thens = [] // Avoid memleaks.
+    },
+    resolve: value => {
+      status = 'resolved'
+      resolvedValue = value
+      thens.forEach(t => t(value))
+      thens = [] // Avoid memleaks.
+    },
+    rejectWith: (context, error) => {
+      status = 'rejected'
+      rejectedError = error
+      catches.forEach(c => c.apply(context, error))
+      catches = [] // Avoid memleaks.
+    },
+    reject: error => {
+      status = 'rejected'
+      rejectedError = error
+      catches.forEach(c => c(error))
+      catches = [] // Avoid memleaks.
+    },
+    always: cb => {
+      cb(
+        (status === 'resolved')
+          ? resolvedValue
+          : (status === 'rejected')
+            ? 'rejectedError'
+            : status
+      );
+    },
+    then: cb => {
+      if (status === 'resolved') {
+        cb(resolvedValue)
+      } else {
+        thens.unshift(cb)
+      }
+    },
+    catch: cb => {
+      if (status === 'rejected') {
+        cb(rejectedError)
+      } else {
+        catches.unshift(cb)
+      }
+    },
+    state: () => {
+      return status;
+    }
+  }
+}
+
 export interface ApiOptions extends ModuleOptions {
   api?: object;
   cache?: string;
@@ -277,7 +340,7 @@ export class Api extends Module {
   request;
 
   // request details
-  xhr;
+  xhr: XMLHttpRequest;
   mockedXHR;
   cancelled: boolean;
   ajaxSettings;
@@ -290,6 +353,8 @@ export class Api extends Module {
   cache;
 
   instance: Api;
+
+  private _xhr: XMLHttpRequest;
 
   constructor(parameters: ApiOptions) {
     super(null, parameters, default_settings);
@@ -393,7 +458,7 @@ export class Api extends Module {
       this.debug('Adding error state');
       this.set_error();
       if (this.should_removeError()) {
-        setTimeout(this.remove_error, this.settings.errorDuration);
+        setTimeout(this.remove_error.bind(this), this.settings.errorDuration);
       }
     }
     this.debug('API Request failed', errorMessage, xhr);
@@ -421,7 +486,7 @@ export class Api extends Module {
       elapsedTime        = (new Date().getTime() - this.requestStartTime),
       timeLeft           = (default_settings.loadingDuration - elapsedTime),
       translatedResponse = ( $.isFunction(default_settings.onResponse) )
-        ? module.is.expectingJSON() && !default_settings.rawResponse
+        ? this.is_expectingJSON() && !default_settings.rawResponse
           ? default_settings.onResponse.call(context, $.extend(true, {}, response))
           : default_settings.onResponse.call(context, response)
         : false
@@ -431,18 +496,20 @@ export class Api extends Module {
       : 0
     ;
     if (translatedResponse) {
-      module.debug('Modified API response in onResponse callback', default_settings.onResponse, translatedResponse, response);
+      this.debug('Modified API response in onResponse callback', default_settings.onResponse, translatedResponse, response);
       response = translatedResponse;
     }
     if (timeLeft > 0) {
-      module.debug('Response completed early delaying state change by', timeLeft);
+      this.debug('Response completed early delaying state change by', timeLeft);
     }
-    setTimeout(function() {
-      if (module.is.validResponse(response)) {
-        module.request.resolveWith(context, [response, xhr]);
+    setTimeout(() => {
+      if (this.is_validResponse(response)) {
+        // module.request.resolveWith(context, [response, xhr]);
+        this.request.resolveWith(context, [response, xhr]);
       }
       else {
-        module.request.rejectWith(context, [xhr, 'invalid']);
+        // module.request.rejectWith(context, [xhr, 'invalid']);
+        this.request.rejectWith(context, [xhr, 'invalid']);
       }
     }, timeLeft);
   }
@@ -450,7 +517,7 @@ export class Api extends Module {
   event_xhr_fail(xhr, status, httpMessage) {
     let
       context     = this,
-      elapsedTime = (new Date().getTime() - requestStartTime),
+      elapsedTime = (new Date().getTime() - this.requestStartTime),
       timeLeft    = (default_settings.loadingDuration - elapsedTime)
     ;
     timeLeft = (timeLeft > 0)
@@ -458,14 +525,14 @@ export class Api extends Module {
       : 0
     ;
     if (timeLeft > 0) {
-      module.debug('Response completed early delaying state change by', timeLeft);
+      this.debug('Response completed early delaying state change by', timeLeft);
     }
-    setTimeout(function() {
-      if (module.is.abortedRequest(xhr)) {
-        module.request.rejectWith(context, [xhr, 'aborted', httpMessage]);
+    setTimeout(() => {
+      if (this.is_abortedRequest(xhr)) {
+        this.request.rejectWith(context, [xhr, 'aborted', httpMessage]);
       }
       else {
-        module.request.rejectWith(context, [xhr, 'error', status, httpMessage]);
+        this.request.rejectWith(context, [xhr, 'error', status, httpMessage]);
       }
     }, timeLeft);
   }
@@ -561,7 +628,7 @@ export class Api extends Module {
 
     // look for jQuery ajax parameters in settings
     this.ajaxSettings = $.extend(true, {}, this.settings, {
-      type       : this.settings.method || this.settings.type,
+      type       : this.settings.method,
       data       : this.data,
       url        : this.settings.base + this.url,
       beforeSend : this.settings.beforeXHR,
@@ -605,7 +672,7 @@ export class Api extends Module {
 
   abort() {
     let xhr = this.get_xhr();
-    if (xhr && xhr.state() !== 'resolved') {
+    if (xhr && xhr.statusText !== 'resolved') {
       this.debug('Cancelling API request');
       xhr.abort();
     }
@@ -624,11 +691,19 @@ export class Api extends Module {
       mockedXHR
     ;
 
-    mockedXHR = Deferred()
-      .always(this.event_xhr_complete)
-      .done(this.event_xhr_done)
-      .fail(this.event_xhr_fail)
+    // mockedXHR = Deferred()
+    //   .always(this.event_xhr_complete)
+    //   .done(this.event_xhr_done)
+    //   .fail(this.event_xhr_fail)
+    // ;
+
+    mockedXHR = deferred()
+      // .always(this.event_xhr_complete)
     ;
+
+    mockedXHR.always(this.event_xhr_complete);
+    mockedXHR.catch(this.event_xhr_fail);
+    mockedXHR.then(this.event_xhr_done);
 
     if (responder) {
       if ($.isFunction(responder)) {
@@ -661,24 +736,45 @@ export class Api extends Module {
 
   create_request() {
     // api request promise
-    return $.Deferred()
-      .always(this.event_request_complete.bind(this))
-      .done(this.event_request_done.bind(this))
-      .fail(this.event_request_fail.bind(this))
-    ;
+    // return $.Deferred()
+    //   .always(this.event_request_complete.bind(this))
+    //   .done(this.event_request_done.bind(this))
+    //   .fail(this.event_request_fail.bind(this))
+    // ;
+
+    let def = deferred();
+
+    def.always(this.event_request_complete.bind(this));
+    def.catch(this.event_request_fail.bind(this));
+    def.then(this.event_request_done.bind(this));
+
+    return def;
   }
 
-  create_xhr() {
-    let xhr;
-
+  create_xhr(): XMLHttpRequest {
     // ajax request promise
-    xhr = $.ajax(this.ajaxSettings)
-      .always(this.event_xhr_always)
-      .done(this.event_xhr_done)
-      .fail(this.event_xhr_fail)
-    ;
-    this.verbose('Created server request', xhr, this.ajaxSettings);
-    return xhr;
+    // xhr = $.ajax(this.ajaxSettings)
+    //   .always(this.event_xhr_always)
+    //   .done(this.event_xhr_done)
+    //   .fail(this.event_xhr_fail)
+    // ;
+
+    let module = this;
+
+    this._xhr = new XMLHttpRequest();
+
+    this._xhr.open(this.ajaxSettings.method, this.ajaxSettings.url, true);
+
+    this._xhr.onerror = function () {
+      module.event_xhr_fail(this, this.status, this.response);
+    }
+
+    this._xhr.onload = function () {
+      module.event_xhr_done(this.response, this.statusText, this);
+    }
+
+    this.verbose('Created server request', this._xhr, this.ajaxSettings);
+    return this._xhr;
   }
 
   send_request() {
@@ -689,6 +785,7 @@ export class Api extends Module {
     }
     else {
       this.xhr = this.create_xhr();
+      this.xhr.send();
     }
     this.settings.onRequest.call(this.context, this.request, this.xhr);
   }
@@ -734,14 +831,14 @@ export class Api extends Module {
     return data;
   }
 
-  add_urlData(url, urlData = {}) {
+  add_urlData(url, urlData = null) {
     if (url) {
       let
         requiredVariables = url.match(this.settings.regExp.required),
         optionalVariables = url.match(this.settings.regExp.optional)
       ;
       urlData = urlData || this.settings.urlData;
-      console.log(url, urlData, requiredVariables, optionalVariables)
+      console.log(urlData);
       if (requiredVariables) {
         this.debug('Looking for required URL variables', requiredVariables);
         $.each(requiredVariables, (_index, templatedString: string) => {
@@ -882,7 +979,7 @@ export class Api extends Module {
   }
 
   was_complete(): boolean {
-    return (this.request && (this.request.state() == 'resolved' || this.request.state() == 'rejected') );
+    return (this.request && (this.request.state() == 'resolved' || this.request.status == 'rejected') );
   }
 
   was_failure(): boolean {

@@ -7,9 +7,9 @@
   <script src="../dist/fomantic.umd.js"></script>
   
 </head>
-<body>
+<body style="padding: 1rem;">
 
-  
+  Magic happens in the console :)
 
   <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', () => {
@@ -17,10 +17,21 @@
         debug: true,
         verbose: true,
         url: 'http://api.github.com/search/repositories?q={query}',
-        on: false,
+        on: 'now',
+        dataType: 'json',
+        rawResponse: true,
         action: 'search',
         urlData: {
-          query: 'pru'
+          query: 'fomantic-ui'
+        },
+        onResponse: (response) => {
+          // console.log(response);
+        },
+        onSuccess: function(response, element, xhr) {
+          console.log(response, element, xhr);
+        },
+        onFailure: (response, $module) => {
+          console.log(response, $module)
         }
       });
 
