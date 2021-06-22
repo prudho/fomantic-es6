@@ -168,9 +168,9 @@ export class Rating extends Module {
     this.$element.addClass(this.settings.className.disabled);
   }
 
-  clearRating(): void {
+  clearRating(triggerChange: boolean = true): void {
     this.debug('Clearing current rating');
-    this.set_rating(0);
+    this.set_rating(0, triggerChange);
   }
 
   event_mouseenter(element): void {
@@ -242,7 +242,7 @@ export class Rating extends Module {
     return this.$element.hasClass(this.settings.className.disabled);
   }
 
-  set_rating(rating: number): void {
+  set_rating(rating: number, triggerChange: boolean = true): void {
     let
       ratingIndex: number = (rating - 1 >= 0)
         ? (rating - 1)
@@ -270,7 +270,7 @@ export class Rating extends Module {
         --idx;
       }
     }
-    if (!this.initialLoad || this.settings.fireOnInit) {
+    if ((!this.initialLoad || this.settings.fireOnInit) && triggerChange) {
       this.settings.onRate.call(this.element, rating);
     }
   }
