@@ -531,7 +531,7 @@ export class Search extends Module {
           query : searchTerm
         },
         onSuccess         : (response) => {
-          this.parse_response.call(this.element, response, searchTerm);
+          this.parse_response.call(this, response, searchTerm);
           callback();
         },
         onFailure         : () => {
