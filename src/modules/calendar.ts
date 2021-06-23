@@ -18,8 +18,8 @@ export interface CalendarOptions extends ModuleOptions {
   on: null;
   initialDate: null;
   startMode: false | 'year' | 'month' | 'day' | 'hour' | 'minute';
-  minDate: Date;
-  maxDate: Date;
+  minDate: any;
+  maxDate: any;
   ampm: boolean;
   disableYear: boolean;
   disableMonth: boolean;
@@ -31,7 +31,7 @@ export interface CalendarOptions extends ModuleOptions {
   minTimeGap: number;
   showWeekNumbers: null;
   disabledDates: [];
-  disabledDaysOfWeek: [];
+  disabledDaysOfWeek: Array<number>;
   enabledDates: [];
   eventDates: [];
   centuryBreak: number;
@@ -723,7 +723,10 @@ export class Calendar extends Module {
         this.refreshTooltips();
         return this.settings.onVisible.apply(this.$container, arguments);
       },
-      onHidden = this.settings.onHidden
+      onHidden = () => {
+        this.blur();
+        return this.settings.onHidden.apply(this.$container, arguments);
+      }
     ;
     if (!this.$input.length) {
       //no input, $container has to handle focus/blur
@@ -732,10 +735,6 @@ export class Calendar extends Module {
         this.refreshTooltips();
         this.focus();
         return this.settings.onVisible.apply(this.$container, arguments);
-      };
-      onHidden = () => {
-        this.blur();
-        return this.settings.onHidden.apply(this.$container, arguments);
       };
     }
 
@@ -757,9 +756,7 @@ export class Calendar extends Module {
         onHidden: onHidden
       })
     ;
-    
-    //this.popup(options);
-    this.popup = new Popup(this.settings.selector.activator, options);
+    this.popup = new Popup(this.selector + ' ' + this.settings.selector.input, options);
   }
 
   setup_inline(): void {
@@ -1400,8 +1397,13 @@ export class Calendar extends Module {
     return (endModule ? endModule.get.date() : this.$element.data(this.settings.metadata.endDate)) || null;
   }
 
-  get_focusDate() {
-    return this.$element.data(this.settings.metadata.focusDate) || null;
+  get_focusDate(): Date {
+    // return this.$element.data(this.settings.metadata.focusDate) || null;
+    if (this.$element.data(this.settings.metadata.focusDate)) {
+      return new Date(this.$element.data(this.settings.metadata.focusDate));
+    } else {
+      return null;
+    }
   }
 
   get_inputDate() {
