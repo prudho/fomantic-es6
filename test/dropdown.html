@@ -9,13 +9,14 @@
 </head>
 <body style="padding: 1rem;">
 
-  <!-- <div id="dropdown" class="ui selection dropdown">
+  <!-- <div id="dropdown" class="ui multiple selection dropdown">
     <input type="hidden" name="gender">
     <i class="dropdown icon"></i>
     <div class="default text">Gender</div>
     <div class="menu">
       <div class="item" data-value="1">Male</div>
       <div class="item" data-value="0">Female</div>
+      <div class="item" data-value="2">Fluid</div>
     </div>
   </div> -->
 
@@ -204,7 +205,10 @@
     document.addEventListener('DOMContentLoaded', () => {
       const test = new fomantic.Dropdown('#dropdown', {
         debug: true,
-        verbose: true
+        verbose: true,
+        onChange: (value) => {
+          console.log(value)
+        }
       });
     });
   </script>

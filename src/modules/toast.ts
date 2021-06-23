@@ -588,10 +588,9 @@ export class Toast extends Module {
     if (this.$animationObject) {
       this.$animationObject.on('animationend' + this.eventNamespace, this.close.bind(this));
     }
-    this.$toastBox
-      .on('click' + this.eventNamespace, this.settings.selector.approve, this.event_approve.bind(this))
-      .on('click' + this.eventNamespace, this.settings.selector.deny, this.event_deny.bind(this))
-    ;
+
+    this.$toastBox.find(this.settings.selector.approve).on('click' + this.eventNamespace, this.event_approve.bind(this));
+    this.$toastBox.find(this.settings.selector.deny).on('click' + this.eventNamespace, this.event_deny.bind(this));
   }
 
   unbind_events(): void {

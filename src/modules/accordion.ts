@@ -159,11 +159,7 @@ export class Accordion extends Module {
 
   bind_events(): void {
     this.debug("Binding delegated events");
-    this.$element.on(
-      this.settings.on + this.eventNamespace,
-      this.settings.selector.trigger,
-      this.event_click.bind(this)
-    );
+    this.$element.find(this.settings.selector.trigger).on(this.settings.on + this.eventNamespace, this.event_click.bind(this));
   }
 
   event_click(event): void {

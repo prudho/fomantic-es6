@@ -177,10 +177,8 @@ export class Shape extends Module {
     if (this.get_transitionEvent()) {
       this.verbose('Starting CSS animation');
       this.$element.addClass(this.settings.className.animating);
-      this.$sides
-        .css(propertyObject)
-        .one(this.get_transitionEvent(), callback)
-      ;
+      this.$sides.css(propertyObject);
+      this.$sides.one(this.get_transitionEvent(), callback);
       this.set_duration(this.settings.duration);
       requestAnimationFrame(() => {
         this.$element.addClass(this.settings.className.animating);

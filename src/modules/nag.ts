@@ -36,7 +36,7 @@ export interface NagOptions extends ModuleOptions {
   samesite      : boolean;
 
   // type of storage to use
-  storageMethod : string;
+  storageMethod : 'cookie' | 'localstorage' | 'sessionstorage';
 
   // value to store in dismissed localstorage/cookie
   key           : string;
@@ -79,7 +79,7 @@ export interface NagOptions extends ModuleOptions {
 
 const default_settings: NagOptions = {
   name        : 'Nag',
-  namespace   : 'Nag',
+  namespace   : 'nag',
   
   silent      : false,
   debug       : false,
@@ -131,7 +131,7 @@ const default_settings: NagOptions = {
   },
 
   selector      : {
-    close : ':scope> .close.icon'
+    close : ':scope > .close.icon'
   },
 
   duration      : 500,
@@ -171,10 +171,10 @@ export class Nag extends Module {
   initialize(): void {
     this.verbose('Initializing element');
     this.storage = this.get_storage();
-    this.$element
-      .on('click' + this.eventNamespace, this.settings.selector.close, this.dismiss.bind(this))
-      .data(this.moduleNamespace, this)
-    ;
+
+    this.$element.data(this.moduleNamespace, this);
+    
+    this.$element.find(this.settings.selector.close).on('click' + this.eventNamespace, this.dismiss.bind(this))
 
     if (this.settings.detachable && this.$element.parent()[0] !== this.$context[0]) {
       this.$element

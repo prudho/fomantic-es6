@@ -8,6 +8,10 @@ import { Api, ApiOptions } from './api';
 
 import $, { Cash } from 'cash-dom';
 
+$.fn.addBack = function (selector) {
+  return this.add(selector == null ? this.prevObject : this.prevObject.filter(selector));
+}
+
 export interface DropdownOptions extends ModuleOptions {
   on: string;
   action: 'nothing' | 'activate' | 'select' | 'combo' | 'hide' | Function;
@@ -392,7 +396,7 @@ const default_settings: DropdownOptions = {
     input        : ':scope > input[type="hidden"], :scope > select',
     item         : '.item',
     label        : ':scope > .label',
-    remove       : ':scope > .label > .delete.icon',
+    remove       : ':scope > .delete.icon',
     siblingLabel : '.label',
     menu         : '.menu',
     message      : '.message',
@@ -945,7 +949,7 @@ export class Dropdown extends Module {
     this.verbose('Binding keyboard events');
     this.$element.on('keydown' + this.eventNamespace, this.event_keydown.bind(this));
     if (this.has_search()) {
-      this.$element.on(this.get_inputEvent() + this.eventNamespace, this.settings.selector.search, this.event_input.bind(this));
+      this.$element.find(this.settings.selector.search).on(this.get_inputEvent() + this.eventNamespace, this.event_input.bind(this));
     }
     if (this.is_multiple() ) {
       this.$document.on('keydown' + this.elementNamespace, this.event_document_keydown.bind(this));
@@ -954,30 +958,32 @@ export class Dropdown extends Module {
 
   bind_inputEvents() {
     this.verbose('Binding input change events');
-    this.$element.on('change' + this.eventNamespace, this.settings.selector.input, this.event_change.bind(this));
+    this.$element.find(this.settings.selector.input).on('change' + this.eventNamespace, this.event_change.bind(this));
   }
 
   bind_mouseEvents() {
     this.verbose('Binding mouse events');
     if (this.is_multiple()) {
-      this.$element
-        .on(this.clickEvent   + this.eventNamespace, this.settings.selector.label,  this.event_label_click.bind(this))
-        .on(this.clickEvent   + this.eventNamespace, this.settings.selector.remove, this.event_remove_click.bind(this))
-      ;
+      this.$element.find(this.settings.selector.label).on(this.clickEvent  + this.eventNamespace, this.event_label_click.bind(this));
     }
     if (this.is_searchSelection()) {
       this.$element
         .on('mousedown'     + this.eventNamespace, this.event_mousedown.bind(this))
         .on('mouseup'       + this.eventNamespace, this.event_mouseup.bind(this))
-        .on('mousedown'     + this.eventNamespace, this.settings.selector.menu,      this.event_menu_mousedown.bind(this))
-        .on('mouseup'       + this.eventNamespace, this.settings.selector.menu,      this.event_menu_mouseup.bind(this))
-        .on(this.clickEvent + this.eventNamespace, this.settings.selector.icon,      this.event_icon_click.bind(this))
-        .on(this.clickEvent + this.eventNamespace, this.settings.selector.clearIcon, this.event_clearIcon_click.bind(this))
-        .on('focus'         + this.eventNamespace, this.settings.selector.search,    this.event_search_focus.bind(this))
-        .on(this.clickEvent + this.eventNamespace, this.settings.selector.search,    this.event_search_focus.bind(this))
-        .on('blur'          + this.eventNamespace, this.settings.selector.search,    this.event_search_blur.bind(this))
-        .on(this.clickEvent + this.eventNamespace, this.settings.selector.text,      this.event_text_focus.bind(this))
       ;
+      this.$element.find(this.settings.selector.menu)
+        .on('mousedown'     + this.eventNamespace, this.event_menu_mousedown.bind(this))
+        .on('mouseup'       + this.eventNamespace, this.event_menu_mouseup.bind(this))
+      ;
+      this.$element.find(this.settings.selector.icon).on(this.clickEvent + this.eventNamespace, this.event_icon_click.bind(this));
+      this.$element.find(this.settings.selector.clearIcon).on(this.clickEvent + this.eventNamespace, this.event_clearIcon_click.bind(this));
+      this.$element.find(this.settings.selector.search)
+        .on('focus'         + this.eventNamespace, this.event_search_focus.bind(this))
+        .on(this.clickEvent + this.eventNamespace, this.event_search_focus.bind(this))
+        .on('blur'          + this.eventNamespace, this.event_search_blur.bind(this))
+      ;
+      this.$element.find(this.settings.selector.text).on(this.clickEvent + this.eventNamespace, this.event_text_focus.bind(this));
+      
       if (this.is_multiple()) {
         this.$element
           .on(this.clickEvent + this.eventNamespace, this.event_click.bind(this))
@@ -1006,19 +1012,20 @@ export class Dropdown extends Module {
         .on('mousedown' + this.eventNamespace, this.event_mousedown.bind(this))
         .on('mouseup'   + this.eventNamespace, this.event_mouseup.bind(this))
         .on('focus'     + this.eventNamespace, this.event_focus.bind(this))
-        .on(this.clickEvent  + this.eventNamespace, this.settings.selector.clearIcon, this.event_clearIcon_click.bind(this))
       ;
+      this.$element.find(this.settings.selector.clearIcon).on(this.clickEvent  + this.eventNamespace, this.event_clearIcon_click.bind(this));
+
       if (this.has_menuSearch()) {
-        this.$element.on('blur' + this.eventNamespace, this.settings.selector.search, this.event_search_blur.bind(this));
+        this.$element.find(this.settings.selector.search).on('blur' + this.eventNamespace, this.event_search_blur.bind(this));
       }
       else {
         this.$element.on('blur' + this.eventNamespace, this.event_blur.bind(this));
       }
     }
-    this.$menu
-      .on((this.hasTouch ? 'touchstart' : 'mouseenter') + this.eventNamespace, this.settings.selector.item, this.event_item_mouseenter.bind(this))
-      .on('mouseleave' + this.eventNamespace, this.settings.selector.item, this.event_item_mouseleave.bind(this))
-      .on('click'      + this.eventNamespace, this.settings.selector.item, this.event_item_click.bind(this))
+    this.$menu.find(this.settings.selector.item).on((this.hasTouch ? 'touchstart' : 'mouseenter') + this.eventNamespace, this.event_item_mouseenter.bind(this));
+    this.$menu.find(this.settings.selector.item)
+      .on('mouseleave' + this.eventNamespace, this.event_item_mouseleave.bind(this))
+      .on('click'      + this.eventNamespace, this.event_item_click.bind(this))
     ;
   }
 
@@ -1207,9 +1214,9 @@ export class Dropdown extends Module {
     this.timer = setTimeout(this.search.bind(this), this.settings.delay.search);
   }
 
-  event_item_click(event, skipRefocus: boolean) {
+  event_item_click(event, target, skipRefocus: boolean = true) {
     let
-      $choice        = $(event.currentTarget),
+      $choice        = target || $(event.currentTarget),
       $target        = (event)
         ? $(event.target)
         : $(''),
@@ -1218,7 +1225,7 @@ export class Dropdown extends Module {
       value          = this.get_choiceValue($choice, text),
       hasSubMenu     = ($subMenu.length > 0),
       // isBubbledEvent = ($subMenu.find($target).length > 0)
-      isBubbledEvent = ($subMenu.find(event.target).length > 0)
+      isBubbledEvent = ($subMenu.find(event.target.selector).length > 0)
     ;
     // prevents IE11 bug where menu receives focus even though `tabindex=-1`
     if (document.activeElement.tagName.toLowerCase() !== 'input') {
@@ -1230,7 +1237,7 @@ export class Dropdown extends Module {
           this.remove_userAddition();
         }
         this.remove_searchTerm();
-        if (!this.is_focusedOnSearch() && !(skipRefocus == true)) {
+        if (!this.is_focusedOnSearch() && !(skipRefocus)) {
           this.focusSearch(true);
         }
       }
@@ -1248,7 +1255,7 @@ export class Dropdown extends Module {
       $subMenu       = $item.children(this.settings.selector.menu),
       $otherMenus    = $item.siblings(this.settings.selector.item).children(this.settings.selector.menu),
       hasSubMenu     = ($subMenu.length > 0),
-      isBubbledEvent = ($subMenu.find(event.target).length > 0),
+      isBubbledEvent = ($subMenu.find(event.target.selector).length > 0),
       module         = this
     ;
     if (!isBubbledEvent && hasSubMenu) {
@@ -1305,7 +1312,7 @@ export class Dropdown extends Module {
       // allow selection with menu closed
       if (isAdditionWithoutMenu) {
         this.verbose('Selecting item from keyboard shortcut', $selectedItem);
-        this.event_item_click.call($selectedItem, event);
+        this.event_item_click(event, $selectedItem);
         if (this.is_searchSelection()) {
           this.remove_searchTerm();
         }
@@ -1325,11 +1332,11 @@ export class Dropdown extends Module {
           }
           else if (selectedIsSelectable) {
             this.verbose('Selecting item from keyboard shortcut', $selectedItem);
-            this.event_item_click.call($selectedItem, event);
+            this.event_item_click({target: $selectedItem}, $selectedItem);
             if (this.is_searchSelection()) {
               this.remove_searchTerm();
               if (this.is_multiple()) {
-                  this.$search.trigger('focus');
+                this.$search.trigger('focus');
               }
             }
           }
@@ -1550,7 +1557,7 @@ export class Dropdown extends Module {
   }
 
   event_test_hide(event) {
-    if (this.determine_eventInModule(event, this.hide)) {
+    if (this.determine_eventInModule(event, this.hide.bind(this))) {
       if (this.element.id && $(event.target).attr('for') === this.element.id) {
         event.preventDefault();
       }
@@ -1596,9 +1603,9 @@ export class Dropdown extends Module {
     if (this.has_search() && !this.is_focusedOnSearch() ) {
       if (skipHandler) {
         // this.$element.off('focus' + this.eventNamespace, this.settings.selector.search);
-        this.$element.off('focus' + this.eventNamespace, this.settings.selector.search, null);
+        this.$element.find(this.settings.selector.search).off('focus' + this.eventNamespace);
         this.$search.trigger('focus');
-        this.$element.on('focus'  + this.eventNamespace, this.settings.selector.search, this.event_search_focus.bind(this));
+        this.$element.find(this.settings.selector.search).on('focus'  + this.eventNamespace, this.event_search_focus.bind(this));
       }
       else {
         this.$search.trigger('focus');
@@ -1906,7 +1913,7 @@ export class Dropdown extends Module {
     ;
     if (this.settings.allowAdditions || (hasSelected && !this.is_multiple())) {
       this.debug('Forcing partial selection to selected item', $selectedItem);
-      this.event_item_click.call(this, {currentTarget: $selectedItem}, true);
+      this.event_item_click({}, $selectedItem, true);
     }
     else {
       this.remove_searchTerm();
@@ -2219,15 +2226,15 @@ export class Dropdown extends Module {
   determine_selectAction($target, text, value) {
     this.selectActionActive = true;
     this.verbose('Determining action', this.settings.action);
-    if ($.isFunction( this.action[this.settings.action] ) ) {
-      this.verbose('Triggering preset action', this.settings.action, text, value);
-      this.action[ this.settings.action ].call(this.element, text, value, $target);
-    }
-    else if ($.isFunction(this.settings.action)) {
+    if ($.isFunction(this.settings.action)) {
       this.verbose('Triggering user action', this.settings.action, text, value);
       this.settings.action.call(this.element, text, value, $target);
     }
-    else {
+    else if ($.isFunction( this.action[this.settings.action] ) ) {
+      this.verbose('Triggering preset action', this.settings.action, text, value);
+      this.action[ this.settings.action ].call(this.element, text, value, $target);
+    }
+    else  {
       this.error(this.settings.error.action, this.settings.action);
     }
     this.selectActionActive = false;
@@ -3447,6 +3454,8 @@ export class Dropdown extends Module {
     ;
     $label = this.settings.onLabelCreate.call($label, escapedValue, text);
 
+    $label.find(this.settings.selector.remove).on(this.clickEvent + this.eventNamespace, this.event_remove_click.bind(this));
+
     if (this.has_label(value)) {
       this.debug('User selection already exists, skipping', escapedValue);
       return;
@@ -3476,7 +3485,8 @@ export class Dropdown extends Module {
         animation  : this.settings.label.transition,
         debug      : this.settings.debug,
         verbose    : this.settings.verbose,
-        duration   : this.settings.label.duration
+        duration   : this.settings.label.duration,
+        autostart  : true
       });
     }
     else {
@@ -3798,6 +3808,7 @@ export class Dropdown extends Module {
       $removedLabel = $labels.filter('[data-' + this.settings.metadata.value + '="' + this.escape_string(this.settings.ignoreCase ? escapedValue.toLowerCase() : escapedValue) +'"]')
     ;
     this.verbose('Removing label', $removedLabel);
+    // Should we remove event too ?
     $removedLabel.remove();
   }
 
@@ -3919,7 +3930,7 @@ export class Dropdown extends Module {
         .removeClass(module.settings.className.filtered)
         .removeClass(module.settings.className.active)
       ;
-      if (this.settings.useLabels) {
+      if (module.settings.useLabels) {
         $selected.removeClass(module.settings.className.selected);
       }
     });

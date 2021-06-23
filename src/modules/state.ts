@@ -268,7 +268,7 @@ export class State extends Module {
     ;
     $.each(this.settings.defaults, (type, typeStates) => {
       if (module.is[type] !== undefined && module.is[type]() ) {
-        module.verbose('Adding default states', type, element);
+        this.verbose('Adding default states', type, this.element);
         $.extend(this.settings.states, typeStates, userStates);
       }
     });
@@ -281,7 +281,7 @@ export class State extends Module {
     ;
     if (this.allows('active') && this.is_enabled()) {
       this.refresh();
-      if($.fn.api !== undefined) {
+      // if($.fn.api !== undefined) {
         apiRequest       = this.$element.api('get request');
         requestCancelled = this.$element('was cancelled');
         if (requestCancelled) {
@@ -293,7 +293,7 @@ export class State extends Module {
           this.listenTo(apiRequest);
           return;
         }
-      }
+      // }
       this.change_state();
     }
   }
@@ -302,7 +302,7 @@ export class State extends Module {
     this.debug('API request detected, waiting for state signal', apiRequest);
     if (apiRequest) {
       if (this.settings.text.loading) {
-        this.update_text(text.loading);
+        this.update_text(this.settings.text.loading);
       }
       $.when(apiRequest)
         .then(function() {

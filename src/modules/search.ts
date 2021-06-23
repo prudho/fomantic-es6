@@ -579,18 +579,21 @@ export class Search extends Module {
       this.$element.on(this.get_inputEvent() + this.eventNamespace, this.settings.selector.prompt, this.event_input.bind(this));
       this.$prompt.attr('autocomplete', this.is_chrome() ? 'fomantic-search' : 'off');
     }
-    this.$element
-      // prompt
-      .on('focus'     + this.eventNamespace, this.settings.selector.prompt, this.event_focus.bind(this))
-      .on('blur'      + this.eventNamespace, this.settings.selector.prompt, this.event_blur.bind(this))
-      .on('keydown'   + this.eventNamespace, this.settings.selector.prompt, this.handleKeyboard.bind(this))
-      // search button
-      .on('click'     + this.eventNamespace, this.settings.selector.searchButton, this.query)
-      // results
-      .on('mousedown' + this.eventNamespace, this.settings.selector.results, this.event_result_mousedown.bind(this))
-      .on('mouseup'   + this.eventNamespace, this.settings.selector.results, this.event_result_mouseup.bind(this))
-      .on('click'     + this.eventNamespace, this.settings.selector.result,  this.event_result_click.bind(this))
+    // prompt
+    this.$element.find(this.settings.selector.prompt)
+      .on('focus'     + this.eventNamespace, this.event_focus.bind(this))
+      .on('blur'      + this.eventNamespace, this.event_blur.bind(this))
+      .on('keydown'   + this.eventNamespace, this.handleKeyboard.bind(this))
     ;
+    // search button
+    this.$element.find(this.settings.selector.searchButton).on('click' + this.eventNamespace, this.query);
+    // results
+    this.$element.find(this.settings.selector.results)
+      .on('mousedown' + this.eventNamespace, this.event_result_mousedown.bind(this))
+      .on('mouseup'   + this.eventNamespace, this.event_result_mouseup.bind(this))
+    ;
+    // result
+    this.$element.find(this.settings.selector.result).on('click' + this.eventNamespace,  this.event_result_click.bind(this));
   }
 
   event_input(): void {
@@ -624,7 +627,7 @@ export class Search extends Module {
       callback      = () => {
         this.cancel_query();
         this.remove_focus();
-        this.timer = setTimeout(this.hideResults, this.settings.hideDelay);
+        this.timer = setTimeout(this.hideResults.bind(this), this.settings.hideDelay);
       }
     ;
     if (pageLostFocus) {

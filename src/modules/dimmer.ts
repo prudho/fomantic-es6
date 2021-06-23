@@ -231,7 +231,7 @@ export class Dimmer extends Module {
 
     if (this.is_closable()) {
       this.verbose('Adding dimmer close event', this.$dimmer);
-      this.$dimmable.on(this.clickEvent + this.eventNamespace, this.settings.selector.dimmer, this.event_click.bind(this));
+      this.$dimmable.find(this.settings.selector.dimmer).on(this.clickEvent + this.eventNamespace, this.event_click.bind(this));
     }
   }
 

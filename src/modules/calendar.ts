@@ -16,7 +16,7 @@ export interface CalendarOptions extends ModuleOptions {
   touchReadonly: boolean;
   inline: boolean;
   on: null;
-  initialDate: null;
+  initialDate: Date | string;
   startMode: false | 'year' | 'month' | 'day' | 'hour' | 'minute';
   minDate: any;
   maxDate: any;
@@ -25,8 +25,8 @@ export interface CalendarOptions extends ModuleOptions {
   disableMonth: boolean;
   disableMinute: boolean;
   formatInput: boolean;
-  startCalendar: null;
-  endCalendar: null;
+  startCalendar: Calendar;
+  endCalendar: Calendar;
   multiMonth: number;
   minTimeGap: number;
   showWeekNumbers: null;
@@ -222,35 +222,35 @@ const default_settings: CalendarOptions = {
   },
 
   formatter: {
-    header: function (date, mode, settings) {
+    header: function (date, mode: string, settings: CalendarOptions) {
       return mode === 'year' ? settings.formatter.yearHeader(date, settings) :
         mode === 'month' ? settings.formatter.monthHeader(date, settings) :
           mode === 'day' ? settings.formatter.dayHeader(date, settings) :
             mode === 'hour' ? settings.formatter.hourHeader(date, settings) :
               settings.formatter.minuteHeader(date, settings);
     },
-    yearHeader: function (date, settings) {
+    yearHeader: function (date, settings: CalendarOptions) {
       var decadeYear = Math.ceil(date.getFullYear() / 10) * 10;
       return (decadeYear - 9) + ' - ' + (decadeYear + 2);
     },
-    monthHeader: function (date, settings) {
+    monthHeader: function (date, settings: CalendarOptions) {
       return date.getFullYear();
     },
-    dayHeader: function (date, settings) {
+    dayHeader: function (date, settings: CalendarOptions) {
       var month = settings.text.months[date.getMonth()];
       var year = date.getFullYear();
       return month + ' ' + year;
     },
-    hourHeader: function (date, settings) {
+    hourHeader: function (date, settings: CalendarOptions) {
       return settings.formatter.date(date, settings);
     },
-    minuteHeader: function (date, settings) {
+    minuteHeader: function (date, settings: CalendarOptions) {
       return settings.formatter.date(date, settings);
     },
-    dayColumnHeader: function (day, settings) {
+    dayColumnHeader: function (day, settings: CalendarOptions) {
       return settings.text.days[day];
     },
-    datetime: function (date, settings) {
+    datetime: function (date, settings: CalendarOptions) {
       if (!date) {
         return '';
       }
@@ -259,7 +259,7 @@ const default_settings: CalendarOptions = {
       var separator = settings.type === 'datetime' ? ' ' : '';
       return day + separator + time;
     },
-    date: function (date, settings) {
+    date: function (date, settings: CalendarOptions) {
       if (!date) {
         return '';
       }
@@ -270,7 +270,7 @@ const default_settings: CalendarOptions = {
         settings.type === 'month' ? month + ' ' + year :
         (settings.monthFirst ? month + ' ' + day : day + ' ' + month) + ', ' + year;
     },
-    time: function (date, settings, forCalendar) {
+    time: function (date, settings: CalendarOptions, forCalendar) {
       if (!date) {
         return '';
       }
@@ -291,7 +291,7 @@ const default_settings: CalendarOptions = {
   },
 
   parser: {
-    date: function (text, settings) {
+    date: function (text, settings: CalendarOptions) {
       if (text instanceof Date) {
         return text;
       }
@@ -688,6 +688,13 @@ export class Calendar extends Module {
     }
     this.setting('type', this.get_type());
     this.setting('on', this.settings.on || (this.$input.length ? 'focus' : 'click'));
+
+    // link startCalendar and endCalendar if needed
+    if (this.settings.startCalendar) {
+      this.settings.startCalendar.settings.endCalendar = this;
+    } else if (this.settings.endCalendar) {
+      this.settings.endCalendar.settings.startCalendar = this;
+    }
   }
 
   setup_popup(): void {
@@ -1296,10 +1303,10 @@ export class Calendar extends Module {
         if (this.settings.closable) {
           this.popup.hide();
           //if this is a range calendar, focus the container or input. This will open the popup from its event listeners.
-          let endModule = this.get_calendarModule(this.settings.endCalendar);
+          let endModule = this.settings.endCalendar;
           if (endModule) {
             if (endModule.setting('on') !== 'focus') {
-              endModule.popup('show');
+              endModule.popup.show();
             }
             endModule.focus();
           }
@@ -1393,8 +1400,8 @@ export class Calendar extends Module {
   }
 
   get_endDate() {
-    let endModule = this.get_calendarModule(this.settings.endCalendar);
-    return (endModule ? endModule.get.date() : this.$element.data(this.settings.metadata.endDate)) || null;
+    let endModule = this.settings.endCalendar;
+    return (endModule ? endModule.get_date() : this.$element.data(this.settings.metadata.endDate)) || null;
   }
 
   get_focusDate(): Date {
@@ -1439,8 +1446,8 @@ export class Calendar extends Module {
   }
 
   get_startDate() {
-    let startModule = this.get_calendarModule(this.settings.startCalendar);
-    return (startModule ? startModule.get.date() : this.$element.data(this.settings.metadata.startDate)) || null;
+    let startModule = this.settings.startCalendar;
+    return (startModule ? startModule.get_date() : this.$element.data(this.settings.metadata.startDate)) || null;
   }
 
   get_type(): string {
@@ -1496,7 +1503,7 @@ export class Calendar extends Module {
     }();
   }
 
-  set_dataKeyValue(key, value, refreshCalendar: boolean = false) {
+  set_dataKeyValue(key: string, value, refreshCalendar: boolean = false) {
     var oldValue = this.$element.data(key);
     var equal = oldValue === value || (oldValue <= value && oldValue >= value); //equality test for dates and string objects
     if (value) {
@@ -1548,9 +1555,9 @@ export class Calendar extends Module {
 
   set_endDate(date, refreshCalendar: boolean = false) {
     date = this.helper_sanitiseDate(date);
-    let endModule = this.get_calendarModule(this.settings.endCalendar);
+    let endModule = this.settings.endCalendar;
     if (endModule) {
-      endModule.set.date(date);
+      endModule.set_date(date);
     }
     this.set_dataKeyValue(this.settings.metadata.endDate, date, refreshCalendar);
   }
@@ -1608,9 +1615,9 @@ export class Calendar extends Module {
 
   set_startDate(date, refreshCalendar): void {
     date = this.helper_sanitiseDate(date);
-    let startModule = this.get_calendarModule(this.settings.startCalendar);
+    let startModule = this.settings.startCalendar;
     if (startModule) {
-      startModule.set.date(date);
+      startModule.set_date(date);
     }
     this.set_dataKeyValue(this.settings.metadata.startDate, date, refreshCalendar);
   }

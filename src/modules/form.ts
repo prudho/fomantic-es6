@@ -987,15 +987,14 @@ export class Form extends Module {
 
   bindEvents() {
     this.verbose('Attaching form events');
-    this.$element
-      .on('submit' + this.eventNamespace, this.validate_form.bind(this))
-      .on('blur'   + this.eventNamespace, this.settings.selector.field, this.event_field_blur.bind(this))
-      .on('click'  + this.eventNamespace, this.settings.selector.submit, this.submit.bind(this))
-      .on('click'  + this.eventNamespace, this.settings.selector.reset, this.reset)
-      .on('click'  + this.eventNamespace, this.settings.selector.clear, this.clear)
-    ;
+    this.$element.on('submit' + this.eventNamespace, this.validate_form.bind(this));
+    this.$element.find(this.settings.selector.field).on( 'blur'  + this.eventNamespace, this.event_field_blur.bind(this));
+    this.$element.find(this.settings.selector.submit).on('click' + this.eventNamespace, this.submit.bind(this));
+    this.$element.find(this.settings.selector.reset).on( 'click' + this.eventNamespace, this.reset.bind(this));
+    this.$element.find(this.settings.selector.clear).on( 'click' + this.eventNamespace, this.clear.bind(this));
+
     if (this.settings.keyboardShortcuts) {
-      this.$element.on('keydown' + this.eventNamespace, this.settings.selector.field, this.event_field_keydown.bind(this));
+      this.$element.find(this.settings.selector.field).on('keydown' + this.eventNamespace, this.event_field_keydown.bind(this));
     }
     this.$field.each((_index, el) => {
       let
@@ -1146,9 +1145,10 @@ export class Form extends Module {
 
         new Transition($prompt, {
           animation: this.settings.transition + ' out',
-          duration: this.settings.duration
-        }).on('complete', () => {
-          $prompt.remove();
+          duration: this.settings.duration,
+          onComplete: () => {
+            $prompt.remove();
+          }
         });
       }
       else {

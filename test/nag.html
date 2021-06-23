@@ -9,7 +9,7 @@
 </head>
 <body style="padding: 1rem;">
   
-  <div id="nag" class="ui inline cookie nag">
+  <div id="nag" class="ui inline cookie nag" style="display: none;">
     <span class="title">
       We use cookies to ensure you get the best experience on our website
     </span>
@@ -21,12 +21,18 @@
       const nag = new fomantic.Nag('#nag', {
         debug: true,
         verbose: true,
-        onRate: (one) => {
-          console.log(one);
+        // storageMethod: 'localstorage',
+        onShow: () => {
+          console.log('onShow');
         },
-        onBeforeRate: (one, two) => {
-          console.log(one, two);
-          return false;
+        onVisible: () => {
+          console.log('onVisible');
+        },
+        onHide: () => {
+          console.log('onHide');
+        },
+        onHidden: () => {
+          console.log('onHidden');
         }
       });
     });

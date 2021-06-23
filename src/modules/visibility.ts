@@ -67,20 +67,20 @@ export interface VisibilityOptions extends ModuleOptions {
   onPassed               : {},
 
   // standard callbacks
-  onOnScreen             : false,
-  onOffScreen            : false,
-  onPassing              : false,
-  onTopVisible           : false,
-  onBottomVisible        : false,
-  onTopPassed            : false,
-  onBottomPassed         : false,
+  onOnScreen             : Function;
+  onOffScreen            : Function;
+  onPassing              : Function;
+  onTopVisible           : Function;
+  onBottomVisible        : Function;
+  onTopPassed            : Function;
+  onBottomPassed         : Function;
 
   // reverse callbacks
-  onPassingReverse       : false,
-  onTopVisibleReverse    : false,
-  onBottomVisibleReverse : false,
-  onTopPassedReverse     : false,
-  onBottomPassedReverse  : false,
+  onPassingReverse       : Function;
+  onTopVisibleReverse    : Function;
+  onBottomVisibleReverse : Function;
+  onTopPassedReverse     : Function;
+  onBottomPassedReverse  : Function;
 
   // special callbacks for image
   onLoad                 : Function;
@@ -298,10 +298,10 @@ settings: VisibilityOptions;
       this.settings.observeChanges = false;
 
       // show when top visible
-      this.settings.onOnScreen = function() {
-        module.debug('Image on screen', element);
-        module.precache(src, function() {
-          module.set.image(src, function() {
+      this.settings.onOnScreen = () => {
+        this.debug('Image on screen', this.element);
+        this.precache(src, () => {
+          this.set_image(src, function() {
             loadedCount++;
             if(loadedCount == moduleCount) {
               this.settings.onAllLoaded.call(this);
@@ -595,7 +595,7 @@ settings: VisibilityOptions;
     }
   }
 
-  passed(amount, newCallback) {
+  passed(amount = undefined, newCallback = undefined) {
     let calculations = this.get_elementCalculations();
     // assign callback
     if (amount && newCallback) {
@@ -616,7 +616,7 @@ settings: VisibilityOptions;
     }
   }
 
-  onScreen(newCallback) {
+  onScreen(newCallback = undefined) {
     let
       calculations = this.get_elementCalculations(),
       callback     = newCallback || this.settings.onOnScreen,
@@ -637,7 +637,7 @@ settings: VisibilityOptions;
     }
   }
 
-  offScreen(newCallback) {
+  offScreen(newCallback = undefined) {
     let
       calculations = this.get_elementCalculations(),
       callback     = newCallback || this.settings.onOffScreen,
@@ -658,7 +658,7 @@ settings: VisibilityOptions;
     }
   }
 
-  passing(newCallback) {
+  passing(newCallback = undefined) {
     let
       calculations = this.get_elementCalculations(),
       callback     = newCallback || this.settings.onPassing,
@@ -679,7 +679,7 @@ settings: VisibilityOptions;
     }
   }
 
-  topVisible(newCallback) {
+  topVisible(newCallback = undefined) {
     let
       calculations = this.get_elementCalculations(),
       callback     = newCallback || this.settings.onTopVisible,
@@ -700,7 +700,7 @@ settings: VisibilityOptions;
     }
   }
 
-  bottomVisible(newCallback) {
+  bottomVisible(newCallback = undefined) {
     let
       calculations = this.get_elementCalculations(),
       callback     = newCallback || this.settings.onBottomVisible,
@@ -721,7 +721,7 @@ settings: VisibilityOptions;
     }
   }
 
-  topPassed(newCallback) {
+  topPassed(newCallback = undefined) {
     let
       calculations = this.get_elementCalculations(),
       callback     = newCallback || this.settings.onTopPassed,
@@ -742,7 +742,7 @@ settings: VisibilityOptions;
     }
   }
 
-  bottomPassed(newCallback) {
+  bottomPassed(newCallback = undefined) {
     let
       calculations = this.get_elementCalculations(),
       callback     = newCallback || this.settings.onBottomPassed,
@@ -763,7 +763,7 @@ settings: VisibilityOptions;
     }
   }
 
-  passingReverse(newCallback) {
+  passingReverse(newCallback = undefined) {
     let
       calculations = this.get_elementCalculations(),
       callback     = newCallback || this.settings.onPassingReverse,
@@ -786,7 +786,7 @@ settings: VisibilityOptions;
     }
   }
 
-  topVisibleReverse(newCallback) {
+  topVisibleReverse(newCallback = undefined) {
     let
       calculations = this.get_elementCalculations(),
       callback     = newCallback || this.settings.onTopVisibleReverse,
@@ -809,7 +809,7 @@ settings: VisibilityOptions;
     }
   }
 
-  bottomVisibleReverse(newCallback) {
+  bottomVisibleReverse(newCallback = undefined) {
     let
       calculations = this.get_elementCalculations(),
       callback     = newCallback || this.settings.onBottomVisibleReverse,
@@ -832,7 +832,7 @@ settings: VisibilityOptions;
     }
   }
 
-  topPassedReverse(newCallback) {
+  topPassedReverse(newCallback = undefined) {
     let
       calculations = this.get_elementCalculations(),
       callback     = newCallback ||this. settings.onTopPassedReverse,
@@ -855,7 +855,7 @@ settings: VisibilityOptions;
     }
   }
 
-  bottomPassedReverse(newCallback) {
+  bottomPassedReverse(newCallback = undefined) {
     let
       calculations = this.get_elementCalculations(),
       callback     = newCallback || this.settings.onBottomPassedReverse,

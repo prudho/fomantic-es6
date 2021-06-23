@@ -838,7 +838,6 @@ export class Api extends Module {
         optionalVariables = url.match(this.settings.regExp.optional)
       ;
       urlData = urlData || this.settings.urlData;
-      console.log(urlData);
       if (requiredVariables) {
         this.debug('Looking for required URL variables', requiredVariables);
         $.each(requiredVariables, (_index, templatedString: string) => {

@@ -833,7 +833,7 @@ export class Popup extends Module {
             this.reset();
             callback.call(this.$popup, this.element);
             // INVESTIGATE: broken when using in calendar
-            // this.settings.onHidden.call(this.$popup, this.element);
+            this.settings.onHidden.call(this.$popup, this.element);
           }
       });
     }

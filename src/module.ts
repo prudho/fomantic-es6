@@ -97,11 +97,12 @@ export abstract class Module {
   }
 
   setting(name, value = undefined): any {
-    this.debug('Changing setting', name, value);
     if ($.isPlainObject(name)) {
+      this.debug('Changing setting', name, value);
       $.extend(true, this.settings, name);
     }
     else if (value !== undefined) {
+      this.debug('Changing setting', name, value);
       if ($.isPlainObject(this.settings[name])) {
         $.extend(true, this.settings[name], value);
       }
@@ -110,6 +111,7 @@ export abstract class Module {
       }
     }
     else {
+      this.debug('Getting setting', name);
       return this.settings[name];
     }
   }

@@ -567,11 +567,10 @@ export class Modal extends Module {
 
   bind_events(): void {
     this.verbose('Attaching events');
-    this.$element
-      .on('click' + this.eventNamespace, this.settings.selector.close, this.event_close.bind(this))
-      .on('click' + this.eventNamespace, this.settings.selector.approve, this.event_approve.bind(this))
-      .on('click' + this.eventNamespace, this.settings.selector.deny, this.event_deny.bind(this))
-    ;
+    this.$element.find(this.settings.selector.close).on(  'click' + this.eventNamespace, this.event_close.bind(this));
+    this.$element.find(this.settings.selector.approve).on('click' + this.eventNamespace, this.event_approve.bind(this));
+    this.$element.find(this.settings.selector.deny).on(   'click' + this.eventNamespace, this.event_deny.bind(this));
+
     this.$window.on('resize' + this.elementEventNamespace, this.event_resize.bind(this));
   }
 

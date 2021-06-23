@@ -180,8 +180,10 @@ export class Checkbox extends Module {
     this.$element
       .on('click'   + this.eventNamespace, this.event_click.bind(this))
       .on('change'  + this.eventNamespace, this.event_change.bind(this))
-      .on('keydown' + this.eventNamespace, this.settings.selector.input, this.event_keydown.bind(this))
-      .on('keyup'   + this.eventNamespace, this.settings.selector.input, this.event_keyup.bind(this))
+    ;
+    this.$element.find(this.settings.selector.input)
+      .on('keydown' + this.eventNamespace, this.event_keydown.bind(this))
+      .on('keyup'   + this.eventNamespace, this.event_keyup.bind(this))
     ;
   }
 
@@ -648,9 +650,7 @@ export class Checkbox extends Module {
     ;
     if ($element.length > 0) {
       this.debug('Attaching checkbox events to element', selector, event);
-      $element
-        .on('click' + this.eventNamespace, event)
-      ;
+      $element.on('click' + this.eventNamespace, event);
     }
     else {
       this.error(this.settings.error.notFound);

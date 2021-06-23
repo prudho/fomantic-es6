@@ -338,10 +338,8 @@ export class Embed extends Module {
   bind_events(): void {
     if (this.has_placeholder()) {
       this.debug('Adding placeholder events');
-      this.$element
-        .on('click' + this.eventNamespace, this.settings.selector.placeholder, this.createAndShow.bind(this))
-        .on('click' + this.eventNamespace, this.settings.selector.icon, this.createAndShow.bind(this))
-      ;
+      this.$element.find(this.settings.selector.placeholder).on('click' + this.eventNamespace, this.createAndShow.bind(this));
+      this.$element.find(this.settings.selector.icon).on('click' + this.eventNamespace, this.createAndShow.bind(this));
     }
   }
 
