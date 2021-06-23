@@ -35,11 +35,11 @@ npm run build
 | Sticky        | none          |   ✔️  |         |
 | Slider        | none          |   ✔️  |         |
 | Sidebar       | none          |   ✔️  |         |
+| Accordion     | Transition    |   ✔️  |         |
 | Calendar      | Popup         |   ⚠️  | range is broken, halp ! |
 | Checkbox      | none          |   ⚠️  | grouped checkbox must be rethinked |
 | Dropdown      | Transition    |   ⚠️  | not finished and utterly broken |
 | Tab           | none          |   ⚠️  | need to find a replacement for $.address (state library) |
-| Accordion     | Transition    |   ⚠️  |         |
 | Embed         | none          |   ⚠️  |         |
 | Modal         | Transition, Dimmer |   ⚠️  |         |
 | Nag           | none          |   ⚠️  |         |

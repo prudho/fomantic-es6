@@ -176,7 +176,7 @@ export class Accordion extends Module {
           ? typeof query === "number"
             ? this.$title.eq(query)
             : $(query).closest(this.settings.selector.title)
-          : $(this).closest(this.settings.selector.title),
+          : $(this.element).closest(this.settings.selector.title),
       $activeContent = $activeTitle.next(this.$content),
       isAnimating = $activeContent.hasClass(this.settings.className.animating),
       isActive = $activeContent.hasClass(this.settings.className.active),
@@ -201,7 +201,7 @@ export class Accordion extends Module {
         ? typeof query === "number"
           ? this.$title.eq(query)
           : $(query).closest(this.settings.selector.title)
-        : $(this).closest(this.settings.selector.title),
+        : $(this.element).closest(this.settings.selector.title),
       $activeContent = $activeTitle.next(this.$content),
       isAnimating = $activeContent.hasClass(this.settings.className.animating),
       isActive = $activeContent.hasClass(this.settings.className.active),
@@ -224,22 +224,7 @@ export class Accordion extends Module {
     if (this.settings.animateChildren) {
       // if ($.fn.transition !== undefined && $module.transition("is supported")) {
       if (true) {
-        // $activeContent.children().transition({
-        //   animation: "fade in",
-        //   queue: false,
-        //   useFailSafe: true,
-        //   debug: settings.debug,
-        //   verbose: settings.verbose,
-        //   duration: settings.duration,
-        //   skipInlineHidden: true,
-        //   onComplete: function () {
-        //     $activeContent
-        //       .children()
-        //       .removeClass(this.settings.className.transition);
-        //   },
-        // });
-
-        const transition = new Transition($activeContent.children(), {
+        new Transition($activeContent.children(), {
           animation: "fade in",
           queue: false,
           useFailSafe: true,
@@ -264,23 +249,12 @@ export class Accordion extends Module {
         // ;
       }
     }
-    // $activeContent
-    //   .slideDown(this.settings.duration, this.settings.easing, function() {
-    //     $activeContent
-    //       .removeClass(this.settings.className.animating)
-    //       .addClass(this.settings.className.active)
-    //     ;
-    //     this.reset_display.call(this);
-    //     this.settings.onOpen.call(this);
-    //     this.settings.onChange.call(this);
-    //   })
-    // ;
     Utils.slideDown($activeContent, this.settings.duration, () => {
       $activeContent
         .removeClass(this.settings.className.animating)
         .addClass(this.settings.className.active)
       ;
-      this.reset_display.call(this);
+      this.reset_display.call(this, $activeContent);
       this.settings.onOpen.call(this);
       this.settings.onChange.call(this);
     });
@@ -292,7 +266,7 @@ export class Accordion extends Module {
           ? typeof query === "number"
             ? this.$title.eq(query)
             : $(query).closest(this.settings.selector.title)
-          : $(this).closest(this.settings.selector.title),
+          : $(this.element).closest(this.settings.selector.title),
       $activeContent = $activeTitle.next(this.$content),
       isAnimating = $activeContent.hasClass(this.settings.className.animating),
       isActive = $activeContent.hasClass(this.settings.className.active),
@@ -310,16 +284,7 @@ export class Accordion extends Module {
       if (this.settings.animateChildren) {
         // if ($.fn.transition !== undefined && $module.transition("is supported")) {
         if (true) {
-          // $activeContent.children().transition({
-          //   animation: "fade out",
-          //   queue: false,
-          //   useFailSafe: true,
-          //   debug: this.settings.debug,
-          //   verbose: this.settings.verbose,
-          //   duration: this.settings.duration,
-          //   skipInlineHidden: true,
-          // });
-          new Transition($activeContent, {
+          new Transition($activeContent.children(), {
             animation: "fade out",
             queue: false,
             useFailSafe: true,
@@ -338,22 +303,11 @@ export class Accordion extends Module {
           // ;
         }
       }
-      // $activeContent
-      //   .slideUp(this.settings.duration, this.settings.easing, function() {
-      //     $activeContent
-      //       .removeClass(this.settings.className.animating)
-      //       .removeClass(this.settings.className.active)
-      //     ;
-      //     this.reset_display.call(this);
-      //     this.settings.onClose.call(this);
-      //     this.settings.onChange.call(this);
-      //   })
-      // ;
       Utils.slideUp($activeContent, this.settings.duration, () => {
         $activeContent
           .removeClass(this.settings.className.animating)
           .removeClass(this.settings.className.active);
-        this.reset_display.call(this);
+        this.reset_display.call(this, $activeContent);
         this.settings.onClose.call(this);
         this.settings.onChange.call(this);
       });
@@ -366,7 +320,7 @@ export class Accordion extends Module {
         ? typeof index === "number"
           ? this.$title.eq(index)
           : $(index).closest(this.settings.selector.title)
-        : $(this).closest(this.settings.selector.title),
+        : $(this.element).closest(this.settings.selector.title),
       $parentTitles = $activeTitle
         .parents(this.settings.selector.content)
         .prev(this.settings.selector.title),
@@ -395,15 +349,6 @@ export class Accordion extends Module {
       if (this.settings.animateChildren) {
         // if ($.fn.transition !== undefined && ) {
         if (true) {
-          // $openContents.children().transition({
-          //   animation: "fade out",
-          //   useFailSafe: true,
-          //   debug: this.settings.debug,
-          //   verbose: this.settings.verbose,
-          //   duration: settings.duration,
-          //   skipInlineHidden: true,
-          // });
-
           new Transition($openContents.children(), {
             animation: "fade out",
             useFailSafe: true,
@@ -422,32 +367,26 @@ export class Accordion extends Module {
           // ;
         }
       }
-      // $openContents
-      //   .slideUp(this.settings.duration , this.settings.easing, function() {
-      //     $(this).removeClass(this.settings.className.active);
-      //     this.reset_display.call(this);
-      //   })
-      // ;
       Utils.slideUp($openContents, this.settings.duration, () => {
-        $(this).removeClass(this.settings.className.active);
-        this.reset_display.call(this);
+        $($openContents).removeClass(this.settings.className.active);
+        this.reset_display.call(this, $openContents);
       });
     }
   }
 
-  reset_display(): void {
-    this.verbose("Removing inline display from element", this);
-    $(this).css("display", "");
-    if ($(this).attr("style") === "") {
-      $(this).attr("style", "").removeAttr("style");
+  reset_display($element): void {
+    this.verbose("Removing inline display from element", $element);
+    $($element).css("display", "");
+    if ($($element).attr("style") === "") {
+      $($element).attr("style", "").removeAttr("style");
     }
   }
 
-  reset_opacity(): void {
-    this.verbose("Removing inline opacity from element", this);
-    $(this).css("opacity", "");
-    if ($(this).attr("style") === "") {
-      $(this).attr("style", "").removeAttr("style");
+  reset_opacity($element): void {
+    this.verbose("Removing inline opacity from element", $element);
+    $($element).css("opacity", "");
+    if ($($element).attr("style") === "") {
+      $($element).attr("style", "").removeAttr("style");
     }
   }
 }
