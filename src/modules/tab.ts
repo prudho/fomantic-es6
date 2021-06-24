@@ -576,7 +576,7 @@ export class Tab extends Module {
       this.debug('Adding cached content', fullTabPath);
       if (!this.settings.loadOnce) {
         if (this.settings.evaluateScripts == 'once') {
-          this.update_content(tabPath, cachedContent, false);
+          this.update_content(tabPath, cachedContent, null);
         }
         else {
           this.update_content(tabPath, cachedContent);

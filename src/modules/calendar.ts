@@ -637,7 +637,7 @@ export class Calendar extends Module {
   instance: Calendar;
   popup: Popup;
 
-  constructor(selector: string, parameters: CalendarOptions) {
+  constructor(selector, parameters) {
     super(selector, parameters, default_settings);
 
     this.$input = this.$element.find(this.settings.selector.input);

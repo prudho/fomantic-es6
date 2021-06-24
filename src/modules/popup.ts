@@ -939,7 +939,7 @@ export class Popup extends Module {
     let
       $popupOffsetParent = this.get_offsetParent(this.$popup),
       targetElement      = this.$target[0],
-      isWindow           = (this.$boundary[0] == window),
+      isWindow           = ($.isWindow(this.$boundary[0])),
       targetOffset       = this.$target.offset(),
       parentOffset       = this.settings.inline || (this.settings.popup && this.settings.movePopup)
         ? this.$target.offsetParent().offset()

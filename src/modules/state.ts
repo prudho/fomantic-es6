@@ -225,11 +225,11 @@ export class State extends Module {
     }
 
     // bind events with delegated events
-    if (this.settings.context && moduleSelector !== '') {
+    if (this.settings.context && this.selector !== '') {
       $(this.settings.context)
-        .on(this.moduleSelector, 'mouseenter' + this.eventNamespace, this.change_text)
-        .on(this.moduleSelector, 'mouseleave' + this.eventNamespace, this.reset_text)
-        .on(this.moduleSelector, 'click'      + this.eventNamespace, this.toggle_state)
+        .on(this.selector, 'mouseenter' + this.eventNamespace, this.change_text)
+        .on(this.selector, 'mouseleave' + this.eventNamespace, this.reset_text)
+        .on(this.selector, 'click'      + this.eventNamespace, this.toggle_state)
       ;
     }
     else {
@@ -262,8 +262,8 @@ export class State extends Module {
   }
 
   add_defaults() {
-    let userStates = parameters && $.isPlainObject(parameters.states)
-      ? parameters.states
+    let userStates = this.settings && $.isPlainObject(this.settings.states)
+      ? this.settings.states
       : {}
     ;
     $.each(this.settings.defaults, (type, typeStates) => {
@@ -305,18 +305,18 @@ export class State extends Module {
         this.update_text(this.settings.text.loading);
       }
       $.when(apiRequest)
-        .then(function() {
+        .then(() => {
           if(apiRequest.state() == 'resolved') {
-            module.debug('API request succeeded');
+            this.debug('API request succeeded');
             this.settings.activateTest   = function(){ return true; };
             this.settings.deactivateTest = function(){ return true; };
           }
           else {
-            module.debug('API request failed');
+            this.debug('API request failed');
             this.settings.activateTest   = function(){ return false; };
             this.settings.deactivateTest = function(){ return false; };
           }
-          module.change.state();
+          this.change_state();
         })
       ;
     }

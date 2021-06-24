@@ -611,7 +611,7 @@ export class Sticky extends Module {
   }
 
   is_standardScroll(): boolean {
-    return (this.$scroll[0] == window);
+    return ($.isWindow(this.$scroll[0]));
   }
 
   is_top(): boolean {
@@ -627,7 +627,7 @@ export class Sticky extends Module {
   }
   
   is_hidden(): boolean {
-    return (!this.$element.is('visible'));
+    return (!this.$element.hasClass('visible'));
   }
   
   is_bound(): boolean {

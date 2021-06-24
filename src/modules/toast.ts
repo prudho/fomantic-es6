@@ -318,12 +318,12 @@ export class Toast extends Module {
     this.$element.removeAttr(this.moduleNamespace);
   }
 
-  create_container() {
+  create_container(): void {
     this.verbose('Creating container');
     this.$context.append($(`<div class="${this.settings.position} ${this.settings.className.container} ${(this.settings.horizontal ? this.settings.className.horizontal : '')}"/>`));
   }
 
-  create_toast() {
+  create_toast(): void {
     this.$toastBox = $(`<div class="${this.settings.className.box}"/>`);
     let iconClass = this.get_iconClass();
     if (!this.isToastComponent) {
@@ -604,14 +604,14 @@ export class Toast extends Module {
     this.$toastBox.off('click' + this.eventNamespace);
   }
 
-  event_click(event) {
+  event_click(event): void {
     if ($(event.target).closest('a').length === 0) {
       this.settings.onClick.call(this.$toastBox, this.element)
       this.close();
     }
   }
 
-  event_approve() {
+  event_approve(): void {
     if (this.settings.onApprove.call(this.element, this.$element) === false) {
       this.verbose('Approve callback returned false cancelling close');
       return;
@@ -619,7 +619,7 @@ export class Toast extends Module {
     this.close();
   }
 
-  event_deny() {
+  event_deny(): void {
     if (this.settings.onDeny.call(this.element, this.$element) === false) {
       this.verbose('Deny callback returned false cancelling close');
       return;
@@ -627,7 +627,7 @@ export class Toast extends Module {
     this.close();
   }
 
-  can_useElement(element) {
+  can_useElement(element): boolean {
     if ($.fn[element] !== undefined) {
       return true;
     }
@@ -660,7 +660,7 @@ export class Toast extends Module {
     return typeof this.settings.showIcon === 'string' ? this.settings.showIcon : this.settings.showIcon && this.settings.icons[this.settings.class] ? this.settings.icons[this.settings.class] : '';
   }
 
-  get_remainingTime() {
+  get_remainingTime(): number {
     return this.$animationObject ? parseFloat(this.$animationObject.css('opacity')) * this.settings.displayTime : 0;
   }
 

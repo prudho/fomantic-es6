@@ -8,7 +8,18 @@ import { Api, ApiOptions } from './api';
 
 import $, { Cash } from 'cash-dom';
 
-$.fn.addBack = function (selector) {
+declare module 'cash-dom' {
+  interface Cash {
+    addBack(): Cash;
+    addBack(selector: string): Cash;
+  }
+}
+
+$.fn.addBack = function (): Cash {
+  return $.fn.addBack(null);
+}
+
+$.fn.addBack = function (selector: string = null): Cash {
   return this.add(selector == null ? this.prevObject : this.prevObject.filter(selector));
 }
 
@@ -60,7 +71,7 @@ export interface DropdownOptions extends ModuleOptions {
 
   fireOnInit: boolean;
 
-  transition: string;
+  transition: any;
   duration: number;
   displayType: string;
 
@@ -634,7 +645,7 @@ export class Dropdown extends Module {
 
   private _context;
 
-  constructor(selector: string, parameters) {
+  constructor(selector, parameters) {
     super(selector, parameters, default_settings);
 
     this.$document       = $(document)
@@ -1115,7 +1126,8 @@ export class Dropdown extends Module {
           else {
             $activeLabel.prev(this.settings.selector.siblingLabel)
               .addClass(this.settings.className.active)
-              .end()
+              // INVESTIGATE
+              // .end()
             ;
           }
           event.preventDefault();
@@ -1865,7 +1877,7 @@ export class Dropdown extends Module {
       $currentItem  = $selectedItem || this.get_selectedItem(),
       $menu         = $currentItem.closest(this.settings.selector.menu),
       menuHeight    = $menu.outerHeight(),
-      currentScroll = $menu.scrollTop(),
+      currentScroll = $menu[0].scrollY,
       itemHeight    = this.$item.eq(0).outerHeight(),
       itemsPerPage  = Math.floor(menuHeight / itemHeight),
       maxScroll     = $menu.prop('scrollHeight'),
@@ -1898,7 +1910,7 @@ export class Dropdown extends Module {
       if (this.settings.selectOnKeydown && this.is_single()) {
         this.set_selectedItem($nextSelectedItem);
       }
-      $menu.scrollTop(newScroll);
+      $menu[0].scrollY = newScroll;
     }
   }
 
@@ -2404,7 +2416,7 @@ export class Dropdown extends Module {
   is_animating($subMenu): boolean {
     return ($subMenu)
       ? $subMenu.transition && $subMenu.transition('is animating')
-      : this.$menu.transition    && this.$menu.transition('is animating')
+      : this.menuTransition && this.menuTransition.is_animating()
     ;
   }
 
@@ -2691,9 +2703,9 @@ export class Dropdown extends Module {
     else if (!returnEndPos && 'selectionStart' in input) {
       return input.selectionStart;
     }
-    if (document.selection) {
+    if (document.getSelection()) {
       input.focus();
-      range       = document.selection.createRange();
+      range       = document.getSelection()[0].createRange();
       rangeLength = range.text.length;
       if (returnEndPos) {
         return rangeLength;
@@ -2986,7 +2998,7 @@ export class Dropdown extends Module {
     return this.settings.preserveHTML ? this.$text.html() : this.$text.text();
   }
 
-  get_transition($subMenu) {
+  get_transition($subMenu): string {
     return (this.settings.transition === 'auto')
       ? this.is_upward($subMenu)
         ? 'slide up'
@@ -3228,54 +3240,52 @@ export class Dropdown extends Module {
       this.remove_selectedItem();
     }
 
-    let module = this;
-
     // select each item
-    $selectedItem.each(function() {
+    $selectedItem.each((_index, element) => {
       let
-        $selected      = $(this),
-        selectedText   = module.get_choiceText($selected),
-        selectedValue  = module.get_choiceValue($selected, selectedText),
+        $selected      = $(element),
+        selectedText   = this.get_choiceText($selected),
+        selectedValue  = this.get_choiceValue($selected, selectedText),
 
-        isFiltered     = $selected.hasClass(module.settings.className.filtered),
-        isActive       = $selected.hasClass(module.settings.className.active),
-        isUserValue    = $selected.hasClass(module.settings.className.addition),
+        isFiltered     = $selected.hasClass(this.settings.className.filtered),
+        isActive       = $selected.hasClass(this.settings.className.active),
+        isUserValue    = $selected.hasClass(this.settings.className.addition),
         shouldAnimate  = (isMultiple && $selectedItem.length == 1)
       ;
       if (isMultiple) {
         if (!isActive || isUserValue) {
-          if (module.settings.apiSettings && module.settings.saveRemoteData) {
-            module.save_remoteData(selectedText, selectedValue);
+          if (this.settings.apiSettings && this.settings.saveRemoteData) {
+            this.save_remoteData(selectedText, selectedValue);
           }
-          if (module.settings.useLabels) {
-            module.add_label(selectedValue, selectedText, shouldAnimate);
-            module.add_value(selectedValue, selectedText, $selected);
-            module.set_activeItem($selected);
-            module.filterActive();
-            module.select_nextAvailable($selectedItem);
+          if (this.settings.useLabels) {
+            this.add_label(selectedValue, selectedText, shouldAnimate);
+            this.add_value(selectedValue, selectedText, $selected);
+            this.set_activeItem($selected);
+            this.filterActive();
+            this.select_nextAvailable($selectedItem);
           }
           else {
-            module.add_value(selectedValue, selectedText, $selected);
-            module.set_text(module.add_variables(module.settings.message.count));
-            module.set_activeItem($selected);
+            this.add_value(selectedValue, selectedText, $selected);
+            this.set_text(this.add_variables(this.settings.message.count));
+            this.set_activeItem($selected);
           }
         }
         else if (!isFiltered && (this.settings.useLabels || this.selectActionActive)) {
-          module.debug('Selected active value, removing label');
-          module.remove_selected(selectedValue);
+          this.debug('Selected active value, removing label');
+          this.remove_selected(selectedValue);
         }
       }
       else {
-        if (module.settings.apiSettings && module.settings.saveRemoteData) {
-          module.save_remoteData(selectedText, selectedValue);
+        if (this.settings.apiSettings && this.settings.saveRemoteData) {
+          this.save_remoteData(selectedText, selectedValue);
         }
         if (!keepSearchTerm) {
-          module.set_text(selectedText);
+          this.set_text(selectedText);
         }
-        module.set_value(selectedValue, selectedText, $selected, preventChangeTrigger);
+        this.set_value(selectedValue, selectedText, $selected, preventChangeTrigger);
         $selected
-          .addClass(module.settings.className.active)
-          .addClass(module.settings.className.selected)
+          .addClass(this.settings.className.active)
+          .addClass(this.settings.className.selected)
         ;
       }
     });
@@ -3380,7 +3390,7 @@ export class Dropdown extends Module {
     $element.addClass(this.settings.className.upward);
   }
 
-  set_value(value, text = value, $selected, preventChangeTrigger: boolean = false) {
+  set_value(value, text = value, $selected = null, preventChangeTrigger: boolean = false) {
     if (value !== undefined && value !== '' && !(Array.isArray(value) && value.length === 0)) {
       this.$input.removeClass(this.settings.className.noselection);
     } else {
@@ -4011,7 +4021,7 @@ export class Dropdown extends Module {
 
   save_placeholderText() {
     let text: string;
-    if (this.settings.placeholder !== false && this.$text.hasClass(this.settings.className.placeholder)) {
+    if (this.settings.placeholder !== null && this.$text.hasClass(this.settings.className.placeholder)) {
       text = this.get_text();
       this.verbose('Saving placeholder text as', text);
       this.$element.data(this.settings.metadata.placeholderText, text);
@@ -4251,7 +4261,7 @@ export class Dropdown extends Module {
     }
   }
 
-  escape_string(text: string): string {
+  escape_string(text: any): string {
     text =  String(text);
     return text.replace(this.settings.regExp.escape, '\\$&');
   }
@@ -4278,7 +4288,7 @@ export class Dropdown extends Module {
     return string;
   }
 
-  escape_value(value: string) {
+  escape_value(value: string): any {
     let
       multipleValues = Array.isArray(value),
       stringValue    = (typeof value === 'string'),

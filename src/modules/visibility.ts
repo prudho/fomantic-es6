@@ -33,10 +33,10 @@ export interface VisibilityOptions extends ModuleOptions {
   includeMargin          : boolean;
 
   // scroll context for visibility checks
-  context                : Window,
+  context                : Window | string,
 
   // visibility check delay in ms (defaults to animationFrame)
-  throttle               : boolean;
+  throttle               : number;
 
   // special visibility type (image, fixed)
   type                   : 'image' | 'fixed';
@@ -45,7 +45,7 @@ export interface VisibilityOptions extends ModuleOptions {
   zIndex                 : number;
 
   // image only animation settings
-  transition             : string;
+  transition             : any;
   duration               : number;
 
   metadata : {
@@ -135,7 +135,7 @@ const default_settings: VisibilityOptions = {
   context                : window,
 
   // visibility check delay in ms (defaults to animationFrame)
-  throttle               : false,
+  throttle               : 0,
 
   // special visibility type (image, fixed)
   type                   : null,
@@ -250,13 +250,13 @@ settings: VisibilityOptions;
     this.instantiate();
   }
 
-  instantiate() {
+  instantiate(): void {
     this.debug('Storing instance', this);
     this.$element.data(this.moduleNamespace, this);
     this.instance = this;
   }
 
-  destroy() {
+  destroy(): void {
     this.verbose('Destroying previous module');
     if (this.observer) {
       this.observer.disconnect();
@@ -265,8 +265,8 @@ settings: VisibilityOptions;
       this.contextObserver.disconnect();
     }
     this.$window
-      .off('load'   + this.eventNamespace, this.event_load)
-      .off('resize' + this.eventNamespace, this.event_resize)
+      .off('load'   + this.eventNamespace, this.event_load.bind(this))
+      .off('resize' + this.eventNamespace, this.event_resize.bind(this))
     ;
     this.$context
       .off('scroll'       + this.eventNamespace, this.event_scroll)
@@ -282,7 +282,7 @@ settings: VisibilityOptions;
     ;
   }
 
-  setup_cache() {
+  setup_cache(): void {
     this.cache = {
       occurred : {},
       screen   : {},
@@ -290,7 +290,7 @@ settings: VisibilityOptions;
     };
   }
 
-  setup_image() {
+  setup_image(): void {
     let src = this.$element.data(this.settings.metadata.src);
     if (src) {
       this.verbose('Lazy loading image', src);
@@ -299,14 +299,19 @@ settings: VisibilityOptions;
 
       // show when top visible
       this.settings.onOnScreen = () => {
+        let
+          loadedCount: number = 0,
+          module: Visibility = this
+        ;
+
         this.debug('Image on screen', this.element);
         this.precache(src, () => {
           this.set_image(src, function() {
             loadedCount++;
-            if(loadedCount == moduleCount) {
-              this.settings.onAllLoaded.call(this);
+            if (loadedCount == moduleCount) {
+              module.settings.onAllLoaded.call(this);
             }
-            this.settings.onLoad.call(this);
+            module.settings.onLoad.call(this);
           });
         });
       };
@@ -319,9 +324,12 @@ settings: VisibilityOptions;
     this.settings.observeChanges = false;
     this.settings.initialCheck   = true;
     this.settings.refreshOnLoad  = true;
-    if (!this.settings.parameters.transition) {
-      this.settings.transition = false;
-    }
+
+    // LEGACY ?
+    // if (!this.settings.parameters.transition) {
+    //   this.settings.transition = false;
+    // }
+
     this.create_placeholder();
     this.debug('Added placeholder', this.$placeholder);
     this.settings.onTopPassed = () => {
@@ -341,7 +349,7 @@ settings: VisibilityOptions;
     };
   }
 
-  create_placeholder() {
+  create_placeholder(): void {
     this.verbose('Creating fixed position placeholder');
     this.$placeholder = this.$element
       .clone(false)
@@ -351,11 +359,10 @@ settings: VisibilityOptions;
     ;
   }
 
-  checkVisibility(scroll) {
+  checkVisibility(scroll: number = 0): void {
     this.verbose('Checking visibility of element', this.cache.element);
   
     if (!this.disabled && this.is_visible()) {
-
       // save scroll position
       this.save_scroll(scroll);
 
@@ -388,7 +395,7 @@ settings: VisibilityOptions;
     }
   }
 
-  show_placeholder() {
+  show_placeholder(): void {
     this.verbose('Showing placeholder');
     this.$placeholder
       .css('display', 'block')
@@ -396,7 +403,7 @@ settings: VisibilityOptions;
     ;
   }
 
-  hide_placeholder() {
+  hide_placeholder(): void {
     this.verbose('Hiding placeholder');
     this.$placeholder
       .css('display', 'none')
@@ -423,7 +430,7 @@ settings: VisibilityOptions;
 
   is_verticallyScrollableContext(): boolean {
     let
-      overflowY = (this.$context.get(0) !== window)
+      overflowY = (!$.isWindow(this.$context[0]))
         ? this.$context.css('overflow-y')
         : false
     ;
@@ -432,7 +439,7 @@ settings: VisibilityOptions;
 
   is_horizontallyScrollableContext(): boolean {
     let
-      overflowX = (this.$context.get(0) !== window)
+      overflowX = (!$.isWindow(this.$context[0]))
         ? this.$context.css('overflow-x')
         : false
     ;
@@ -440,15 +447,15 @@ settings: VisibilityOptions;
   }
 
   should_trackChanges(): boolean {
-    if (methodInvoked) {
-      this.debug('One time query, no need to bind events');
-      return false;
-    }
+    // if (methodInvoked) {
+    //   this.debug('One time query, no need to bind events');
+    //   return false;
+    // }
     this.debug('Callbacks being attached');
     return true;
   }
 
-  observeChanges() {
+  observeChanges(): void {
     if ('MutationObserver' in window) {
       this.contextObserver = new MutationObserver(this.event_contextChanged);
       this.observer        = new MutationObserver(this.event_changed);
@@ -464,22 +471,22 @@ settings: VisibilityOptions;
     }
   }
 
-  bind_events() {
+  bind_events(): void {
     this.verbose('Binding visibility events to scroll and resize');
     if (this.settings.refreshOnLoad) {
-      this.$window.on('load' + this.eventNamespace, this.event_load);
+      this.$window.on('load' + this.eventNamespace, this.event_load.bind(this));
     }
-    this.$window.on('resize' + this.eventNamespace, this.event_resize)
+    this.$window.on('resize' + this.eventNamespace, this.event_resize.bind(this))
     ;
     // pub/sub pattern
     this.$context
       .off('scroll'      + this.eventNamespace)
-      .on('scroll'       + this.eventNamespace, this.event_scroll)
-      .on('scrollchange' + this.eventNamespace, this.event_scrollchange)
+      .on('scroll'       + this.eventNamespace, this.event_scroll.bind(this))
+      .on('scrollchange' + this.eventNamespace, this.event_scrollchange.bind(this))
     ;
   }
 
-  event_changed(mutations) {
+  event_changed(mutations): void {
     this.verbose('DOM tree modified, updating visibility calculations');
     this.timer = setTimeout(() => {
       this.verbose('DOM tree modified, updating sticky menu');
@@ -487,11 +494,11 @@ settings: VisibilityOptions;
     }, 100);
   }
 
-  event_contextChanged(mutations) {
+  event_contextChanged(mutations): void {
     [].forEach.call(mutations, (mutation) => {
       if (mutation.removedNodes) {
         [].forEach.call(mutation.removedNodes, (node) => {
-          if(node == this.element || $(node).find(this.element).length > 0) {
+          if(node == this.element || $(node).find(this.selector).length > 0) {
             this.debug('Element removed from DOM, tearing down events');
             this.destroy();
           }
@@ -500,39 +507,41 @@ settings: VisibilityOptions;
     });
   }
 
-  event_resize() {
+  event_resize(): void {
     this.debug('Window resized');
     if (this.settings.refreshOnResize) {
-      requestAnimationFrame(this.refresh);
+      requestAnimationFrame(this.refresh.bind(this));
     }
   }
 
-  event_load() {
+  event_load(): void {
     this.debug('Page finished loading');
-    requestAnimationFrame(this.refresh);
+    requestAnimationFrame(this.refresh.bind(this));
   }
 
   // publishes scrollchange event on one scroll
-  event_scroll() {
+  event_scroll(): void {
     if (this.settings.throttle) {
       clearTimeout(this.timer);
       this.timer = setTimeout(() => {
-        this.$context.triggerHandler('scrollchange' + this.eventNamespace, [ this.$context.scrollTop() ]);
+        // this.$context.triggerHandler('scrollchange' + this.eventNamespace, [ this.$context.scrollY ]);
+        this.$context.trigger('scrollchange' + this.eventNamespace, [ this.$context.scrollY ]);
       }, this.settings.throttle);
     }
     else {
       requestAnimationFrame(() => {
-        this.$context.triggerHandler('scrollchange' + this.eventNamespace, [ this.$context.scrollTop() ]);
+        // this.$context.triggerHandler('scrollchange' + this.eventNamespace, [ this._context.scrollY ]);
+        this.$context.trigger('scrollchange' + this.eventNamespace, [ this.$context.scrollY ]);
       });
     }
   }
 
   // subscribes to scrollchange
-  event_scrollchange(event, scrollPosition) {
-    this.checkVisibility(scrollPosition);
+  event_scrollchange(event): void {
+    this.checkVisibility(event.target.scrollY);
   }
 
-  precache(images, callback) {
+  precache(images, callback): void {
     if (!(images instanceof Array)) {
       images = [images];
     }
@@ -559,17 +568,17 @@ settings: VisibilityOptions;
     }
   }
 
-  enableCallbacks() {
+  enableCallbacks(): void {
     this.debug('Allowing callbacks to occur');
     this.disabled = false;
   }
 
-  disableCallbacks() {
+  disableCallbacks(): void {
     this.debug('Disabling all callbacks temporarily');
     this.disabled = true;
   }
 
-  refresh() {
+  refresh(): void {
     this.debug('Refreshing constants (width/height)');
     if (this.settings.type == 'fixed') {
       this.resetFixed();
@@ -582,12 +591,12 @@ settings: VisibilityOptions;
     this.settings.onRefresh.call(this.element);
   }
 
-  resetFixed () {
+  resetFixed(): void {
     this.remove_fixed();
     this.remove_occurred();
   }
 
-  reset() {
+  reset(): void {
     this.verbose('Resetting all cached values');
     if ($.isPlainObject(this.cache)) {
       this.cache.screen = {};
@@ -616,7 +625,7 @@ settings: VisibilityOptions;
     }
   }
 
-  onScreen(newCallback = undefined) {
+  onScreen(newCallback = undefined): void {
     let
       calculations = this.get_elementCalculations(),
       callback     = newCallback || this.settings.onOnScreen,
@@ -624,12 +633,11 @@ settings: VisibilityOptions;
     ;
     if (newCallback) {
       this.debug('Adding callback for onScreen', newCallback);
-       this.settings.onOnScreen = newCallback;
+      this.settings.onOnScreen = newCallback;
     }
     if (calculations.onScreen) {
       this.execute(callback, callbackName);
-    }
-    else if (!this.settings.once) {
+    } else if (!this.settings.once) {
       this.remove_occurred(callbackName);
     }
     if (newCallback !== undefined) {
@@ -637,7 +645,7 @@ settings: VisibilityOptions;
     }
   }
 
-  offScreen(newCallback = undefined) {
+  offScreen(newCallback = undefined): void {
     let
       calculations = this.get_elementCalculations(),
       callback     = newCallback || this.settings.onOffScreen,
@@ -649,8 +657,7 @@ settings: VisibilityOptions;
     }
     if (calculations.offScreen) {
       this.execute(callback, callbackName);
-    }
-    else if (!this.settings.once) {
+    } else if (!this.settings.once) {
       this.remove_occurred(callbackName);
     }
     if (newCallback !== undefined) {
@@ -658,7 +665,7 @@ settings: VisibilityOptions;
     }
   }
 
-  passing(newCallback = undefined) {
+  passing(newCallback = undefined): void {
     let
       calculations = this.get_elementCalculations(),
       callback     = newCallback || this.settings.onPassing,
@@ -670,8 +677,7 @@ settings: VisibilityOptions;
     }
     if (calculations.passing) {
       this.execute(callback, callbackName);
-    }
-    else if (!this.settings.once) {
+    } else if (!this.settings.once) {
       this.remove_occurred(callbackName);
     }
     if (newCallback !== undefined) {
@@ -679,7 +685,7 @@ settings: VisibilityOptions;
     }
   }
 
-  topVisible(newCallback = undefined) {
+  topVisible(newCallback = undefined): void {
     let
       calculations = this.get_elementCalculations(),
       callback     = newCallback || this.settings.onTopVisible,
@@ -691,8 +697,7 @@ settings: VisibilityOptions;
     }
     if (calculations.topVisible) {
       this.execute(callback, callbackName);
-    }
-    else if (!this.settings.once) {
+    } else if (!this.settings.once) {
       this.remove_occurred(callbackName);
     }
     if (newCallback === undefined) {
@@ -700,7 +705,7 @@ settings: VisibilityOptions;
     }
   }
 
-  bottomVisible(newCallback = undefined) {
+  bottomVisible(newCallback = undefined): void {
     let
       calculations = this.get_elementCalculations(),
       callback     = newCallback || this.settings.onBottomVisible,
@@ -712,8 +717,7 @@ settings: VisibilityOptions;
     }
     if (calculations.bottomVisible) {
       this.execute(callback, callbackName);
-    }
-    else if (!this.settings.once) {
+    } else if (!this.settings.once) {
       this.remove_occurred(callbackName);
     }
     if (newCallback === undefined) {
@@ -721,7 +725,7 @@ settings: VisibilityOptions;
     }
   }
 
-  topPassed(newCallback = undefined) {
+  topPassed(newCallback = undefined): void {
     let
       calculations = this.get_elementCalculations(),
       callback     = newCallback || this.settings.onTopPassed,
@@ -733,8 +737,7 @@ settings: VisibilityOptions;
     }
     if (calculations.topPassed) {
       this.execute(callback, callbackName);
-    }
-    else if (!this.settings.once) {
+    } else if (!this.settings.once) {
       this.remove_occurred(callbackName);
     }
     if (newCallback === undefined) {
@@ -742,7 +745,7 @@ settings: VisibilityOptions;
     }
   }
 
-  bottomPassed(newCallback = undefined) {
+  bottomPassed(newCallback = undefined): void {
     let
       calculations = this.get_elementCalculations(),
       callback     = newCallback || this.settings.onBottomPassed,
@@ -754,8 +757,7 @@ settings: VisibilityOptions;
     }
     if (calculations.bottomPassed) {
       this.execute(callback, callbackName);
-    }
-    else if (!this.settings.once) {
+    } else if (!this.settings.once) {
       this.remove_occurred(callbackName);
     }
     if (newCallback === undefined) {
@@ -777,8 +779,7 @@ settings: VisibilityOptions;
       if (this.get_occurred('passing')) {
         this.execute(callback, callbackName);
       }
-    }
-    else if (!this.settings.once) {
+    } else if (!this.settings.once) {
       this.remove_occurred(callbackName);
     }
     if (newCallback !== undefined) {
@@ -800,8 +801,7 @@ settings: VisibilityOptions;
       if (this.get_occurred('topVisible')) {
         this.execute(callback, callbackName);
       }
-    }
-    else if (!this.settings.once) {
+    } else if (!this.settings.once) {
       this.remove_occurred(callbackName);
     }
     if (newCallback === undefined) {
@@ -823,8 +823,7 @@ settings: VisibilityOptions;
       if (this.get_occurred('bottomVisible')) {
         this.execute(callback, callbackName);
       }
-    }
-    else if(!this.settings.once) {
+    } else if(!this.settings.once) {
       this.remove_occurred(callbackName);
     }
     if (newCallback === undefined) {
@@ -846,8 +845,7 @@ settings: VisibilityOptions;
       if (this.get_occurred('topPassed')) {
         this.execute(callback, callbackName);
       }
-    }
-    else if (!this.settings.once) {
+    } else if (!this.settings.once) {
       this.remove_occurred(callbackName);
     }
     if(newCallback === undefined) {
@@ -869,8 +867,7 @@ settings: VisibilityOptions;
       if (this.get_occurred('bottomPassed')) {
         this.execute(callback, callbackName);
       }
-    }
-    else if (!this.settings.once) {
+    } else if (!this.settings.once) {
       this.remove_occurred(callbackName);
     }
     if (newCallback === undefined) {
@@ -878,7 +875,7 @@ settings: VisibilityOptions;
     }
   }
 
-  execute(callback, callbackName) {
+  execute(callback, callbackName): void {
     let
       calculations = this.get_elementCalculations(),
       screen       = this.get_screenCalculations()
@@ -888,8 +885,7 @@ settings: VisibilityOptions;
       if (this.settings.continuous) {
         this.debug('Callback being called continuously', callbackName, calculations);
         callback.call(this.element, calculations, screen);
-      }
-      else if (!this.get_occurred(callbackName)) {
+      } else if (!this.get_occurred(callbackName)) {
         this.debug('Conditions met', callbackName, calculations);
         callback.call(this.element, calculations, screen);
       }
@@ -897,7 +893,7 @@ settings: VisibilityOptions;
     this.save_occurred(callbackName);
   }
 
-  get_pixelsPassed(amount) {
+  get_pixelsPassed(amount): number {
     let element = this.get_elementCalculations();
     if (amount.search('%') > -1) {
       return (element.height * (parseInt(amount, 10) / 100));
@@ -905,14 +901,14 @@ settings: VisibilityOptions;
     return parseInt(amount, 10);
   }
 
-  get_occurred(callback) {
+  get_occurred(callback): boolean {
     return (this.cache.occurred !== undefined)
       ? this.cache.occurred[callback] || false
       : false
     ;
   }
 
-  get_direction() {
+  get_direction(): string {
     if (this.cache.direction === undefined) {
       this.save_direction();
     }
@@ -947,11 +943,11 @@ settings: VisibilityOptions;
     return this.cache.screen;
   }
 
-  get_scroll() {
+  get_scroll(): number {
     if (this.cache.scroll === undefined) {
       this.save_scroll();
     }
-    return this.cache.scroll;
+    return parseInt(this.cache.scroll);
   }
 
   get_lastScroll() {
@@ -962,7 +958,7 @@ settings: VisibilityOptions;
     return this.cache.screen.top;
   }
 
-  set_fixed() {
+  set_fixed(): void {
     this.verbose('Setting element to fixed position');
     this.$element
       .addClass(this.settings.className.fixed)
@@ -976,7 +972,7 @@ settings: VisibilityOptions;
     this.settings.onFixed.call(this.element);
   }
 
-  set_image(src, callback) {
+  set_image(src, callback): void {
     this.$element.attr('src', src);
     if (this.settings.transition) {
       if ($.fn.transition !== undefined) {
@@ -995,14 +991,14 @@ settings: VisibilityOptions;
     }
   }
 
-  save_calculations() {
+  save_calculations(): void {
     this.verbose('Saving all calculations necessary to determine positioning');
     this.save_direction();
     this.save_screenCalculations();
     this.save_elementCalculations();
   }
 
-  save_occurred(callback) {
+  save_occurred(callback): void {
     if (callback) {
       if (this.cache.occurred[callback] === undefined || (this.cache.occurred[callback] !== true)) {
         this.verbose('Saving callback occurred', callback);
@@ -1011,24 +1007,22 @@ settings: VisibilityOptions;
     }
   }
 
-  save_scroll(scrollPosition) {
-    scrollPosition      = scrollPosition + this.settings.offset || this.$context.scrollTop() + this.settings.offset;
+  save_scroll(scrollPosition: number = 0): void {
+    scrollPosition      = scrollPosition + this.settings.offset || this.$context[0].scrollY + this.settings.offset;
     this.cache.scroll = scrollPosition;
   }
 
-  save_direction() {
+  save_direction(): string {
     let
-      scroll     = this.get_scroll(),
-      lastScroll = this.get_lastScroll(),
-      direction
+      scroll: number     = this.get_scroll(),
+      lastScroll: number = this.get_lastScroll(),
+      direction: string
     ;
     if (scroll > lastScroll && lastScroll) {
       direction = 'down';
-    }
-    else if (scroll < lastScroll && lastScroll) {
+    } else if (scroll < lastScroll && lastScroll) {
       direction = 'up';
-    }
-    else {
+    } else {
       direction = 'static';
     }
     this.cache.direction = direction;
@@ -1048,10 +1042,10 @@ settings: VisibilityOptions;
     element.height        = this.$element.outerHeight();
     // compensate for scroll in context
     if (this.is_verticallyScrollableContext()) {
-      element.offset.top += this.$context.scrollTop() - this.$context.offset().top;
+      element.offset.top += this.$context[0].scrollY - this.$context.offset().top;
     }
     if (this.is_horizontallyScrollableContext()) {
-      element.offset.left += this.$context.scrollLeft() - this.$context.offset().left;
+      element.offset.left += this.$context[0].scrollX - this.$context.offset().left;
     }
     // store
     this.cache.element = element;
@@ -1100,7 +1094,7 @@ settings: VisibilityOptions;
   }
 
   save_screenCalculations() {
-    let scroll = this.get_scroll();
+    let scroll: number = this.get_scroll();
     this.save_direction();
     this.cache.screen.top    = scroll;
     this.cache.screen.bottom = scroll + this.cache.screen.height;
@@ -1114,12 +1108,12 @@ settings: VisibilityOptions;
     };
   }
 
-  save_position() {
+  save_position(): void {
     this.save_screenSize();
     this.save_elementPosition();
   }
 
-  remove_fixed() {
+  remove_fixed(): void {
     this.debug('Removing fixed position');
     this.$element
       .removeClass(this.settings.className.fixed)
@@ -1133,14 +1127,14 @@ settings: VisibilityOptions;
     this.settings.onUnfixed.call(this.element);
   }
 
-  remove_placeholder() {
+  remove_placeholder(): void {
     this.debug('Removing placeholder content');
     if (this.$placeholder) {
       this.$placeholder.remove();
     }
   }
 
-  remove_occurred(callback) {
+  remove_occurred(callback = null): void {
     if (callback) {
       let occurred = this.cache.occurred;
       if (occurred[callback] !== undefined && occurred[callback] === true) {
